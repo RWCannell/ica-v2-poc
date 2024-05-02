@@ -7,7 +7,7 @@ This is a simple proof of concept (POC) for automating certain processes that us
 - trigger download of output file(s)
 - delete output file after download succeeds   
 
-We can use a combination of both the [API](https://ica.illumina.com/ica/api/swagger/index.html#/) and the [CLI](https://help.ica.illumina.com/command-line-interface/cli-indexcommands).   
+We can use a combination of both the [API](https://ica.illumina.com/ica/api/swagger/index.html#/) and the [CLI](https://help.ica.illumina.com/command-line-interface/cli-indexcommands). However, we will almost only use the CLI.   
 
 Before we can begin, we need to have an existing project or create a new project. For the rest of this README, we'll be referring to the existing project, **SGDP**.   
 
@@ -32,7 +32,7 @@ x-api-key : myAPIKey
 output-format (allowed values table,yaml,json defaults to table) : 
 colormode (allowed values none,dark,light defaults to none) :
 ```
-The `/Users/regancannell/.icav2/config.yaml` file can be modified if the default settings are wished to be changed.
+The `/Users/regancannell/.icav2/config.yaml` file can be modified if the default settings are wished to be changed. In our case, our output format is JSON.
 
 ## Project and Project Data   
 A project can be created in the UI. After a project is created, the project object can be obtained by using the following `curl` command with the API:
@@ -52,7 +52,15 @@ The CLI can also be used to upload a file. We can get a list of projects with th
 ```bash
 icav2 projects list
 ```
-From the returned object (which is JSON by default), the `projectId` should be noted, since it will be required in subsequent commands/requests. To set the project context, run the following command:
+From the returned object (which is JSON by default), the `projectId` should be noted, since it will be required in subsequent commands/requests. To get the `projectId` programmatically using the name of the project ("SGDP" in this case), the following script can be run:
+```bash
+PROJECTS=$(icav2 projects list)
+PROJECT_ID=$(echo $PROJECTS | jq -r '.items[] | select(.name == "SGDP").id')
+echo $PROJECT_ID
+```
+We made use of the [jq](https://jqlang.github.io/jq/) library (which is a JSON parser) in the above script.   
+
+To set the project context, run the following command:
 ```bash
 icav2 projects enter <projectId>
 ```
@@ -89,6 +97,83 @@ curl -X 'GET' \
   -H 'X-API-Key: XXXXXXXXXXXXXXXX'
 ```
 
+A file can be uploaded without entering the project context. To do this, the `--project-id` flag needs to be set in the command. Here is an example of uploading a file from the location `Documents/test_data/fastq/1_control_trnL_2019_minq7.fastq` and the JSON response received:   
+```bash
+icav2 projectdata upload Documents/test_data/fastq/1_control_trnL_2019_minq7.fastq \ 
+--project-id 049307d6-85dd-4cdc-b88d-a740e4e9e550
+```
+![Upload Response](public/assets/images/icav2_upload_response.png "Upload Response")   
+
+```json
+{
+	"details": {
+		"creatorId": "eb6b7257-1545-4cfb-a5cd-3b30f800a356",
+		"dataType": "FILE",
+		"fileSizeInBytes": 0,
+		"format": {
+			"code": "FASTQ",
+			"description": "FASTQ format is a text-based format for storing both a biological sequence (usually nucleotide sequence) and its corresponding quality scores.",
+			"id": "7674cc19-2ab7-42fe-bac3-be16c83c720c",
+			"ownerId": "499bfe9d-85bd-4588-ba70-fbc2f664bb9e",
+			"tenantId": "9fec8354-853b-4ee5-b211-eb03e484d876",
+			"tenantName": "Illumina",
+			"timeCreated": "2021-10-29T09:44:27Z",
+			"timeModified": "2021-10-29T09:44:27Z"
+		},
+		"name": "1_control_trnL_2019_minq7.fastq",
+		"owningProjectId": "049307d6-85dd-4cdc-b88d-a740e4e9e550",
+		"owningProjectName": "SGDP",
+		"path": "/1_control_trnL_2019_minq7.fastq",
+		"region": {
+			"cityName": "North Virginia",
+			"code": "US",
+			"country": {
+				"code": "US",
+				"id": "99f932f8-bc5b-419c-854c-872a5a00cbae",
+				"name": "United States",
+				"ownerId": "499bfe9d-85bd-4588-ba70-fbc2f664bb9e",
+				"region": "earth",
+				"tenantId": "9fec8354-853b-4ee5-b211-eb03e484d876",
+				"tenantName": "Illumina",
+				"timeCreated": "2021-10-29T09:44:26Z",
+				"timeModified": "2021-10-29T09:44:26Z"
+			},
+			"id": "c39b1feb-3e94-4440-805e-45e0c76462bf",
+			"ownerId": "8ec463f6-1acb-341b-b321-043c39d8716a",
+			"tenantId": "f91bb1a0-c55f-4bce-8014-b2e60c0ec7d3",
+			"tenantName": "ica-cp-admin",
+			"timeCreated": "2021-11-05T09:57:38Z",
+			"timeModified": "2024-04-25T20:48:22Z"
+		},
+		"status": "PARTIAL",
+		"storedForTheFirstTimeAt": "2024-05-02T08:24:54Z",
+		"tags": {
+			"connectorTags": [],
+			"referenceTags": [],
+			"runInTags": [],
+			"runOutTags": [],
+			"technicalTags": [],
+			"userTags": []
+		},
+		"tenantId": "02ea1bcf-6b20-4cbf-a9b2-724d1833eb07",
+		"tenantName": "sbimb-wits",
+		"timeCreated": "2024-05-02T08:24:54Z",
+		"timeModified": "2024-05-02T08:24:54Z"
+	},
+	"id": "fil.178b9b4066234c0db33908dc6a426494",
+	"urn": "urn:ilmn:ica:region:c39b1feb-3e94-4440-805e-45e0c76462bf:data:fil.178b9b4066234c0db33908dc6a426494#/1_control_trnL_2019_minq7.fastq"
+}
+```
+Notice that the JSON response contains an `"id"` key that begins with _"fil"_. We can store that value inside a variable and use it to make subsequent requests using the CLI (or API). For instance, we can get the file details with:
+```bash
+icav2 projectdata get <file-id> --project-id <project-id>
+```
+
+To upload multiple files, we can use the following command:
+```bash
+find $source -name '*.fastq.gz' | xargs -n 1 -P 10 -I {} icav2 projectdata upload {} /$target/
+```
+
 ## Downloading Files from Illumina Connected Analytics   
 Files can be downloaded from the ICA storage using the CLI with the following CLI command:
 ```bash
@@ -97,11 +182,68 @@ icav2 projectdata download <dataId>
 ```
 
 ## Run Nextflow Pipelines   
-A Nextflow pipeline can be created in the web UI. A tutorial on creating a Nextflow pipeline and running an analysis through the web UI can be found over [here](https://help.ica.illumina.com/tutorials/nextflow). Once the pipeline is created, the CLI can be used to get a JSON object of the pipeline and all its details:
+A Nextflow pipeline can be created in the web UI. A tutorial on creating a Nextflow pipeline and running an analysis through the web UI can be found over [here](https://help.ica.illumina.com/tutorials/nextflow). Once the pipeline is created, the CLI can be used to get a list of all pipelines:
+```bash
+icav2 projectpipelines list --project-id <projectId>
+```
+Here is an example using a real project and an existing pipeline:
+```bash
+icav2 projectpipelines list --project-id 049307d6-85dd-4cdc-b88d-a740e4e9e550
+``` 
+```json
+{
+	"items": [
+		{
+			"bundleLinks": {
+				"items": []
+			},
+			"pipeline": {
+				"analysisStorage": {
+					"description": "1.2TB",
+					"id": "6e1b6c8f-f913-48b2-9bd0-7fc13eda0fd0",
+					"name": "Small",
+					"ownerId": "8ec463f6-1acb-341b-b321-043c39d8716a",
+					"tenantId": "f91bb1a0-c55f-4bce-8014-b2e60c0ec7d3",
+					"tenantName": "ica-cp-admin",
+					"timeCreated": "2021-11-05T10:28:20Z",
+					"timeModified": "2023-05-31T16:38:26Z"
+				},
+				"code": "basic_pipeline",
+				"description": "Reverses a fasta file and outputs to stdout.",
+				"id": "bfecca03-6443-45bd-b313-e4f555cd0748",
+				"language": "NEXTFLOW",
+				"languageVersion": {
+					"id": "2483549a-1530-4973-bb00-f3f6ccb7e610",
+					"language": "NEXTFLOW",
+					"name": "20.10.0"
+				},
+				"ownerId": "f030a442-4aa3-3bf1-acf0-25f76194603f",
+				"pipelineTags": {
+					"technicalTags": []
+				},
+				"tenantId": "02ea1bcf-6b20-4cbf-a9b2-724d1833eb07",
+				"tenantName": "sbimb-wits",
+				"timeCreated": "2024-04-26T12:23:56Z",
+				"timeModified": "2024-04-26T12:23:56Z",
+				"urn": "urn:ilmn:ica:pipeline:bfecca03-6443-45bd-b313-e4f555cd0748#basic_pipeline"
+			},
+			"projectId": "049307d6-85dd-4cdc-b88d-a740e4e9e550"
+		}
+	]
+}
+```
+The challenge here is that the pipeline object is inside an array, so we'd need to iterate over the array of pipeline objects to get the `id` of the pipeline. We can get an array of pipeline objects with the following command:
+```bash
+icav2 projectpipelines list --project-id <projectId> | jq -r '.items'
+```
+
+For a specific pipeline, we can get a JSON response of the pipeline and all its details by using the pipeline ID in the command:
 ```bash
 icav2 pipelines get <pipelineId>
-```
-The analysis from the example in the tutorial takes about 30 minutes to complete. When completed, there is output data in the ICA storage. The analysis has an `id`, so the CLI can be used to get the status of the analysis:
+```   
+We'd like to perform an analysis on a file using the CLI. For convenience and for testing purposes, we will use small files. We can download small files of various formats from [here](https://ftp.ncbi.nih.gov/genomes/HUMAN_MICROBIOM/Bacteria/). Since the Nextflow pipeline that exists in our project performs an analysis on FASTA files, we'll use the FASTA format for our tests.   
+
+We can use the CLI to kick off an analysis on an uploaded file.The analysis from the example in the tutorial takes about 30 minutes to complete. When completed, there is output data in the ICA storage. The analysis has an `id`, so the CLI can be used to get the status of the analysis:
 ```bash
 icav2 projectanalyses get <analysisId>
 ```
