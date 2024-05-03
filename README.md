@@ -182,7 +182,11 @@ icav2 projectdata download <dataId>
 ```
 
 ## Run Nextflow Pipelines   
-A Nextflow pipeline can be created in the web UI. A tutorial on creating a Nextflow pipeline and running an analysis through the web UI can be found over [here](https://help.ica.illumina.com/tutorials/nextflow). Once the pipeline is created, the CLI can be used to get a list of all pipelines:
+A Nextflow pipeline can be created in the web UI. A tutorial on creating a Nextflow pipeline and running an analysis through the web UI can be found over [here](https://help.ica.illumina.com/tutorials/nextflow). The pipeline can also be created using the CLI with the following command:
+```bash
+icav2 projectpipelines create nextflow --project-id <projectId> --main /path/to/main.nf --parameter /path/to/xml
+```
+Once the pipeline is created, the following command can be used to get a list of all pipelines:
 ```bash
 icav2 projectpipelines list --project-id <projectId>
 ```
