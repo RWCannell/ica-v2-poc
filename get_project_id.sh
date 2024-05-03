@@ -1,3 +1,7 @@
-PROJECTS=$(icav2 projects list)
-PROJECT_ID=$(echo $PROJECTS | jq -r '.items[] | select(.name == "SGDP").id')
-echo $PROJECT_ID
+#!/bin/bash
+
+project_name="SGDP"
+
+projects=$(icav2 projects list)
+project_id=$(echo $projects | jq -r ".items[] | select(.name == \"$project_name\").id")
+echo $project_id
