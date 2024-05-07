@@ -247,16 +247,81 @@ icav2 pipelines get <pipelineId>
 ```   
 We'd like to perform an analysis on a file using the CLI. For convenience and for testing purposes, we will use small files. We can download small files of various formats from [here](https://ftp.ncbi.nih.gov/genomes/HUMAN_MICROBIOM/Bacteria/). Since the Nextflow pipeline that exists in our project performs an analysis on FASTA files, we'll use the FASTA format for our tests.   
 
-We can use the CLI to kick off an analysis on an uploaded file.The analysis from the example in the tutorial takes about 30 minutes to complete. When completed, there is output data in the ICA storage. The analysis has an `id`, so the CLI can be used to get the status of the analysis:
+We can use the CLI to kick off an analysis on an uploaded file. The analysis from the example in the tutorial takes about 30 minutes to complete. When completed, there is output data in the ICA storage. We can get a list of analyses belonging to a project with the following command:
+```bash
+icav2 projectanalyses list --project-id <projectId>
+```
+The JSON response for the list of analyses has the following form:
+```json
+{
+	"items": [
+		{
+			"analysisStorage": {
+				"description": "1.2TB",
+				"id": "6e1b6c8f-f913-48b2-9bd0-7fc13eda0fd0",
+				"name": "Small",
+				"ownerId": "8ec463f6-1acb-341b-b321-043c39d8716a",
+				"tenantId": "f91bb1a0-c55f-4bce-8014-b2e60c0ec7d3",
+				"tenantName": "ica-cp-admin",
+				"timeCreated": "2021-11-05T10:28:20Z",
+				"timeModified": "2023-05-31T16:38:26Z"
+			},
+			"endDate": "2024-04-26T12:48:02Z",
+			"id": "387b5178-732f-4706-9c41-e67a0cd00dc6",
+			"ownerId": "f030a442-4aa3-3bf1-acf0-25f76194603f",
+			"pipeline": {
+				"analysisStorage": {
+					"description": "1.2TB",
+					"id": "6e1b6c8f-f913-48b2-9bd0-7fc13eda0fd0",
+					"name": "Small",
+					"ownerId": "8ec463f6-1acb-341b-b321-043c39d8716a",
+					"tenantId": "f91bb1a0-c55f-4bce-8014-b2e60c0ec7d3",
+					"tenantName": "ica-cp-admin",
+					"timeCreated": "2021-11-05T10:28:20Z",
+					"timeModified": "2023-05-31T16:38:26Z"
+				},
+				"code": "basic_pipeline",
+				"description": "Reverses a fasta file and outputs to stdout.",
+				"id": "bfecca03-6443-45bd-b313-e4f555cd0748",
+				"language": "NEXTFLOW",
+				"languageVersion": {
+					"id": "2483549a-1530-4973-bb00-f3f6ccb7e610",
+					"language": "NEXTFLOW",
+					"name": "20.10.0"
+				},
+				"ownerId": "f030a442-4aa3-3bf1-acf0-25f76194603f",
+				"pipelineTags": {
+					"technicalTags": []
+				},
+				"tenantId": "02ea1bcf-6b20-4cbf-a9b2-724d1833eb07",
+				"tenantName": "sbimb-wits",
+				"timeCreated": "2024-04-26T12:23:56Z",
+				"timeModified": "2024-04-26T12:23:56Z",
+				"urn": "urn:ilmn:ica:pipeline:bfecca03-6443-45bd-b313-e4f555cd0748#basic_pipeline"
+			},
+			"reference": "regan_test_analysis_01-basic_pipeline-21ac67ed-ada1-4a82-8415-d2f83ec1e918",
+			"startDate": "2024-04-26T12:34:19Z",
+			"status": "SUCCEEDED",
+			"summary": "",
+			"tags": {
+				"referenceTags": [],
+				"technicalTags": [],
+				"userTags": [
+					"regan"
+				]
+			},
+			"tenantId": "02ea1bcf-6b20-4cbf-a9b2-724d1833eb07",
+			"tenantName": "sbimb-wits",
+			"timeCreated": "2024-04-26T12:34:11Z",
+			"timeModified": "2024-04-26T12:48:03Z",
+			"userReference": "regan_test_analysis_01"
+		}
+	]
+}
+```
+We can filter by `userReference` to get the `id` or `status` of the desired analysis. The CLI can be used to get the status of the analysis:
 ```bash
 icav2 projectanalyses get <analysisId>
-```
-We could also use a GET request to the API as follows:
-```bash
-curl -X 'GET' \
-  'https://ica.illumina.com/ica/rest/api/projects/049307d6-85dd-4cdc-b88d-a740e4e9e550/analyses/387b5178-732f-4706-9c41-e67a0cd00dc6' \
-  -H 'accept: application/vnd.illumina.v4+json' \
-  -H 'X-API-Key: XXXXXXXXXXXXXXXX'
 ```
 The JSON response contains a lot of information, but we are interested in the status of the analysis, i.e.
 ```json
@@ -323,6 +388,16 @@ The JSON response contains a lot of information, but we are interested in the st
 	"userReference": "regan_test_analysis_01"
 }
 ```
+We can sorted the project analysis by any one of the following fields:   
+- reference
+- userReference
+- pipeline
+- status
+- startDate
+- endDate
+- summary
+We'll use `userReference` because this value is set by the user themselves.   
+
 We would like to download the output files after the analysis is complete and successful, i.e. the status should be **"SUCCEEDED"**. The possible values are:
 - REQUESTED 
 - QUEUED 
@@ -337,18 +412,25 @@ We would like to download the output files after the analysis is complete and su
 - FAILED_FINAL 
 - ABORTED   
 
+We can use a simple polling mechanism to keep checking the status of the analysis. When the status of the analysis is **SUCCEEDED**, then we can proceed to download the data. If the status is any one of **FAILED**, **FAILED_FINAL**, or **ABORTED**, then whatever `bash` script that's running should be terminated.   
+
 ## Trigger Download of Output File(s)   
 The output data files can be downloaded from the ICA storage using the web UI. A download can even be scheduled through the web UI.   
 
 ![Schedule Download through Web UI](public/assets/images/download_scheduled_with_ui.png "Schedule Download through Web UI")   
 
-We would like to poll the status of the analysis and then trigger a download process as soon as the status reaches **"SUCCEEDED"**. After a successful download, we can then delete the files from the ICA storage.   
+As mentioned above, we would like to trigger a download process as soon as the status reaches **"SUCCEEDED"**. After a successful download, we can then delete the files from the ICA storage.   
 
 ## Delete Output File   
 To delete data from a project, the following CLI command can be used:
 ```bash
 icav2 projectdata delete <path or dataId>
 ```
-The full process for a simple upload-analysis-download-delete mechanism can be seen in the diagram below:   
+
+## Single File Upload-Download Process
+The full process for a single file upload-analysis-download-delete process can be seen in the diagram below:   
 
 ![Upload-Download ICA Process](public/assets/images/ica_upload_download_process.png "Upload-Download ICA Process")   
+
+The entire process is to be run with `bash` commands in a Nextflow pipeline (not to be confused with the Nextflow pipeline that resides in the ICA and that will perform the analysis).
+
