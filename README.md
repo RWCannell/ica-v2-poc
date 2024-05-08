@@ -407,10 +407,12 @@ The script [download_file_by_path.sh](bash/download_file_by_path.sh) can be test
 ![Download File from ICA Storage](public/assets/images/successful_download_script.png "Download File from ICA Storage")   
 
 ## Delete Output File   
-To delete data from a project, the following CLI command can be used:
+To delete a file from a project, the following CLI command can be used:
 ```bash
-icav2 projectdata delete <path or dataId>
+icav2 projectdata delete <path> --project-id <project_id>
 ```
+The script [delete_file_by_path.sh](bash/delete_file_by_path.sh) extracts the path of the file in the ICA storage and then proceeds to delete the file. Below is a screenshot of the process completed successfully:   
+![Delete File from ICA Storage](public/assets/images/delete_file_by_path_script.png "Delete File from ICA Storage")   
 
 ## Single File Upload-Analyse-Download Process
 The full process for a single file upload-analysis-download-delete process can be seen in the diagram below:   

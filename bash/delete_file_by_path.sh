@@ -22,8 +22,14 @@ else
         file_local_storage_path="${local_storage_path}/${file_name}"
         if [[ -f "$file_local_storage_path" ]]; then
             printf "File '$file_name' exists in local path '$local_storage_path'. Deleting from ICA storage... \n"
+            icav2 projectdata delete $file_ica_storage_path --project-id $project_id
+            if [[ $? != 0 ]]; then
+                printf "Failed to delete file. \n"
+            else
+                printf "File '$file_name' successfully deleted from ICA storage path '$file_ica_storage_path'. \n"
+            fi
         else
-            printf "File '$file_name' does NOT exist in local path '$local_storage_path'. Deleting is on hold... \n"
+            printf "File '$file_name' does NOT exist in local path '$local_storage_path'. Delete process stopped... \n"
             exit 1
         fi
     fi
