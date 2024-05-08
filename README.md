@@ -238,7 +238,7 @@ icav2 projectpipelines list --project-id 049307d6-85dd-4cdc-b88d-a740e4e9e550
 ```
 The challenge here is that the pipeline object is inside an array, so we'd need to iterate over the array of pipeline objects to get the `id` of the pipeline. We can get an array of pipeline objects with the following command:
 ```bash
-icav2 projectpipelines list --project-id <projectId> | jq -r '.items'
+icav2 projectpipelines list --project-id <projectId> | jq -r ".items"
 ```
 
 For a specific pipeline, we can get a JSON response of the pipeline and all its details by using the pipeline ID in the command:
@@ -427,10 +427,11 @@ To delete data from a project, the following CLI command can be used:
 icav2 projectdata delete <path or dataId>
 ```
 
-## Single File Upload-Download Process
+## Single File Upload-Analyse-Download Process
 The full process for a single file upload-analysis-download-delete process can be seen in the diagram below:   
 
 ![Upload-Download ICA Process](public/assets/images/ica_upload_download_process.png "Upload-Download ICA Process")   
 
-The entire process is to be run with `bash` commands in a Nextflow pipeline (not to be confused with the Nextflow pipeline that resides in the ICA and that will perform the analysis).
+The entire process is to be run with `bash` commands in a Nextflow pipeline (not to be confused with the Nextflow pipeline that resides in the ICA and that will perform the analysis).   
 
+![ICA Upload-Analyse-Download Bash Process](public/assets/images/ica_upload_analyse_download_bash_process.png "ICA Upload-Analyse-Download Bash Process")   
