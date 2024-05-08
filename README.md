@@ -1,13 +1,13 @@
 # ica-v2-poc   
 ## Introduction   
-This is a simple proof of concept (POC) for automating certain processes that use the _Illumina Connected Analytics (ICA)_ API. The main processes that we wish to automate are:   
+This is a simple proof of concept (POC) for automating certain processes that use the _Illumina Connected Analytics (ICA)_ CLI. The main processes that we wish to automate are:   
 
 - uploading files for analysis
 - run Nextflow pipelines for analysis
 - trigger download of output file(s)
 - delete output file after download succeeds   
 
-We can use a combination of both the [API](https://ica.illumina.com/ica/api/swagger/index.html#/) and the [CLI](https://help.ica.illumina.com/command-line-interface/cli-indexcommands). However, we will almost only use the CLI.   
+We can use a combination of both the [API](https://ica.illumina.com/ica/api/swagger/index.html#/) and the [CLI](https://help.ica.illumina.com/command-line-interface/cli-indexcommands). However, we will almost exclusively use the CLI.   
 
 Before we can begin, we need to have an existing project or create a new project. For the rest of this README, we'll be referring to the existing project, **SGDP**.   
 
@@ -35,32 +35,21 @@ colormode (allowed values none,dark,light defaults to none) :
 The `/Users/regancannell/.icav2/config.yaml` file can be modified if the default settings are wished to be changed. In our case, our output format is JSON.
 
 ## Project and Project Data   
-A project can be created in the UI. After a project is created, the project object can be obtained by using the following `curl` command with the API:
+A project can be created in the UI. After a project is created, the project object can be obtained by using the following CLI command:
 ```bash
-curl -X 'GET' \
-  'https://ica.illumina.com/ica/rest/api/projects?includeHiddenProjects=false' \
-  -H 'accept: application/vnd.illumina.v3+json' \
-  -H 'X-API-Key: XXXXXXXXXXXXXXXX'
+projects=$(icav2 projects list)
 ```
-The response body will contain a JSON object with a lot of details about the project. (The object is too big to be displayed here).   
+The response body will contain a JSON object with a list of existing projects. A single project object contains a lot of details about the project. (The object is too big to be displayed here).   
+
+To get the details of a specific project, the project id or name will be required. For example, we have a [script](bash/get_project_id.sh) in the `/bash` directory that extracts the `project_id` by using the `project_name` (which we create when creating a project).   
+
+We make use of the [jq](https://jqlang.github.io/jq/) library (which is a JSON parser) in several of our scripts.   
 
 ## Uploading Files to Illumina Connected Analytics   
 We can use the UI to upload a file to a project.   
 ![Uploading File using UI](public/assets/images/upload_file_using_ui.png "Uploading File using UI")
 
-The CLI can also be used to upload a file. We can get a list of projects with the following CLI command:
-```bash
-icav2 projects list
-```
-From the returned object (which is JSON by default), the `projectId` should be noted, since it will be required in subsequent commands/requests. To get the `projectId` programmatically using the name of the project ("SGDP" in this case), the following script can be run:
-```bash
-PROJECTS=$(icav2 projects list)
-PROJECT_ID=$(echo $PROJECTS | jq -r '.items[] | select(.name == "SGDP").id')
-echo $PROJECT_ID
-```
-We made use of the [jq](https://jqlang.github.io/jq/) library (which is a JSON parser) in the above script.   
-
-To set the project context, run the following command:
+However, we will mostly use the CLI. Instead of specifying the `project_id` every time we make requests to ICA, we can set the project context. To set the project context, run the following command:
 ```bash
 icav2 projects enter <projectId>
 ```
@@ -74,30 +63,11 @@ icav2 projectdata upload <localFileFolder>
 ```
 If a remote path for uploading is not specified, the data will be uploaded to the top level of the project's storage folder.   
 
-The API can also be used for uploading data. Data for the project can be created by using the following `curl` command:
+Without setting the project context, the `project_id` will need to be explicitly stated, i.e.
 ```bash
- curl -X 'POST' \
- 'https://ica.illumina.com/ica/rest/api/projects/{projectId}/data' \
- -H 'accept: application/vnd.illumina.v3+json' \
- -H 'X-API-Key: XXXXXXXXXXXXXXXX' \
- -H 'Content-Type: application/vnd.illumina.v3+json' \
- -d '{
- "name": "gencode.v45.lncRNA_transcripts.fa",
- "folderId": "fol.579eda846f1b4f6e2d1e08db91408069",
- "dataType": "FILE"
- }'
-```
-The example above generated a partial file called `gencode.v45.lncRNA_transcripts.fa` within our project, and is situated inside a folder with the folder ID `fol.579eda846f1b4f6e2d1e08db91408069`. The project, file, or folder IDs can be accessed either by logging into the ICA web UI or by using the ICA V2 CLI.   
-
-To get details about the data of the project, the `id` of the project needs to be sent as a path parameter in the following request:
-```bash
-curl -X 'GET' \
-  'https://ica.illumina.com/ica/rest/api/projects/{projectId}/data?filePathMatchMode=STARTS_WITH_CASE_INSENSITIVE' \
-  -H 'accept: application/vnd.illumina.v3+json' \
-  -H 'X-API-Key: XXXXXXXXXXXXXXXX'
-```
-
-A file can be uploaded without entering the project context. To do this, the `--project-id` flag needs to be set in the command. Here is an example of uploading a file from the location `Documents/test_data/fastq/1_control_trnL_2019_minq7.fastq` and the JSON response received:   
+icav2 projectdata upload <localFileFolder> --project-id <project_id>
+```   
+Here is an example of uploading a file from the location `Documents/test_data/fastq/1_control_trnL_2019_minq7.fastq` and the JSON response received:   
 ```bash
 icav2 projectdata upload Documents/test_data/fastq/1_control_trnL_2019_minq7.fastq \ 
 --project-id 049307d6-85dd-4cdc-b88d-a740e4e9e550
@@ -164,10 +134,11 @@ icav2 projectdata upload Documents/test_data/fastq/1_control_trnL_2019_minq7.fas
 	"urn": "urn:ilmn:ica:region:c39b1feb-3e94-4440-805e-45e0c76462bf:data:fil.178b9b4066234c0db33908dc6a426494#/1_control_trnL_2019_minq7.fastq"
 }
 ```
-Notice that the JSON response contains an `"id"` key that begins with _"fil"_. We can store that value inside a variable and use it to make subsequent requests using the CLI (or API). For instance, we can get the file details with:
+Notice that the JSON response contains an `"id"` key that begins with _"fil"_. We can store that value inside a variable and use it to make subsequent requests using the CLI. For instance, we can get the file details with:
 ```bash
 icav2 projectdata get <file-id> --project-id <project-id>
-```
+```   
+We have a [script](bash/get_uploaded_file_id.sh) in the `/bash` directory that extracts the `file_id` programmatically using certain `bash` commands.    
 
 To upload multiple files, we can use the following command:
 ```bash
@@ -184,7 +155,7 @@ The script [download_file_by_path.sh](bash/download_file_by_path.sh) can be test
 
 ![Download File from ICA Storage](public/assets/images/successful_download_script.png "Download File from ICA Storage")   
 
-## Run Nextflow Pipelines   
+## Creating and Listing Nextflow Pipelines   
 A Nextflow pipeline can be created in the web UI. A tutorial on creating a Nextflow pipeline and running an analysis through the web UI can be found over [here](https://help.ica.illumina.com/tutorials/nextflow). The pipeline can also be created using the CLI with the following command:
 ```bash
 icav2 projectpipelines create nextflow --project-id <projectId> --main /path/to/main.nf --parameter /path/to/xml
@@ -239,15 +210,26 @@ icav2 projectpipelines list --project-id 049307d6-85dd-4cdc-b88d-a740e4e9e550
 	]
 }
 ```
-The challenge here is that the pipeline object is inside an array, so we'd need to iterate over the array of pipeline objects to get the `id` of the pipeline. We can get an array of pipeline objects with the following command:
+The pipeline object is inside an array, so we'd need to iterate over the array of pipeline objects to get the `id` of the pipeline. However, the `jq` library makes it much easier to filter through the array to find the `pipelineId`. We can get an array of pipeline objects with the following command:
 ```bash
 icav2 projectpipelines list --project-id <projectId> | jq -r ".items"
 ```
 
-For a specific pipeline, we can get a JSON response of the pipeline and all its details by using the pipeline ID in the command:
+We can extract the `pipeline_id` from the list of pipelines using the `pipeline_code` (this code is specified when creating a pipeline in the UI). Here is an example script of how to achieve this:   
 ```bash
-icav2 pipelines get <pipelineId>
+#!/bin/bash
+
+project_id="049307d6-85dd-4cdc-b88d-a740e4e9e550"
+pipeline_code="basic_pipeline"
+
+pipelines_response=$(icav2 projectpipelines list --project-id $project_id)
+
+pipeline_id=$(echo $pipelines_response | jq -r ".items[].pipeline | select(.code == \"$pipeline_code\").id")
+
+echo $pipeline_id
 ```   
+
+## Run Nextflow Pipelines (Analyses)   
 We'd like to perform an analysis on a file using the CLI. For convenience and for testing purposes, we will use small files. We can download small files of various formats from [here](https://ftp.ncbi.nih.gov/genomes/HUMAN_MICROBIOM/Bacteria/). Since the Nextflow pipeline that exists in our project performs an analysis on FASTA files, we'll use the FASTA format for our tests.   
 
 We can use the CLI to kick off an analysis on an uploaded file. The analysis from the example in the tutorial takes about 30 minutes to complete. When completed, there is output data in the ICA storage. We can get a list of analyses belonging to a project with the following command:
@@ -391,14 +373,15 @@ The JSON response contains a lot of information, but we are interested in the st
 	"userReference": "regan_test_analysis_01"
 }
 ```
-We can sorted the project analysis by any one of the following fields:   
+We can sort the project analysis by any one of the following fields:   
 - reference
 - userReference
 - pipeline
 - status
 - startDate
 - endDate
-- summary
+- summary   
+
 We'll use `userReference` because this value is set by the user themselves.   
 
 We would like to download the output files after the analysis is complete and successful, i.e. the status should be **"SUCCEEDED"**. The possible values are:
