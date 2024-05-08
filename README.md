@@ -177,9 +177,12 @@ find $source -name '*.fastq.gz' | xargs -n 1 -P 10 -I {} icav2 projectdata uploa
 ## Downloading Files from Illumina Connected Analytics   
 Files can be downloaded from the ICA storage using the CLI with the following CLI command:
 ```bash
-icav2 projectdata list # take note of the dataId
-icav2 projectdata download <dataId>
+icav2 projectdata list # take note of the sourcePath
+icav2 projectdata download <sourcePath> <targetPath>
 ```
+The script [download_file_by_path.sh](bash/download_file_by_path.sh) can be tested with some test data. A successful implementation of this download script should look as follows:   
+
+![Download File from ICA Storage](public/assets/images/successful_download_script.png "Download File from ICA Storage")   
 
 ## Run Nextflow Pipelines   
 A Nextflow pipeline can be created in the web UI. A tutorial on creating a Nextflow pipeline and running an analysis through the web UI can be found over [here](https://help.ica.illumina.com/tutorials/nextflow). The pipeline can also be created using the CLI with the following command:

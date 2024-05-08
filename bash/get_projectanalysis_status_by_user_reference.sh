@@ -8,6 +8,6 @@ projectanalyses_response=$(icav2 projectanalyses list --project-id $project_id)
 analysis_id=$(echo $projectanalyses_response | jq -r ".items[] | select(.userReference == \"$analysis_user_reference\").id")
 analysis_status=$(echo $projectanalyses_response | jq -r ".items[] | select(.userReference == \"$analysis_user_reference\").status")
 
-echo $projectanalyses_response
 echo $analysis_id
+echo $analysis_status
 
