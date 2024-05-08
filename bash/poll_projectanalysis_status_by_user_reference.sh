@@ -1,11 +1,10 @@
 #! /bin/bash
 
 project_id="049307d6-85dd-4cdc-b88d-a740e4e9e550"
-analysis_user_reference="regan_test_analysis_01"
+analysis_user_reference="regan_test_analysis_03"
 
-time_stamp=$(date +"%Y-%m-%d_%H-%M-%S")
 analysis_status="REQUESTED"
-interval_in_seconds=10
+interval_in_seconds=240
 
 printf "Polling ICA V2 every $interval_in_seconds seconds, until status of analysis is 'SUCCEEDED'\n"
 
@@ -16,6 +15,7 @@ do
     if [[ $? == 0 ]]; then
         printf "Fetching status of project analysis with user reference '$analysis_user_reference'... \n"
         analysis_status=$(echo $projectanalyses_response | jq -r ".items[] | select(.userReference == \"$analysis_user_reference\").status")
+        time_stamp=$(date +"%Y-%m-%d_%H-%M-%S")
         printf "$time_stamp: "
         if [ $analysis_status == "SUCCEEDED" ]; then
             printf "Analysis SUCCEEDED \n"

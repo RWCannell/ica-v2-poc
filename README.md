@@ -222,78 +222,11 @@ echo $pipeline_id
 ## Run Nextflow Pipelines (Analyses)   
 We'd like to perform an analysis on a file using the CLI. For convenience and for testing purposes, we will use small files. We can download small files of various formats from [here](https://ftp.ncbi.nih.gov/genomes/HUMAN_MICROBIOM/Bacteria/). Since the Nextflow pipeline that exists in our project performs an analysis on FASTA files, we'll use the FASTA format for our tests.   
 
-We can use the CLI to kick off an analysis on an uploaded file. The analysis from the example in the tutorial takes about 30 minutes to complete. When completed, there is output data in the ICA storage. We can get a list of analyses belonging to a project with the following command:
+We can use the UI to kick off an analysis on an uploaded file. The analysis from the example in the tutorial takes about 30 minutes to complete. When completed, there is output data in the ICA storage. We can get a list of analyses belonging to a project with the following command:
 ```bash
 icav2 projectanalyses list --project-id <projectId>
 ```
-The JSON response for the list of analyses has the following form:
-```json
-{
-	"items": [
-		{
-			"analysisStorage": {
-				"description": "1.2TB",
-				"id": "6e1b6c8f-f913-48b2-9bd0-7fc13eda0fd0",
-				"name": "Small",
-				"ownerId": "8ec463f6-1acb-341b-b321-043c39d8716a",
-				"tenantId": "f91bb1a0-c55f-4bce-8014-b2e60c0ec7d3",
-				"tenantName": "ica-cp-admin",
-				"timeCreated": "2021-11-05T10:28:20Z",
-				"timeModified": "2023-05-31T16:38:26Z"
-			},
-			"endDate": "2024-04-26T12:48:02Z",
-			"id": "387b5178-732f-4706-9c41-e67a0cd00dc6",
-			"ownerId": "f030a442-4aa3-3bf1-acf0-25f76194603f",
-			"pipeline": {
-				"analysisStorage": {
-					"description": "1.2TB",
-					"id": "6e1b6c8f-f913-48b2-9bd0-7fc13eda0fd0",
-					"name": "Small",
-					"ownerId": "8ec463f6-1acb-341b-b321-043c39d8716a",
-					"tenantId": "f91bb1a0-c55f-4bce-8014-b2e60c0ec7d3",
-					"tenantName": "ica-cp-admin",
-					"timeCreated": "2021-11-05T10:28:20Z",
-					"timeModified": "2023-05-31T16:38:26Z"
-				},
-				"code": "basic_pipeline",
-				"description": "Reverses a fasta file and outputs to stdout.",
-				"id": "bfecca03-6443-45bd-b313-e4f555cd0748",
-				"language": "NEXTFLOW",
-				"languageVersion": {
-					"id": "2483549a-1530-4973-bb00-f3f6ccb7e610",
-					"language": "NEXTFLOW",
-					"name": "20.10.0"
-				},
-				"ownerId": "f030a442-4aa3-3bf1-acf0-25f76194603f",
-				"pipelineTags": {
-					"technicalTags": []
-				},
-				"tenantId": "02ea1bcf-6b20-4cbf-a9b2-724d1833eb07",
-				"tenantName": "sbimb-wits",
-				"timeCreated": "2024-04-26T12:23:56Z",
-				"timeModified": "2024-04-26T12:23:56Z",
-				"urn": "urn:ilmn:ica:pipeline:bfecca03-6443-45bd-b313-e4f555cd0748#basic_pipeline"
-			},
-			"reference": "regan_test_analysis_01-basic_pipeline-21ac67ed-ada1-4a82-8415-d2f83ec1e918",
-			"startDate": "2024-04-26T12:34:19Z",
-			"status": "SUCCEEDED",
-			"summary": "",
-			"tags": {
-				"referenceTags": [],
-				"technicalTags": [],
-				"userTags": [
-					"regan"
-				]
-			},
-			"tenantId": "02ea1bcf-6b20-4cbf-a9b2-724d1833eb07",
-			"tenantName": "sbimb-wits",
-			"timeCreated": "2024-04-26T12:34:11Z",
-			"timeModified": "2024-04-26T12:48:03Z",
-			"userReference": "regan_test_analysis_01"
-		}
-	]
-}
-```
+
 We can filter by `userReference` to get the `id` or `status` of the desired analysis. The CLI can be used to get the status of the analysis:
 ```bash
 icav2 projectanalyses get <analysisId>
@@ -389,6 +322,9 @@ We would like to download the output files after the analysis is complete and su
 - ABORTED   
 
 We can use a simple polling mechanism to keep checking the status of the analysis. When the status of the analysis is **SUCCEEDED**, then we can proceed to download the data. If the status is any one of **FAILED**, **FAILED_FINAL**, or **ABORTED**, then whatever `bash` script that's running should be terminated.   
+
+We'd like to use the CLI to trigger a pipeline run. However, it looks like CLI commands only exist for working with an already complete pipeline run that was [launched with the UI](https://help.ica.illumina.com/tutorials/launchpipecli).   
+![Launch Pipelines on CLI](public/assets/images/launch-pipelines-on-cli.png "Launch Pipelines on CLI") 
 
 ## Downloading Files from Illumina Connected Analytics   
 The output data files can be downloaded from the ICA storage using the web UI. A download can even be scheduled through the web UI.   
