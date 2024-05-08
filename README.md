@@ -145,16 +145,6 @@ To upload multiple files, we can use the following command:
 find $source -name '*.fastq.gz' | xargs -n 1 -P 10 -I {} icav2 projectdata upload {} /$target/
 ```
 
-## Downloading Files from Illumina Connected Analytics   
-Files can be downloaded from the ICA storage using the CLI with the following CLI command:
-```bash
-icav2 projectdata list # take note of the sourcePath
-icav2 projectdata download <sourcePath> <targetPath>
-```
-The script [download_file_by_path.sh](bash/download_file_by_path.sh) can be tested with some test data. A successful implementation of this download script should look as follows:   
-
-![Download File from ICA Storage](public/assets/images/successful_download_script.png "Download File from ICA Storage")   
-
 ## Creating and Listing Nextflow Pipelines   
 A Nextflow pipeline can be created in the web UI. A tutorial on creating a Nextflow pipeline and running an analysis through the web UI can be found over [here](https://help.ica.illumina.com/tutorials/nextflow). The pipeline can also be created using the CLI with the following command:
 ```bash
@@ -400,12 +390,21 @@ We would like to download the output files after the analysis is complete and su
 
 We can use a simple polling mechanism to keep checking the status of the analysis. When the status of the analysis is **SUCCEEDED**, then we can proceed to download the data. If the status is any one of **FAILED**, **FAILED_FINAL**, or **ABORTED**, then whatever `bash` script that's running should be terminated.   
 
-## Trigger Download of Output File(s)   
+## Downloading Files from Illumina Connected Analytics   
 The output data files can be downloaded from the ICA storage using the web UI. A download can even be scheduled through the web UI.   
 
 ![Schedule Download through Web UI](public/assets/images/download_scheduled_with_ui.png "Schedule Download through Web UI")   
 
 As mentioned above, we would like to trigger a download process as soon as the status reaches **"SUCCEEDED"**. After a successful download, we can then delete the files from the ICA storage.   
+
+Files can be downloaded from the ICA storage using the CLI with the following CLI command:
+```bash
+icav2 projectdata list # take note of the sourcePath
+icav2 projectdata download <sourcePath> <targetPath>
+```
+The script [download_file_by_path.sh](bash/download_file_by_path.sh) can be tested with some test data. A successful implementation of this download script should look as follows:   
+
+![Download File from ICA Storage](public/assets/images/successful_download_script.png "Download File from ICA Storage")   
 
 ## Delete Output File   
 To delete data from a project, the following CLI command can be used:
