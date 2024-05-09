@@ -16,3 +16,9 @@ analysis_data_id=$(echo $analysis_response | jq -r ".items[].analysisData[] | se
 analysis_data_code=$(echo $analysis_response | jq -r ".items[].code")
 
 file_ref="$analysis_data_code:$analysis_data_id"
+
+icav2 projectpipelines start nextflow $pipeline_id \
+--user-reference $user_reference \
+--project-id $project_id \
+--storage-size $storage_size \
+--input $file_ref
