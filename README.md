@@ -32,7 +32,10 @@ x-api-key : myAPIKey
 output-format (allowed values table,yaml,json defaults to table) : 
 colormode (allowed values none,dark,light defaults to none) :
 ```
-The `/Users/regancannell/.icav2/config.yaml` file can be modified if the default settings are wished to be changed. In our case, our output format is JSON.
+The `/Users/regancannell/.icav2/config.yaml` file can be modified if the default settings are wished to be changed. In our case, our output format is JSON.   
+
+Our goal is to create a process for the uploading of data to ICA, starting a pipeline run (or analysis) of the uploaded data, check the status of the analysis or output files periodically, download the results, and then finally clean up the storage in ICA (delete output and uploaded files). A diagram illustrating a single file upload-analysis-download-delete process can be seen below:   
+![Upload-Download ICA Process](public/assets/images/ica_upload_download_process.png "Upload-Download ICA Process")  
 
 ## Project and Project Data   
 A project can be created in the UI. After a project is created, the project object can be obtained by using the following CLI command:
@@ -321,10 +324,12 @@ We would like to download the output files after the analysis is complete and su
 - FAILED_FINAL 
 - ABORTED   
 
-We can use a simple polling mechanism to keep checking the status of the analysis. When the status of the analysis is **SUCCEEDED**, then we can proceed to download the data. If the status is any one of **FAILED**, **FAILED_FINAL**, or **ABORTED**, then whatever `bash` script that's running should be terminated.   
+We can use a simple polling mechanism to keep checking the status of the analysis. When the status of the analysis is **SUCCEEDED**, then we can proceed to download the data. If the status is any one of **FAILED**, **FAILED_FINAL**, or **ABORTED**, then the polling `bash` script should be terminated. The [get_projectanalysis_status_by_user_reference.sh](bash/get_projectanalysis_status_by_user_reference.sh) script checks the status of a running analysis periodically (the time interval can be set by the developer). Here is a screenshot of an example of its implementation:   
+![Polling the Analysis Status](public/assets/images/polling_the_analysis_status.png "Polling the Analysis Status") 
+
 
 We'd like to use the CLI to trigger a pipeline run. However, it looks like CLI commands only exist for working with an already complete pipeline run that was [launched with the UI](https://help.ica.illumina.com/tutorials/launchpipecli).   
-![Launch Pipelines on CLI](public/assets/images/launch-pipelines-on-cli.png "Launch Pipelines on CLI") 
+![Launch Pipelines on CLI](public/assets/images/launch_pipelines_on_cli.png "Launch Pipelines on CLI") 
 
 ## Downloading Files from Illumina Connected Analytics   
 The output data files can be downloaded from the ICA storage using the web UI. A download can even be scheduled through the web UI.   
@@ -350,11 +355,7 @@ icav2 projectdata delete <path> --project-id <project_id>
 The script [delete_file_by_path.sh](bash/delete_file_by_path.sh) extracts the path of the file in the ICA storage and then proceeds to delete the file. Below is a screenshot of the process completed successfully:   
 ![Delete File from ICA Storage](public/assets/images/delete_file_by_path_script.png "Delete File from ICA Storage")   
 
-## Single File Upload-Analyse-Download Process
-The full process for a single file upload-analysis-download-delete process can be seen in the diagram below:   
-
-![Upload-Download ICA Process](public/assets/images/ica_upload_download_process.png "Upload-Download ICA Process")   
-
+## Single File Upload-Analyse-Download Process 
 The entire process is to be run with `bash` commands in a Nextflow pipeline (not to be confused with the Nextflow pipeline that resides in the ICA and that will perform the analysis).   
 
 ![ICA Upload-Analyse-Download Bash Process](public/assets/images/ica_upload_analyse_download_bash_process.png "ICA Upload-Analyse-Download Bash Process")   
