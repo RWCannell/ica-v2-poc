@@ -324,12 +324,21 @@ We would like to download the output files after the analysis is complete and su
 - FAILED_FINAL 
 - ABORTED   
 
-We can use a simple polling mechanism to keep checking the status of the analysis. When the status of the analysis is **SUCCEEDED**, then we can proceed to download the data. If the status is any one of **FAILED**, **FAILED_FINAL**, or **ABORTED**, then the polling `bash` script should be terminated. The [get_projectanalysis_status_by_user_reference.sh](bash/get_projectanalysis_status_by_user_reference.sh) script checks the status of a running analysis periodically (the time interval can be set by the developer). Here is a screenshot of an example of its implementation:   
+We can use a simple polling mechanism to keep checking the status of the analysis. When the status of the analysis is **SUCCEEDED**, then we can proceed to download the data. If the status is any one of **FAILED**, **FAILED_FINAL**, or **ABORTED**, then the polling `bash` script should be terminated. The [get_projectanalysis_status_by_user_reference.sh](bash/get_projectanalysis_status_by_user_reference.sh) script checks the status of a running analysis periodically (the time interval can be set by the developer). Here is a screenshot of an example of its implementation:    
+
 ![Polling the Analysis Status](public/assets/images/polling_the_analysis_status.png "Polling the Analysis Status") 
 
+We'd like to use the CLI to trigger a pipeline run. In order to use the CLI to automate the running of pipelines, an _analysis code_ is required. To get this code, we need to run a pipeline to completion with the UI. We can then run the pipeline on any appropriate file (a small test file will be good enough). This is explained in more detail over [here](https://help.ica.illumina.com/tutorials/launchpipecli).    
 
-We'd like to use the CLI to trigger a pipeline run. However, it looks like CLI commands only exist for working with an already complete pipeline run that was [launched with the UI](https://help.ica.illumina.com/tutorials/launchpipecli).   
-![Launch Pipelines on CLI](public/assets/images/launch_pipelines_on_cli.png "Launch Pipelines on CLI") 
+Once this analysis code is extracted from the completed pipeline run, we can then use it in tandem with the _file id_ to execute the pipeline on a particular file. The command we use for a basic pipeline run (or analysis) is the following:
+```bash
+icav2 projectpipelines start nextflow $pipeline_id \
+	--user-reference $user_reference \
+	--project-id $project_id \
+	--storage-size $storage_size \
+	--input $file_ref
+```
+The `$file_ref` variable is constructed from the analysis code and the file id as `analysisCode:fileId`. The script for the more detailed process is [start_nextflow_pipeline_analysis.sh](bash/start_nextflow_pipeline_analysis.sh).   
 
 ## Downloading Files from Illumina Connected Analytics   
 The output data files can be downloaded from the ICA storage using the web UI. A download can even be scheduled through the web UI.   
