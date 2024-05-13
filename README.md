@@ -25,14 +25,14 @@ icav2 config set
 There will be prompts. The defaults can be used by simply pressing `Enter` or `Return`. When the API key is prompted, provide the value that has been generated in the UI. 
 ```bash
 icav2 config set
-Creating /Users/regancannell/.icav2/config.yaml
+Creating $HOME/.icav2/config.yaml
 Initialize configuration settings [default]
 server-url [ica.illumina.com]: 
 x-api-key : myAPIKey
 output-format (allowed values table,yaml,json defaults to table) : 
 colormode (allowed values none,dark,light defaults to none) :
 ```
-The `/Users/regancannell/.icav2/config.yaml` file can be modified if the default settings are wished to be changed. In our case, our output format is JSON.   
+The `$HOME/.icav2/config.yaml` file can be modified if the default settings are wished to be changed. In our case, our output format is JSON.   
 
 Our goal is to create a process for the uploading of data to ICA, starting a pipeline run (or analysis) of the uploaded data, check the status of the analysis or output files periodically, download the results, and then finally clean up the storage in ICA (delete output and uploaded files). A diagram illustrating a single file upload-analysis-download-delete process can be seen below:   
 ![Upload-Download ICA Process](public/assets/images/ica_upload_download_process.png "Upload-Download ICA Process")  
@@ -49,6 +49,7 @@ To get the details of a specific project, the project id or name will be require
 We make use of the [jq](https://jqlang.github.io/jq/) library (which is a JSON parser) in several of our scripts.   
 
 ## Uploading Files to Illumina Connected Analytics   
+### Uploading Single Files
 We can use the UI to upload a file to a project.   
 ![Uploading File using UI](public/assets/images/upload_file_using_ui.png "Uploading File using UI")
 
@@ -62,17 +63,17 @@ If the command runs successfully, then a response like
 ```
 should be received. Now the terminal session will be in the specified project's context. It's possible to now upload a file to the project with:
 ```bash
-icav2 projectdata upload <localFileFolder>
+icav2 projectdata upload </local/path/of/file>
 ```
 If a remote path for uploading is not specified, the data will be uploaded to the top level of the project's storage folder.   
 
 Without setting the project context, the `project_id` will need to be explicitly stated, i.e.
 ```bash
-icav2 projectdata upload <localFileFolder> --project-id <project_id>
+icav2 projectdata upload </local/path/of/file> --project-id <project_id>
 ```   
-Here is an example of uploading a file from the location `Documents/test_data/fastq/1_control_trnL_2019_minq7.fastq` and the JSON response received:   
+Here is an example of uploading a file from the location `Documents/ica_data_uploads/fastq/1_control_trnL_2019_minq7.fastq` and the JSON response received:   
 ```bash
-icav2 projectdata upload Documents/test_data/fastq/1_control_trnL_2019_minq7.fastq \ 
+icav2 projectdata upload Documents/ica_data_uploads/fastq/1_control_trnL_2019_minq7.fastq \ 
 --project-id 049307d6-85dd-4cdc-b88d-a740e4e9e550
 ```
 ![Upload Response](public/assets/images/icav2_upload_response.png "Upload Response")   
@@ -143,9 +144,18 @@ icav2 projectdata get <file-id> --project-id <project-id>
 ```   
 We have a [script](bash/get_uploaded_file_id.sh) in the `/bash` directory that extracts the `file_id` programmatically using certain `bash` commands.    
 
+### Uploading Multiple Files or A Folder
 To upload multiple files, we can use the following command:
 ```bash
 find $source -name '*.fastq.gz' | xargs -n 1 -P 10 -I {} icav2 projectdata upload {} /$target/
+```
+To upload a folder, we can use the following command:
+```bash
+icav2 projectdata upload </local/path/of/folder> --project-id <projectId>
+```
+The response from this process will allows us to extract the `folderId` and `folderUploadSessionId`. We can then use these parameters to get details of the folder upload session, i.e.   
+```bash
+icav2 projectdata folderuploadsession --project-id <projectId> <folderId> <folderUploadSessionId>
 ```
 
 ## Creating and Listing Nextflow Pipelines   
@@ -357,13 +367,20 @@ The script [download_file_by_path.sh](bash/download_file_by_path.sh) can be test
 
 ![Download File from ICA Storage](public/assets/images/successful_download_script.png "Download File from ICA Storage")   
 
-## Delete Output File   
+## Delete Output File/Folder   
 To delete a file from a project, the following CLI command can be used:
 ```bash
 icav2 projectdata delete <path> --project-id <project_id>
 ```
 The script [delete_file_by_path.sh](bash/delete_file_by_path.sh) extracts the path of the file in the ICA storage and then proceeds to delete the file. Below is a screenshot of the process completed successfully:   
-![Delete File from ICA Storage](public/assets/images/delete_file_by_path_script.png "Delete File from ICA Storage")   
+![Delete File from ICA Storage](public/assets/images/delete_file_by_path_script.png "Delete File from ICA Storage")  
+
+Deleting a folder follows the same logic as deleting a file. For instance, the following command would delete a folder by its path in the ICA storage:
+```bash
+icav2 projectdata delete $folder_ica_storage_path --project-id $project_id
+```
+The script [delete_folder_by_path](bash/delete_folder_by_path.sh) contains logic for extracting the folder path by filtering a list of project data by the folder name. The folder path is then used to delete the folder.   
+![Delete Folder from ICA Storage](public/assets/images/delete_folder_by_path_script.png "Delete Folder from ICA Storage")  
 
 ## Single File Upload-Analyse-Download Process 
 The entire process is to be run with `bash` commands in a Nextflow pipeline (not to be confused with the Nextflow pipeline that resides in the ICA and that will perform the analysis).   
