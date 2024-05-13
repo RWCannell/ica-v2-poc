@@ -158,6 +158,17 @@ The response from this process will allows us to extract the `folderId` and `fol
 icav2 projectdata folderuploadsession --project-id <projectId> <folderId> <folderUploadSessionId>
 ```
 
+## Creating Samples   
+A sample allows us to group our resources together so that further actions can be performed in a more systematic manner. We can create a sample with the CLI using the following command:
+```bash
+icav2 projectsamples create $sample_name \
+    --project-id $project_id \
+    --description $sample_description \
+    --user-tag $sample_user_tag \
+    --technical-tag $sample_technical_tag
+```
+The script [create_project_sample.sh](bash/create_project_sample.sh) contains the logic for creating a project sample. Once a sample is created, we can link it to an existing project (in addition to the project to which it already belongs). We can also upload files or folders to a sample.
+
 ## Creating and Listing Nextflow Pipelines   
 A Nextflow pipeline can be created in the web UI. A tutorial on creating a Nextflow pipeline and running an analysis through the web UI can be found over [here](https://help.ica.illumina.com/tutorials/nextflow). The pipeline can also be created using the CLI with the following command:
 ```bash

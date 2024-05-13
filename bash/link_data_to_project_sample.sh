@@ -1,14 +1,9 @@
 #!/bin/bash
 
-folder_path="$HOME/Documents/ica_data_uploads/fasta"
 folder_name="Citrobacter_freundii_4_7_47CFAA_uid46379"
 project_id="049307d6-85dd-4cdc-b88d-a740e4e9e550"
-sample_id="4bef7ead-314c-4651-8bb6-da0656dc8332"
 sample_name="Citrobacter_freundii_sample"
-sample_description="a sample containing Citrobacter_freundii_4_7_47CFAA fasta files"
 time_stamp=$(date +"%Y-%m-%d_%H:%M:%S")
-
-upload_folder_path="$folder_path/$folder_name"
 
 printf "[$time_stamp]: "
 printf "Fetching list of samples... \n"
