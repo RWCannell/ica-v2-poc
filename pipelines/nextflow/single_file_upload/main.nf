@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
-filePath = Channel.fromPath("ica_data_uploads/fasta/Citrobacter_freundii_4_7_47CFAA_uid46379/NZ_ADLG00000000.scaffold.fa/NZ_JH414882.fa", checkIfExists: true)
+filePath = Channel.fromPath("ica_data_uploads/fasta/Citrobacter_freundii_4_7_47CFAA_uid46379/NZ_ADLG00000000.scaffold.fa/NZ_JH414877.fa", checkIfExists: true)
 projectId = params.projectId
 analysisDataCode = params.analysisDataCode
 
@@ -11,7 +11,7 @@ process uploadFile {
     val(projectId)
 
     output:
-    path "${fileName}.txt"
+    path "${fileName}.txt", emit: fileUploadResponse
 
     script:
     fileName = filePath.baseName
@@ -30,6 +30,33 @@ process uploadFile {
     """
 }
 
+process constructFileReference {
+    debug true
+    
+    input:
+    path(fileUploadResponse)
+    val(analysisDataCode)
+
+    output:
+    val(fileReference), emit: fileRef
+
+    script:
+    fileReference = ""
+    """
+    #!/bin/bash
+    
+    fileId=\$(cat ${fileUploadResponse} | grep -i '\"id\": \"fil' | grep -o 'fil.[^\"]*')
+
+    fileReference="${analysisDataCode}:\${fileId}"
+
+    echo "File Reference: "
+
+    echo \${fileReference}
+    """
+}
+
 workflow {
     uploadFile(filePath, params.projectId)
+    
+    constructFileReference(uploadFile.out.fileUploadResponse.view(), params.analysisDataCode)
 }
