@@ -1,7 +1,7 @@
 #!/bin/bash
 
 file_path="$HOME/Documents/ica_data_uploads/fasta/Citrobacter_youngae_ATCC_29220_uid28665/NZ_ABWL00000000.scaffold.fa"
-file_name="NZ_GG730302.fa"
+file_name="NZ_GG730303.fa"
 project_id="049307d6-85dd-4cdc-b88d-a740e4e9e550"
 pipeline_id="bfecca03-6443-45bd-b313-e4f555cd0748"
 analysis_id="2e065006-14c0-4474-b08e-802d1907e75b"
@@ -81,6 +81,21 @@ else
                 printf "[$time_stamp]: "
                 if [[ $analysis_status == "SUCCEEDED" ]]; then
                     printf "Analysis SUCCEEDED \n"
+
+                    time_stamp=$(date +"%Y-%m-%d %H:%M:%S")
+                    printf "[$time_stamp]: "
+                    printf "Fetching analysis output of analysis with id '$analysis_id'... \n"
+                    analysis_output=$(icav2 projectanalyses output $analysis_id --project-id $project_id)
+
+                    if [[ $? != 0 ]]; then
+                        printf "Failed to fetch analysis output. \n"
+                    else
+                        printf "Fetching analysis output folder id... \n"
+                        analysis_output_folder_id=$(echo $analysis_output | jq -r ".items[].data[].dataId")
+
+                        printf "Downloading analysis output folder with id '$analysis_output_folder_id' to '$local_download_path'... \n"
+                        analysis_output_download_response=$(icav2 projectdata download $analysis_output_folder_id $local_download_path)
+                    fi
                     break;
 
                 elif [[ $analysis_status == "FAILED" ]]; then
@@ -104,19 +119,4 @@ else
             sleep $interval_in_seconds;
         done
     fi
-fi
-
-time_stamp=$(date +"%Y-%m-%d %H:%M:%S")
-printf "[$time_stamp]: "
-printf "Fetching analysis output of analysis with id '$analysis_id'... \n"
-analysis_output=$(icav2 projectanalyses output $analysis_id --project-id $project_id)
-
-if [[ $? != 0 ]]; then
-    printf "Failed to fetch analysis output. \n"
-else
-    printf "Fetching analysis output folder id... \n"
-    analysis_output_folder_id=$(echo $analysis_output | jq -r ".items[].data[].dataId")
-
-    printf "Downloading analysis output folder with id '$analysis_output_folder_id' to '$local_download_path'... \n"
-    analysis_output_download_response=$(icav2 projectdata download $analysis_output_folder_id $local_download_path)
 fi

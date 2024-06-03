@@ -91,6 +91,21 @@ for file_path in "$file_directory"/*; do
                     printf "[$time_stamp]: "
                     if [[ $analysis_status == "SUCCEEDED" ]]; then
                         printf "Analysis SUCCEEDED \n"
+                        
+                        time_stamp=$(date +"%Y-%m-%d %H:%M:%S")
+                        printf "[$time_stamp]: "
+                        printf "Fetching analysis output of analysis with id '$analysis_id'... \n"
+                        analysis_output=$(icav2 projectanalyses output $analysis_id --project-id $project_id)
+                        
+                        if [[ $? != 0 ]]; then
+                            printf "Failed to fetch analysis output. \n"
+                        else
+                            printf "Fetching analysis output folder id... \n"
+                            analysis_output_folder_id=$(echo $analysis_output | jq -r ".items[].data[].dataId")
+
+                            printf "Downloading analysis output folder with id '$analysis_output_folder_id' to '$local_download_path'... \n"
+                            analysis_output_download_response=$(icav2 projectdata download $analysis_output_folder_id $local_download_path)
+                        fi
                         break;
 
                     elif [[ $analysis_status == "FAILED" ]]; then
@@ -114,21 +129,6 @@ for file_path in "$file_directory"/*; do
                 sleep $interval_in_seconds;
             done
         fi
-    fi
-
-    time_stamp=$(date +"%Y-%m-%d %H:%M:%S")
-    printf "[$time_stamp]: "
-    printf "Fetching analysis output of analysis with id '$analysis_id'... \n"
-    analysis_output=$(icav2 projectanalyses output $analysis_id --project-id $project_id)
-
-    if [[ $? != 0 ]]; then
-        printf "Failed to fetch analysis output. \n"
-    else
-        printf "Fetching analysis output folder id... \n"
-        analysis_output_folder_id=$(echo $analysis_output | jq -r ".items[].data[].dataId")
-
-        printf "Downloading analysis output folder with id '$analysis_output_folder_id' to '$local_download_path'... \n"
-        analysis_output_download_response=$(icav2 projectdata download $analysis_output_folder_id $local_download_path)
     fi
   fi
 done
