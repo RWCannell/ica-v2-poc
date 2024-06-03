@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
-filePath = Channel.fromPath("ica_data_uploads/fasta/Citrobacter_30_2_uid32453/NZ_ACDJ00000000.scaffold.fa/NZ_GG657370.fa", checkIfExists: true)
+filePath = Channel.fromPath("ica_data_uploads/fasta/Citrobacter_30_2_uid32453/NZ_ACDJ00000000.scaffold.fa/NZ_GG657371.fa", checkIfExists: true)
 projectId = params.projectId
 analysisDataCode = params.analysisDataCode
 pipelineId = params.pipelineId
@@ -60,7 +60,7 @@ process checkFileUploadStatus {
     while true;
     do
         echo "Checking status of uploaded file..."
-        ((fileStatusCheckCount+=1))
+        ((\${fileStatusCheckCount}+=1))
         fileResponse=\$(icav2 projectdata get \${fileId} --project-id ${projectId})
         fileStatus=\$(echo \$fileResponse | jq -r ".details.status")
         if [[ "\${fileStatus}" == "AVAILABLE" ]]; then
@@ -76,9 +76,8 @@ process checkFileUploadStatus {
 
             echo "\${fileReference}" > fileReference.txt
             break;
-        elif
-            [[ fileStatusCheckLimit > 10 ]]
-            echo "File status has been checked more than \${fileStatusCheckLimit} times. Stopping..."
+        elif [[ \${fileStatusCheckCount} -gt \${fileStatusCheckLimit} ]]; then
+            echo "File status has been checked more than \${fileStatusCheckCount} times. Stopping..."
         else
             printf "File '\${fileId}' is still not AVAILABLE... \n"
         fi
@@ -141,14 +140,15 @@ process checkAnalysisStatus {
     echo "Checking status of analysis with id '\${analysisId}' every ${analysisStatusCheckInterval} seconds, until status is 'SUCCEEDED'..."
     while true;
     do
+        ((\${StatusCheckCount}+=1))
         updatedAnalysisResponse=\$(icav2 projectanalyses get \${analysisId})
-        analysisStatus=$(echo \${updatedAnalysisResponse} | jq -r ".items[] | select(.reference == "\${analysisRef}").status")
+        analysisStatus=\$(echo \${updatedAnalysisResponse} | jq -r ".items[] | select(.reference == "\${analysisRef}").status")
 
         if [ \${analysisStatus} == "SUCCEEDED" ]; then
             echo "Analysis SUCCEEDED"
             echo "Fetching analysis output response..."
             analysisOutputResponse=\$(icav2 projectanalyses output \$analysisId)
-            analysisOutputFolderId=$(echo \${analysisOutputResponse} | jq -r ".items[].data[].dataId")
+            analysisOutputFolderId=\$(echo \${analysisOutputResponse} | jq -r ".items[].data[].dataId")
             echo "Analysis output folder ID is '\${analysisOutputFolderId}'"
             break;
 
@@ -164,7 +164,7 @@ process checkAnalysisStatus {
             echo "Analysis ABORTED"
             break;
 
-        elif [[ fileStatusCheckLimit > 10 ]]
+        elif [[ \${analysisStatusCheckCount} -gt \${analysisStatusCheckLimit} ]]; then
             echo "Analysis status has been checked more than \${analysisStatusCheckLimit} times. Stopping..."
 
         else

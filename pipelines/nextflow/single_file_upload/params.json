@@ -7,6 +7,6 @@
     "analysisId": "387b5178-732f-4706-9c41-e67a0cd00dc6",
     "analysisDataCode": "in",
     "fileStatusCheckInterval": 30,
-    "analysisStatusCheckInterval": 180,
+    "analysisStatusCheckInterval": 120,
     "localDownloadPath": "${HOME}/Documents/ica_data_downloads/"
 }
