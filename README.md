@@ -396,4 +396,9 @@ The script [delete_folder_by_path](bash/delete_folder_by_path.sh) contains logic
 ## Single File Upload-Analyse-Download Process 
 The entire process is to be run with `bash` commands in a Nextflow pipeline (not to be confused with the Nextflow pipeline that resides in the ICA and that will perform the analysis).   
 
-![ICA Upload-Analyse-Download Bash Process](public/assets/images/ica_upload_analyse_download_bash_process.png "ICA Upload-Analyse-Download Bash Process")   
+![ICA Upload-Analyse-Download Bash Process](public/assets/images/ica_upload_analyse_download_bash_process.png "ICA Upload-Analyse-Download Bash Process")    
+
+The bash script for the full process of uploading a single file, analysing it, and then downloading its output can be found in the [single_file_upload_analyse_download.sh](bash/single_file_upload_analyse_download.sh) script.    
+
+The bash script for the full process of uploading a multiple files, analysing each one, and then downloading the output can be found in the [multiple_files_upload_analyse_download.sh](bash/multiple_files_upload_analyse_download.sh) script.   
+![Multiple Files Upload-Analyse-Download Script](public/assets/images/multiple_files_upload_analyse_download.png "Multiple Files Upload-Analyse-Download Script")  

@@ -1,9 +1,8 @@
 #!/bin/bash
 
 file_path="$HOME/Documents/ica_data_uploads/fasta/Citrobacter_youngae_ATCC_29220_uid28665/NZ_ABWL00000000.scaffold.fa"
-file_name="NZ_GG730301.fa"
+file_name="NZ_GG730302.fa"
 project_id="049307d6-85dd-4cdc-b88d-a740e4e9e550"
-pipeline_code="basic_pipeline"
 pipeline_id="bfecca03-6443-45bd-b313-e4f555cd0748"
 analysis_id="2e065006-14c0-4474-b08e-802d1907e75b"
 user_reference="regan_test_analysis_03"
@@ -15,9 +14,8 @@ upload_file_path="$file_path/$file_name"
 
 # We need the fileId and analysisId to start Nextflow analysis
 file_id=""
-# analysis_id=""
 
-time_stamp=$(date +"%Y-%m-%d_%H:%M:%S")
+time_stamp=$(date +"%Y-%m-%d %H:%M:%S")
 printf "[$time_stamp]: "
 printf "Uploading '$file_name'... \n"
 
@@ -33,7 +31,7 @@ else
     # id of file starts with 'fil.'
     file_id=$(grep -i "\"id\": \"fil\." $temp_file_name | grep -o 'fil[^\"]*')
 
-    time_stamp=$(date +"%Y-%m-%d_%H:%M:%S")
+    time_stamp=$(date +"%Y-%m-%d %H:%M:%S")
     printf "[$time_stamp]: "
     printf "Uploaded file with ID '$file_id' \n"
 
@@ -79,21 +77,21 @@ else
             if [[ $? == 0 ]]; then
                 printf "Fetching status of project analysis with ID '$analysis_id' and pipeline reference '$project_pipeline_reference'... \n"
                 analysis_status=$(echo $projectanalyses_response | jq -r ".items[] | select(.reference == \"$project_pipeline_reference\").status")
-                time_stamp=$(date +"%Y-%m-%d_%H:%M:%S")
+                time_stamp=$(date +"%Y-%m-%d %H:%M:%S")
                 printf "[$time_stamp]: "
-                if [ $analysis_status == "SUCCEEDED" ]; then
+                if [[ $analysis_status == "SUCCEEDED" ]]; then
                     printf "Analysis SUCCEEDED \n"
                     break;
 
-                elif [ $analysis_status == "FAILED" ]; then
+                elif [[ $analysis_status == "FAILED" ]]; then
                     printf "Analysis FAILED \n"
                     break;
 
-                elif [ $analysis_status == "FAILED_FINAL" ]; then
+                elif [[ $analysis_status == "FAILED_FINAL" ]]; then
                     printf "Analysis FAILED_FINAL \n"
                     break;
 
-                elif [ $analysis_status == "ABORTED" ]; then
+                elif [[ $analysis_status == "ABORTED" ]]; then
                     printf "Analysis ABORTED \n"
                     break;
                 else
@@ -108,6 +106,7 @@ else
     fi
 fi
 
+time_stamp=$(date +"%Y-%m-%d %H:%M:%S")
 printf "[$time_stamp]: "
 printf "Fetching analysis output of analysis with id '$analysis_id'... \n"
 analysis_output=$(icav2 projectanalyses output $analysis_id --project-id $project_id)
@@ -115,7 +114,6 @@ analysis_output=$(icav2 projectanalyses output $analysis_id --project-id $projec
 if [[ $? != 0 ]]; then
     printf "Failed to fetch analysis output. \n"
 else
-    # analysis_output_data=$(echo $analysis_output | jq -r ".items[].data[]")
     printf "Fetching analysis output folder id... \n"
     analysis_output_folder_id=$(echo $analysis_output | jq -r ".items[].data[].dataId")
 
