@@ -1,7 +1,6 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 nextflow.preview.recursion=true
-filePath = Channel.fromPath("pipeline_start_response.txt", checkIfExists: true)
 // filePath = Channel.fromPath("ica_data_uploads/fasta/Citrobacter_30_2_uid32453/NZ_ACDJ00000000.scaffold.fa/NZ_GG657383.fa", checkIfExists: true)
 projectId = params.projectId
 analysisDataCode = params.analysisDataCode
@@ -11,37 +10,34 @@ storageSize = params.storageSize
 
 process getAnalysisId {
     debug true
+
     input:
     path(filePath)
 
     output:
-    val analysisId, emit: analysisId
+    stdout
 
     script:
-    analysisId = ""
     """
     #!/bin/bash
 
     analysisResponse=\$(cat ${filePath})
 
-    echo "analysisResponse: \${analysisResponse}" 
-
     analysisId=\$(echo \${analysisResponse} | jq -r ".id")
-    echo "analysisId: \$analysisId"
+    echo "\${analysisId}"
     """
 }
 
-process readStatus {
+process getStatus {
     debug true
     
     input:
-    val(analysisId)
+    val analysisId
 
     output:
-    val(finalStatus), emit: finalStatus
+    stdout
 
     script:
-    finalStatus = "REQUESTED"
     """
     #!/bin/bash
 
@@ -51,22 +47,35 @@ process readStatus {
     
     analysisStatus=\$(echo \${updatedAnalysisResponse} | jq -r ".status")
     
-    finalStatus=\${analysisStatus}
+    echo "\${analysisStatus}"
+    """
+}
 
-    echo "Final Status: \${analysisStatus}"
+process readStatus {
+    debug true
+    
+    input:
+    val(finalStatus)
+
+    script:
+    """
+    #!/bin/bash
+
+    echo "Final Status: ${finalStatus}"
     """
 }
 
 workflow {
-    // ch_collected = filePath.collect()
+    filePath = Channel.fromPath("pipeline_start_response.txt", checkIfExists: true)
     getAnalysisId(filePath)
-    // readStatus.recurse(getAnalysisId.out.analysisId.view().collect()).times(5)
-    readStatus(getAnalysisId.out.analysisId.view())
+    // getStatus.recurse(getAnalysisId.out.analysisId.view().collect()).times(5)
+    getStatus(getAnalysisId.out.view().first())
     // .recurse(getAnalysisId.out.analysisId.view().first())
     // .times(5)
     // .until { it -> it.size() > 100 }
-
-    // readStatus
+    readStatus(getStatus.out.view())
+    // getStatus
     // .out
-    // .view(it)
+    // .finalStatus
+    // .view()
 }
