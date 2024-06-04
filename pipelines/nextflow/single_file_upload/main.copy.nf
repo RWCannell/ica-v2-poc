@@ -8,6 +8,7 @@ pipelineCode = params.pipelineCode
 userReference = params.userReference
 storageSize = params.storageSize
 analysisStatusCheckInterval = params.analysisStatusCheckInterval
+localDownloadPath = params.localDownloadPath
 
 process uploadFile {
     debug true
@@ -172,7 +173,7 @@ process downloadAnalysisOutput {
 
     echo "Downloading analysis output folder with ID '${analysisOutputFolderId}' to '${localDownloadPath}'..."
 
-    icav2 projectdata download ${analysisOutputFolderId} ${local_download_path}
+    icav2 projectdata download ${analysisOutputFolderId} ${localDownloadPath}
     """
 }
 
