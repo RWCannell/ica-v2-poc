@@ -1,6 +1,7 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
-filePath = Channel.fromPath("ica_data_uploads/mixed.txt", checkIfExists: true)
+nextflow.preview.recursion=true
+filePath = Channel.fromPath("pipeline_start_response.txt", checkIfExists: true)
 // filePath = Channel.fromPath("ica_data_uploads/fasta/Citrobacter_30_2_uid32453/NZ_ACDJ00000000.scaffold.fa/NZ_GG657383.fa", checkIfExists: true)
 projectId = params.projectId
 analysisDataCode = params.analysisDataCode
@@ -8,85 +9,64 @@ pipelineId = params.pipelineId
 userReference = params.userReference
 storageSize = params.storageSize
 
-process uploadFile {
+process getAnalysisId {
     debug true
     input:
     path(filePath)
-    val(projectId)
 
     output:
-    path "${fileName}.txt", emit: fileUploadResponse
+    val analysisId, emit: analysisId
 
     script:
-    fileName = filePath.baseName
+    analysisId = ""
     """
     #!/bin/bash
 
-    fileUploadResponse=\$(cat ${filePath})
+    analysisResponse=\$(cat ${filePath})
 
-    echo "\${fileUploadResponse}" > ${fileName}.txt
+    echo "analysisResponse: \${analysisResponse}" 
+
+    analysisId=\$(echo \${analysisResponse} | jq -r ".id")
+    echo "analysisId: \$analysisId"
     """
 }
 
-process constructFileReference {
+process readStatus {
     debug true
     
     input:
-    path(fileUploadResponse)
-    val(analysisDataCode)
+    val(analysisId)
 
     output:
-    path "fileReference.txt", emit: fileRef
+    val(finalStatus), emit: finalStatus
 
     script:
-    fileReference = ""
+    finalStatus = "REQUESTED"
     """
     #!/bin/bash
+
+    echo "analysisId: ${analysisId}"  
+
+    updatedAnalysisResponse=\$(icav2 projectanalyses get ${analysisId})
     
-    fileId=\$(cat ${fileUploadResponse} | grep -i '\"id\": \"fil' | grep -o 'fil.[^\"]*')
-
-    fileReference="${analysisDataCode}:\${fileId}"
-
-    echo "File Reference: "
-
-    echo \${fileReference}
-
-    touch fileReference.txt
-
-    echo "\${fileReference}" > fileReference.txt
-    """
-}
-
-process startAnalysis {
-    debug true
+    analysisStatus=\$(echo \${updatedAnalysisResponse} | jq -r ".status")
     
-    input:
-    val(fileRef)
+    finalStatus=\${analysisStatus}
 
-    // output:
-    // val(fileReference), emit: fileRef
-
-    script:
-    """
-    #!/bin/bash
-    echo "Starting Nextflow analysis..."
-
-    fileRef=\$(cat ${fileRef})
-
-    echo "File Ref: \${fileRef}"
-
-    icav2 projectpipelines start nextflow ${pipelineId} \
-        --user-reference ${userReference} \
-        --project-id ${projectId} \
-        --storage-size ${storageSize} \
-        --input \${fileRef}
+    echo "Final Status: \${analysisStatus}"
     """
 }
 
 workflow {
-    uploadFile(filePath, params.projectId)
-    
-    constructFileReference(uploadFile.out.fileUploadResponse.view(), params.analysisDataCode)
+    // ch_collected = filePath.collect()
+    getAnalysisId(filePath)
+    // readStatus.recurse(getAnalysisId.out.analysisId.view().collect()).times(5)
+    readStatus(getAnalysisId.out.analysisId.view())
+    // .recurse(getAnalysisId.out.analysisId.view().first())
+    // .times(5)
+    // .until { it -> it.size() > 100 }
 
-    startAnalysis(constructFileReference.out.fileRef.view())
+    // readStatus
+    // .out
+    // .view(it)
 }
