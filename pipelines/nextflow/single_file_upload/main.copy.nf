@@ -101,7 +101,7 @@ process checkAnalysisStatus {
     val(analysisStatusCheckInterval)
 
     output:
-    val analysisOutputFolderId, emit: analysisOutputFolderId
+    path "analysisOutputFolderId.txt", emit: analysisOutputFolderId
 
     script:
     analysisOutputFolderId = ""
@@ -131,6 +131,9 @@ process checkAnalysisStatus {
             analysisOutputResponse=\$(icav2 projectanalyses output \$analysisId)
             analysisOutputFolderId=\$(echo \${analysisOutputResponse} | jq -r ".items[].data[].dataId")
             echo "Analysis output folder ID is '\${analysisOutputFolderId}'"
+
+            touch analysisOutputFolderId.txt
+            echo "\${analysisOutputFolderId}" > analysisOutputFolderId.txt
             break;
 
         elif [[ \${analysisStatus} == "FAILED" ]]; then
@@ -161,7 +164,7 @@ process downloadAnalysisOutput {
     debug true
     
     input:
-    val(analysisOutputFolderId)
+    path(analysisOutputFolderId)
     val(localDownloadPath)
 
     output:
@@ -171,9 +174,11 @@ process downloadAnalysisOutput {
     """
     #!/bin/bash
 
-    echo "Downloading analysis output folder with ID '${analysisOutputFolderId}' to '${localDownloadPath}'..."
+    outputFolderId=\$(cat ${analysisOutputFolderId})
 
-    icav2 projectdata download ${analysisOutputFolderId} ${localDownloadPath}
+    echo "Downloading analysis output folder with ID '\${outputFolderId}' to '${localDownloadPath}'..."
+
+    icav2 projectdata download \${outputFolderId} ${localDownloadPath}
     """
 }
 
@@ -186,5 +191,5 @@ workflow {
 
     checkAnalysisStatus(startAnalysis.out.analysisResponse, params.analysisStatusCheckInterval)
 
-    downloadAnalysisOutput(checkAnalysisStatus.out.analysisOutputFolderId.view(), params.localDownloadPath)
+    downloadAnalysisOutput(checkAnalysisStatus.out.analysisOutputFolderId, params.localDownloadPath)
 }
