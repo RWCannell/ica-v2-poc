@@ -44,7 +44,7 @@ projects=$(icav2 projects list)
 ```
 The response body will contain a JSON object with a list of existing projects. A single project object contains a lot of details about the project. (The object is too big to be displayed here).   
 
-To get the details of a specific project, the project id or name will be required. For example, we have a [script](bash/get_project_id.sh) in the `/bash` directory that extracts the `project_id` by using the `project_name` (which we create when creating a project).   
+To get the details of a specific project, the project id or name will be required. For example, we have a [script](bash/helper_scripts/get_project_id.sh) in the `/bash` directory that extracts the `project_id` by using the `project_name` (which we create when creating a project).   
 
 We make use of the [jq](https://jqlang.github.io/jq/) library (which is a JSON parser) in several of our scripts.   
 
@@ -142,7 +142,7 @@ Notice that the JSON response contains an `"id"` key that begins with _"fil"_. W
 ```bash
 icav2 projectdata get <file-id> --project-id <project-id>
 ```   
-We have a [script](bash/get_uploaded_file_id.sh) in the `/bash` directory that extracts the `file_id` programmatically using certain `bash` commands.    
+We have a [script](bash/helper_scripts/get_uploaded_file_id.sh) in the `/bash` directory that extracts the `file_id` programmatically using certain `bash` commands.    
 
 ### Uploading Multiple Files or A Folder
 To upload multiple files, we can use the following command:
@@ -167,7 +167,7 @@ icav2 projectsamples create $sample_name \
     --user-tag $sample_user_tag \
     --technical-tag $sample_technical_tag
 ```
-The script [create_project_sample.sh](bash/create_project_sample.sh) contains the logic for creating a project sample. Once a sample is created, we can link it to an existing project (in addition to the project to which it already belongs). We can also upload files or folders to a sample.
+The script [create_project_sample.sh](bash/helper_scripts/create_project_sample.sh) contains the logic for creating a project sample. Once a sample is created, we can link it to an existing project (in addition to the project to which it already belongs). We can also upload files or folders to a sample.
 
 ## Creating and Listing Nextflow Pipelines   
 A Nextflow pipeline can be created in the web UI. A tutorial on creating a Nextflow pipeline and running an analysis through the web UI can be found over [here](https://help.ica.illumina.com/tutorials/nextflow). The pipeline can also be created using the CLI with the following command:
@@ -341,7 +341,7 @@ icav2 projectpipelines start nextflow $pipeline_id \
 	--storage-size $storage_size \
 	--input $file_ref
 ```
-The `$file_ref` variable is constructed from the analysis code and the file id as `analysisCode:fileId`. The script for the more detailed process is [start_nextflow_pipeline_analysis.sh](bash/start_nextflow_pipeline_analysis.sh).   
+The `$file_ref` variable is constructed from the analysis code and the file id as `analysisCode:fileId`. The script for the more detailed process is [start_nextflow_pipeline_analysis.sh](bash/helper_scripts/start_nextflow_pipeline_analysis.sh).   
 
 ## Polling the Status of a Pipeline Run (or Analysis)   
 We would like to download the output files after the analysis is complete and successful, i.e. the status should be **"SUCCEEDED"**. The possible values are:
@@ -358,7 +358,7 @@ We would like to download the output files after the analysis is complete and su
 - FAILED_FINAL 
 - ABORTED   
 
-We can use a simple polling mechanism to keep checking the status of the analysis. When the status of the analysis is **SUCCEEDED**, then we can proceed to download the data. If the status is any one of **FAILED**, **FAILED_FINAL**, or **ABORTED**, then the polling `bash` script should be terminated. The [get_projectanalysis_status_by_user_reference.sh](bash/get_projectanalysis_status_by_user_reference.sh) script checks the status of a running analysis periodically (the time interval can be set by the developer). Here is a screenshot of an example of its implementation:    
+We can use a simple polling mechanism to keep checking the status of the analysis. When the status of the analysis is **SUCCEEDED**, then we can proceed to download the data. If the status is any one of **FAILED**, **FAILED_FINAL**, or **ABORTED**, then the polling `bash` script should be terminated. The [get_projectanalysis_status_by_user_reference.sh](bash/helper_scripts/get_projectanalysis_status_by_user_reference.sh) script checks the status of a running analysis periodically (the time interval can be set by the developer). Here is a screenshot of an example of its implementation:    
 
 ![Polling the Analysis Status](public/assets/images/polling_the_analysis_status.png "Polling the Analysis Status")   
 
@@ -374,7 +374,7 @@ Files can be downloaded from the ICA storage using the CLI with the following CL
 icav2 projectdata list # take note of the sourcePath
 icav2 projectdata download <sourcePath or dataId> <targetPath>
 ```
-The script [download_file_by_path.sh](bash/download_file_by_path.sh) can be tested with some test data. A successful implementation of this download script should look as follows:   
+The script [download_file_by_path.sh](bash/helper_scripts/download_file_by_path.sh) can be tested with some test data. A successful implementation of this download script should look as follows:   
 
 ![Download File from ICA Storage](public/assets/images/successful_download_script.png "Download File from ICA Storage")   
 
@@ -383,14 +383,14 @@ To delete a file from a project, the following CLI command can be used:
 ```bash
 icav2 projectdata delete <path> --project-id <project_id>
 ```
-The script [delete_file_by_path.sh](bash/delete_file_by_path.sh) extracts the path of the file in the ICA storage and then proceeds to delete the file. Below is a screenshot of the process completed successfully:   
+The script [delete_file_by_path.sh](bash/helper_scripts/delete_file_by_path.sh) extracts the path of the file in the ICA storage and then proceeds to delete the file. Below is a screenshot of the process completed successfully:   
 ![Delete File from ICA Storage](public/assets/images/delete_file_by_path_script.png "Delete File from ICA Storage")  
 
 Deleting a folder follows the same logic as deleting a file. For instance, the following command would delete a folder by its path in the ICA storage:
 ```bash
 icav2 projectdata delete $folder_ica_storage_path --project-id $project_id
 ```
-The script [delete_folder_by_path](bash/delete_folder_by_path.sh) contains logic for extracting the folder path by filtering a list of project data by the folder name. The folder path is then used to delete the folder.   
+The script [delete_folder_by_path](bash/helper_scripts/delete_folder_by_path.sh) contains logic for extracting the folder path by filtering a list of project data by the folder name. The folder path is then used to delete the folder.   
 ![Delete Folder from ICA Storage](public/assets/images/delete_folder_by_path_script.png "Delete Folder from ICA Storage")  
 
 ## Single File Upload-Analyse-Download Process 
