@@ -149,7 +149,9 @@ process checkAnalysisStatus {
 
         echo "Checking status of analysis with reference '\${analysisRef}'..."
         analysisStatus=\$(echo \${updatedAnalysisResponse} | jq -r ".status")
-        echo "Current status of analysis is '\${analysisStatus}'..."
+
+        timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
+        echo "[\${timeStamp}]: Current status of analysis is '\${analysisStatus}'..."
 
         if [[ \${analysisStatus} == "SUCCEEDED" ]]; then
             echo "Analysis SUCCEEDED"
@@ -176,6 +178,7 @@ process checkAnalysisStatus {
 
         elif [[ \${analysisStatusCheckCount} -gt \${analysisStatusCheckLimit} ]]; then
             echo "Analysis status has been checked more than \${analysisStatusCheckLimit} times. Stopping..."
+            break;
 
         else
             echo "Analysis still in progress..."
