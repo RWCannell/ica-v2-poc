@@ -7,6 +7,7 @@ pipelineId = params.pipelineId
 pipelineCode = params.pipelineCode
 userReference = params.userReference
 storageSize = params.storageSize
+fileUploadStatusCheckInterval = params.fileUploadStatusCheckInterval
 analysisStatusCheckInterval = params.analysisStatusCheckInterval
 localDownloadPath = params.localDownloadPath
 
@@ -23,8 +24,8 @@ process uploadFile {
     fileName = filePath.baseName
     """
     #!/bin/bash
-
-    echo "Uploading file '${fileName}' to project with id '${projectId}'..."
+    time_stamp=\$(date +"%Y-%m-%d %H:%M:%S")
+    echo "[\${time_stamp}]: Uploading file '${fileName}' to project with id '${projectId}'..."
 
     touch ${fileName}.txt
 
@@ -36,7 +37,7 @@ process uploadFile {
     """
 }
 
-process checkFileUploadStatus {
+process constructFileReference {
     debug true
     
     input:
@@ -51,15 +52,37 @@ process checkFileUploadStatus {
     """
     #!/bin/bash
     
+    fileUploadStatusCheckCount=0
+    fileUploadStatusCheckLimit=10
+    fileUploadStatus="PARTIAL"
+
     fileId=\$(cat ${fileUploadResponse} | grep -i '\"id\": \"fil' | grep -o 'fil.[^\"]*')
 
-    fileReference="${analysisDataCode}:\${fileId}"
+    echo "Checking status of uploaded file with id '\${fileId}' every ${fileUploadStatusCheckInterval} seconds, until status is 'AVAILABLE'..."
+    while true;
+    do
+        ((\${fileUploadStatusCheckCount}+=1))
+        uploadedFileResponse=\$(icav2 projectanalyses get \${fileId})
 
-    echo "File Reference:\${fileReference}"
+        echo "Checking status of file with id '\${fileId}'..."
+        uploadedFileStatus=\$(echo \${uploadedFileResponse} | jq -r ".details.status")
 
-    touch fileReference.txt
-
-    echo "\${fileReference}" > fileReference.txt
+        echo "Current status of uploaded file is '\${uploadedFileStatus}'."
+        if [[ \${uploadedFileStatus} == "AVAILABLE" ]]; then
+            echo "Uploaded file is AVAILABLE"
+            fileReference="${analysisDataCode}:\${fileId}"
+            echo "[\${time_stamp}]: File Reference:\${fileReference}"
+            touch fileReference.txt
+            echo "\${fileReference}" > fileReference.txt
+            break;
+        elif [[ \${fileUploadStatusCheckCount} -gt \${fileUploadStatusCheckLimit} ]]; then
+            echo "Uploaded file status has been checked more than \${fileUploadStatusCheckLimit} times. Stopping..."
+            break;
+        else
+            echo "Uploaded file is still not AVAILABLE. Checking again..."
+        fi
+        sleep ${fileUploadStatusCheckInterval};
+    done
     """
 }
 
@@ -185,9 +208,9 @@ process downloadAnalysisOutput {
 workflow {
     uploadFile(filePath, params.projectId)
     
-    checkFileUploadStatus(uploadFile.out.fileUploadResponse.view(), params.analysisDataCode)
+    constructFileReference(uploadFile.out.fileUploadResponse.view(), params.analysisDataCode)
 
-    startAnalysis(checkFileUploadStatus.out.fileRef)
+    startAnalysis(constructFileReference.out.fileRef)
 
     checkAnalysisStatus(startAnalysis.out.analysisResponse, params.analysisStatusCheckInterval)
 
