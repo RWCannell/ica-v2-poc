@@ -62,7 +62,7 @@ process constructFileReference {
     while true;
     do
         ((\${fileUploadStatusCheckCount}+=1))
-        uploadedFileResponse=\$(icav2 projectanalyses get \${fileId})
+        uploadedFileResponse=\$(icav2 projectdata get \${fileId})
 
         echo "Checking status of file with id '\${fileId}'..."
         fileUploadStatus=\$(echo \${uploadedFileResponse} | jq -r ".details.status")
