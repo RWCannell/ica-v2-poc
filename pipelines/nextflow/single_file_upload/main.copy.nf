@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
-filePath = Channel.fromPath("NZ_GG704945.fa", checkIfExists: true)
+filePath = Channel.fromPath("NZ_GG704947.fa", checkIfExists: true)
 projectId = params.projectId
 analysisDataCode = params.analysisDataCode
 pipelineId = params.pipelineId
@@ -65,10 +65,10 @@ process constructFileReference {
         uploadedFileResponse=\$(icav2 projectanalyses get \${fileId})
 
         echo "Checking status of file with id '\${fileId}'..."
-        uploadedFileStatus=\$(echo \${uploadedFileResponse} | jq -r ".details.status")
+        fileUploadStatus=\$(echo \${uploadedFileResponse} | jq -r ".details.status")
 
-        echo "Current status of uploaded file is '\${uploadedFileStatus}'."
-        if [[ \${uploadedFileStatus} == "AVAILABLE" ]]; then
+        echo "Current status of uploaded file is '\${fileUploadStatus}'."
+        if [[ \${fileUploadStatus} == "AVAILABLE" ]]; then
             echo "Uploaded file is AVAILABLE"
             fileReference="${analysisDataCode}:\${fileId}"
             echo "[\${time_stamp}]: File Reference:\${fileReference}"
