@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
-filePath = Channel.fromPath("NZ_GG704948.fa", checkIfExists: true)
+filePath = Channel.fromPath("NZ_GG704945.fa", checkIfExists: true)
 projectId = params.projectId
 analysisDataCode = params.analysisDataCode
 pipelineId = params.pipelineId
@@ -229,6 +229,7 @@ process deleteData {
 
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
     echo "[\${timeStamp}]: Deleting uploaded file with ID '\${fileId}'..."
+    icav2 projectdata delete \${fileId}
 
     folderId=\$(cat ${outputFolderId})
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
