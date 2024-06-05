@@ -1,6 +1,5 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
-filePath = Channel.fromPath("NZ_GG704945.fa", checkIfExists: true)
 projectId = params.projectId
 analysisDataCode = params.analysisDataCode
 pipelineId = params.pipelineId
@@ -9,6 +8,7 @@ userReference = params.userReference
 storageSize = params.storageSize
 fileUploadStatusCheckInterval = params.fileUploadStatusCheckInterval
 analysisStatusCheckInterval = params.analysisStatusCheckInterval
+localUploadPath = params.localUploadPath
 localDownloadPath = params.localDownloadPath
 
 process uploadFile {
@@ -241,6 +241,8 @@ process deleteData {
 }
 
 workflow {
+    filePath = Channel.fromPath(params.localUploadPath, checkIfExists: true)
+
     uploadFile(filePath, params.projectId)
     
     constructFileReference(uploadFile.out.fileUploadResponse.view(), params.analysisDataCode)
