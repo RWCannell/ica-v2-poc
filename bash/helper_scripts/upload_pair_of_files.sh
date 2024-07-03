@@ -1,12 +1,14 @@
 #!/bin/bash
 
-file_path="$HOME/Documents/RWCannell/ica-v2-poc/public/assets/ica_data_uploads/fastq/1_control_18S_2019_minq7"
+file_path="$HOME/Documents/RWCannell/ica-v2-poc/public/assets/ica_data_uploads/fastq/1_control_rbcLa_2019_minq7"
 project_id="049307d6-85dd-4cdc-b88d-a740e4e9e550"
 time_stamp=$(date +"%Y-%m-%d %H:%M:%S")
 
 output_file_prefix=$(echo "${file_path##*/}")
 read_1_file=""
 read_2_file=""
+read_1_analysis_code="read1"
+read_2_analysis_code="read2"
 ica_path=$(echo "/${file_path##*/}/")
 
 manifest_file="manifest.tsv"
@@ -49,12 +51,15 @@ printf "Writing read file ids to manifest file...\n"
 
 manifest_header_1="file_name"
 manifest_header_2="file_id"
+manifest_header_3="file_ref"
 manifest_tab=$(printf "\t")
+read_1_file_ref="$read_1_analysis_code:$read_1_file_id"
+read_2_file_ref="$read_2_analysis_code:$read_2_file_id"
 
 cat > $manifest_file << EOF
-$manifest_header_1 $manifest_tab $manifest_header_2
-$(echo "${read_1_file##*/}") $manifest_tab $read_1_file_id
-$(echo "${read_2_file##*/}") $manifest_tab $read_2_file_id
+$manifest_header_1 $manifest_tab $manifest_header_2 $manifest_tab $manifest_header_3
+$(echo "${read_1_file##*/}") $manifest_tab $read_1_file_id $manifest_tab $read_1_file_ref
+$(echo "${read_2_file##*/}") $manifest_tab $read_2_file_id $manifest_tab $read_2_file_ref
 EOF
 
 printf "[$time_stamp]: "
