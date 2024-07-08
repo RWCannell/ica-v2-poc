@@ -19,13 +19,14 @@ process uploadFiles {
     debug true
     input:
     path(readsFilePath)
+    path(referenceFilePath)
     val(projectId)
 
     output:
-    path "${fileName}.txt", emit: fileUploadResponse
+    path "manifest.tsv", emit: manifestFile
 
     script:
-    refFileName = referenceFilePath.baseName
+    referenceFileName = referenceFilePath.baseName
     """
     #!/bin/bash
     time_stamp=\$(date +"%Y-%m-%d %H:%M:%S")
@@ -63,7 +64,7 @@ process uploadFiles {
     echo "\${read_2_upload_response}" > \${read_2_file_response}
 
     printf "[\${time_stamp}]: "
-    printf "Uploading reference file '${refFileName}'... \n"
+    printf "Uploading reference file '${referenceFileName}'... \n"
     reference_file_upload_response=$(icav2 projectdata upload ${referenceFilePath} ${icaUploadPath} --project-id ${projectId})
     echo "\${reference_file_upload_response}" > \${reference_file_response}.txt
 
@@ -109,21 +110,22 @@ process uploadFiles {
         manifest_header_1="file_name"
         manifest_header_2="file_id"
         manifest_header_3="file_ica_path"
+        manifest_header_4="file_analysis_code"
 
         printf "[\${time_stamp}]: "
         printf "Writing file data to manifest...\n"
 
-        printf "\${manifest_header_1} \${manifest_tab} \${manifest_header_2} \${manifest_tab} \${manifest_header_3}\n" >> \${manifest_file}
-        printf "\${read_1_file} \${manifest_tab} \${read_1_file_id} \${manifest_tab} \${read_1_uploaded_file_path}\n" >> \${manifest_file}
-        printf "\${read_2_file} \${manifest_tab} \${read_2_file_id} \${manifest_tab} \${read_2_uploaded_file_path}\n" >> \${manifest_file}
-        printf "${refFileName} \${manifest_tab} \${reference_file_id} \${manifest_tab} \${reference_file_upload_path}\n" >> \${manifest_file}
+        printf "\${manifest_header_1} \${manifest_tab} \${manifest_header_2} \${manifest_tab} \${manifest_header_3} \${manifest_tab} \${manifest_header_4}\n" >> \${manifest_file}
+        printf "\${read_1_file} \${manifest_tab} \${read_1_file_id} \${manifest_tab} \${read_1_uploaded_file_path} \${manifest_tab} ${read1AnalysisDataCode}:\${read_1_file_id}\n" >> \${manifest_file}
+        printf "\${read_2_file} \${manifest_tab} \${read_2_file_id} \${manifest_tab} \${read_2_uploaded_file_path} \${manifest_tab} ${read2AnalysisDataCode}:\${read_2_file_id}\n" >> \${manifest_file}
+        printf "${referenceFileName} \${manifest_tab} \${reference_file_id} \${manifest_tab} \${reference_file_upload_path} \${manifest_tab} ${referenceAnalysisDataCode}:\${reference_file_id}\n" >> \${manifest_file}
     else
         printf "[\${time_stamp}]: "
         printf "Writing file data to existing manifest...\n"
 
-        printf "\${read_1_file} \${manifest_tab} \${read_1_file_id} \${manifest_tab} \${read_1_uploaded_file_path}\n" >> \${manifest_file}
-        printf "\${read_2_file} \${manifest_tab} \${read_2_file_id} \${manifest_tab} \${read_2_uploaded_file_path}\n" >> \${manifest_file}
-        printf "${refFileName} \${manifest_tab} \${reference_file_id} \${manifest_tab} \${reference_file_upload_path}\n" >> \${manifest_file}
+        printf "\${read_1_file} \${manifest_tab} \${read_1_file_id} \${manifest_tab} \${read_1_uploaded_file_path} \${manifest_tab} ${read1AnalysisDataCode}:\${read_1_file_id}\n" >> \${manifest_file}
+        printf "\${read_2_file} \${manifest_tab} \${read_2_file_id} \${manifest_tab} \${read_2_uploaded_file_path} \${manifest_tab} ${read2AnalysisDataCode}:\${read_2_file_id}\n" >> \${manifest_file}
+        printf "${referenceFileName} \${manifest_tab} \${reference_file_id} \${manifest_tab} \${reference_file_upload_path} \${manifest_tab} ${referenceAnalysisDataCode}:\${reference_file_id}\n" >> \${manifest_file}
     fi
 
     """
@@ -339,15 +341,15 @@ workflow {
     readsFilePath = Channel.fromPath(params.readsFileUploadPath, checkIfExists: true)
     referenceFilePath = Channel.fromPath(params.referenceFileUploadPath, checkIfExists: true)
 
-    uploadFiles(readsFilePath, params.projectId)
+    uploadFiles(readsFilePath, referenceFilePath, params.projectId)
     
-    constructFileReference(uploadFiles.out.fileUploadResponse.view(), params.analysisDataCode)
+    // constructFileReference(uploadFiles.out.fileUploadResponse.view(), params.analysisDataCode)
 
-    startAnalysis(constructFileReference.out.fileRef)
+    // startAnalysis(constructFileReference.out.fileRef)
 
-    checkAnalysisStatus(startAnalysis.out.analysisResponse, params.analysisStatusCheckInterval)
+    // checkAnalysisStatus(startAnalysis.out.analysisResponse, params.analysisStatusCheckInterval)
 
-    downloadAnalysisOutput(checkAnalysisStatus.out.analysisOutputFolderId, params.localDownloadPath)
+    // downloadAnalysisOutput(checkAnalysisStatus.out.analysisOutputFolderId, params.localDownloadPath)
 
-    deleteData(uploadFiles.out.fileUploadResponse.view(), downloadAnalysisOutput.out.outputFolderId)
+    // deleteData(uploadFiles.out.fileUploadResponse.view(), downloadAnalysisOutput.out.outputFolderId)
 }
