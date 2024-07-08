@@ -11,8 +11,8 @@
     "referenceAnalysisDataCode": "ref_tar",
     "fileUploadStatusCheckInterval": 120,
     "analysisStatusCheckInterval": 300,
-    "readsFileUploadPath": "/Users/regancannell/Documents/ica_data_uploads/fastq/multiple_fastq_files/*",
-    "referenceFileUploadPath": "/Users/regancannell/Documents/ica_data_uploads/reference_files/ref_file",
+    "readsFileUploadPath": "/Users/regancannell/Documents/RWCannell/ica-v2-poc/public/assets/ica_data_uploads/fastq/1_control_18S_2019_minq7",
+    "referenceFileUploadPath": "/Users/regancannell/Documents/RWCannell/ica-v2-poc/public/assets/ica_data_uploads/fastq/reference_files/reference_file.txt",
     "localDownloadPath": "/Users/regancannell/Documents/ica_data_downloads/",
-    "icaUploadPath": "/regan_dragen_test_analysis/"
+    "icaUploadPath": "/fastq/1_control_18S_2019_minq7/"
 }
