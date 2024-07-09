@@ -55,48 +55,48 @@ process uploadFiles {
 
     printf "[\${time_stamp}]: "
     printf "Uploading read 1 file '\${read_1_file}'... \n"
-    read_1_upload_response=$(icav2 projectdata upload \${read_1_file} ${icaUploadPath} --project-id ${projectId})
+    read_1_upload_response=\$(icav2 projectdata upload \${read_1_file} ${icaUploadPath} --project-id ${projectId})
     echo "\${read_1_upload_response}" > \${read_1_file_response}
 
     printf "[\${time_stamp}]: "
     printf "Uploading read 2 file '\${read_2_file}'... \n"
-    read_2_upload_response=$(icav2 projectdata upload \${read_2_file} ${icaUploadPath} --project-id ${projectId})
+    read_2_upload_response=\$(icav2 projectdata upload \${read_2_file} ${icaUploadPath} --project-id ${projectId})
     echo "\${read_2_upload_response}" > \${read_2_file_response}
 
     printf "[\${time_stamp}]: "
     printf "Uploading reference file '${referenceFileName}'... \n"
-    reference_file_upload_response=$(icav2 projectdata upload ${referenceFilePath} ${icaUploadPath} --project-id ${projectId})
+    reference_file_upload_response=\$(icav2 projectdata upload ${referenceFilePath} ${icaUploadPath} --project-id ${projectId})
     echo "\${reference_file_upload_response}" > \${reference_file_response}.txt
 
     # id of file starts with 'fil.'
-    read_1_file_id=$(grep -i "\"id\": \"fil\." \${read_1_file_response} | grep -o 'fil[^\"]*')
-    read_2_file_id=$(grep -i "\"id\": \"fil\." \${read_2_file_response} | grep -o 'fil[^\"]*')
-    reference_file_id=$(grep -i "\"id\": \"fil\." \${reference_file_response} | grep -o 'fil[^\"]*')
+    read_1_file_id=\$(cat \${read_1_file_response} | grep -i '\"id\": \"fil' | grep -o 'fil.[^\"]*')
+    read_2_file_id=\$(cat \${read_2_file_response} | grep -i '\"id\": \"fil' | grep -o 'fil.[^\"]*')
+    reference_file_id=\$(cat \${read_1_file_response} | grep -i '\"id\": \"fil' | grep -o 'fil.[^\"]*')
 
-    read_1_uploaded_file_data_response=$(icav2 projectdata get \${read_1_file_id})
-    if [[ $? != 0 ]]; then
+    read_1_uploaded_file_data_response=\$(icav2 projectdata get \${read_1_file_id})
+    if [[ \$? != 0 ]]; then
         printf "Failed to fetch data about file with id '\${read_1_file_id}'. \n"
         exit 1
     else
-        read_1_uploaded_file_path=$(echo \${read_1_uploaded_file_data_response} | jq -r ".details.path")
+        read_1_uploaded_file_path=\$(echo \${read_1_uploaded_file_data_response} | jq -r ".details.path")
         printf "Path of uploaded file is '\${read_1_uploaded_file_path}'. \n"
     fi
 
-    read_2_uploaded_file_data_response=$(icav2 projectdata get \${read_2_file_id})
-    if [[ $? != 0 ]]; then
+    read_2_uploaded_file_data_response=\$(icav2 projectdata get \${read_2_file_id})
+    if [[ \$? != 0 ]]; then
         printf "Failed to fetch data about file with id '\${read_2_file_id}'. \n"
         exit 1
     else
-        read_2_uploaded_file_path=$(echo \${read_2_uploaded_file_data_response} | jq -r ".details.path")
+        read_2_uploaded_file_path=\$(echo \${read_2_uploaded_file_data_response} | jq -r ".details.path")
         printf "Path of uploaded file is '\${read_2_uploaded_file_path}'. \n"
     fi
 
     uploaded_reference_file_data_response=\$(icav2 projectdata get \${reference_file_id})
-    if [[ $? != 0 ]]; then
+    if [[ \$? != 0 ]]; then
         printf "Failed to fetch data about reference file with id '\${reference_file_id}'. \n"
         exit 1
     else
-        reference_file_upload_path=$(echo \${uploaded_reference_file_data_response} | jq -r ".details.path")
+        reference_file_upload_path=\$(echo \${uploaded_reference_file_data_response} | jq -r ".details.path")
         printf "Path of uploaded reference file is '\${reference_file_upload_path}'. \n"
     fi
 

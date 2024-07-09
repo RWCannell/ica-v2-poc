@@ -7,3 +7,7 @@ pipelines/nextflow/single_file_upload/.nextflow
 pipelines/nextflow/single_file_upload/ica_data_uploads
 pipelines/nextflow/single_file_upload/work
 pipelines/nextflow/single_file_upload/.nextflow.*
+pipelines/nextflow/multiple_file_upload_for_dragen/.nextflow
+pipelines/nextflow/multiple_file_upload_for_dragen/ica_data_uploads
+pipelines/nextflow/multiple_file_upload_for_dragen/work
+pipelines/nextflow/multiple_file_upload_for_dragen/.nextflow.*
