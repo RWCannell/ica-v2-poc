@@ -121,27 +121,33 @@ process uploadReferenceFile {
   #!/bin/bash
   time_stamp=\$(date +"%Y-%m-%d %H:%M:%S")
   reference_file_id=""
-  ica_upload_path="/bam/$sampleId/"
+  reference_file_ica_path="/bam/$reference_file/"
 
-  reference_file_response="reference_file_response.txt"
+  get_reference_file_response_file="get_reference_file_response.txt"
+  reference_file_upload_response_file="reference_file_upload_response.txt"
 
-  touch \${bam_file_response}
+  touch \${reference_file_response}
 
   printf "[\${time_stamp}]: "
-  printf "Uploading reference file '${reference_file}'... \n"
-  reference_file_upload_response=\$(icav2 projectdata upload ${reference_file} \${ica_upload_path} --project-id ${projectId})
-  echo "\${reference_file_upload_response}" > \${reference_file_response}
+  printf "Checking if reference file already exists in ICA...\n"
+  get_reference_file_response=\$(icav2 projectdata get ${referenceFileIcaPath} --project-id ${projectId})
+  echo "\${get_reference_file_response}" > \${get_reference_file_response_file}
 
-  # id of file starts with 'fil.'
-  reference_file_id=\$(cat \${reference_file_response} | grep -i '\"id\": \"fil' | grep -o 'fil.[^\"]*')
+  if grep -iq "No data found for path" \${get_reference_file_response_file};then
+      printf "[\${time_stamp}]: "
+      printf "Reference file not found in ICA. Uploading reference file '${reference_file}'... \n"
+      reference_file_upload_response=\$(icav2 projectdata upload ${reference_file} \${ica_upload_path} --project-id ${projectId})
+      echo "\${reference_file_upload_response}" > \${reference_file_upload_response_file}
 
-  reference_file_uploaded_file_data_response=\$(icav2 projectdata get \${reference_file_id})
-  if [[ \$? != 0 ]]; then
-      printf "Failed to fetch data about reference file with id '\${reference_file_id}'. \n"
-      exit 1
+      # id of file starts with 'fil.'
+      printf "[\${time_stamp}]: "
+      printf "Extracting file_id of reference file '${reference_file}' from upload response... \n"
+      reference_file_id=\$(cat \${reference_file_upload_response_file} | grep -i '\"id\": \"fil' | grep -o 'fil.[^\"]*')
   else
-      reference_file_uploaded_file_path=\$(echo \${reference_file_uploaded_file_data_response} | jq -r ".details.path")
-      printf "Path of uploaded reference file is '\${reference_file_uploaded_file_path}'. \n"
+      # id of file starts with 'fil.'
+      printf "[\${time_stamp}]: "
+      printf "Extracting file_id of reference file '${reference_file}' from get response... \n"
+      reference_file_id=\$(cat \${get_reference_file_response_file} | grep -i '\"id\": \"fil' | grep -o 'fil.[^\"]*')
   fi
 
   manifest_tab=\$(printf "\t")
