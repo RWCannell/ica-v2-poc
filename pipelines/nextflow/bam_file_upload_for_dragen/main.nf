@@ -136,7 +136,7 @@ process uploadReferenceFile {
   if grep -iq "No data found for path" \${get_reference_file_response_file};then
       printf "[\${time_stamp}]: "
       printf "Reference file not found in ICA. Uploading reference file '${reference_file}'... \n"
-      reference_file_upload_response=\$(icav2 projectdata upload ${reference_file} \${ica_upload_path} --project-id ${projectId})
+      reference_file_upload_response=\$(icav2 projectdata upload ${reference_file} ${referenceFileIcaPath} --project-id ${projectId})
       echo "\${reference_file_upload_response}" > \${reference_file_upload_response_file}
 
       # id of file starts with 'fil.'
