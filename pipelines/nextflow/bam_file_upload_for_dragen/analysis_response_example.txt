@@ -1,0 +1,61 @@
+{
+	"analysisPriority": "MEDIUM",
+	"analysisStorage": {
+		"description": "1.2TB",
+		"id": "6e1b6c8f-f913-48b2-9bd0-7fc13eda0fd0",
+		"name": "Small",
+		"ownerId": "8ec463f6-1acb-341b-b321-043c39d8716a",
+		"tenantId": "f91bb1a0-c55f-4bce-8014-b2e60c0ec7d3",
+		"tenantName": "ica-cp-admin",
+		"timeCreated": "2021-11-05T10:28:20Z",
+		"timeModified": "2023-05-31T16:38:26Z"
+	},
+	"id": "8b3b92ba-6aad-4aaf-81a9-ea70f5736b2f",
+	"ownerId": "f030a442-4aa3-3bf1-acf0-25f76194603f",
+	"pipeline": {
+		"analysisStorage": {
+			"description": "1.2TB",
+			"id": "6e1b6c8f-f913-48b2-9bd0-7fc13eda0fd0",
+			"name": "Small",
+			"ownerId": "8ec463f6-1acb-341b-b321-043c39d8716a",
+			"tenantId": "f91bb1a0-c55f-4bce-8014-b2e60c0ec7d3",
+			"tenantName": "ica-cp-admin",
+			"timeCreated": "2021-11-05T10:28:20Z",
+			"timeModified": "2023-05-31T16:38:26Z"
+		},
+		"code": "dragen_for_paired_end_bam_input",
+		"description": "Paired-End BAM Input, VCF Output",
+		"id": "844921d7-1dc6-4079-a3c4-16b7fb8415e1",
+		"language": "NEXTFLOW",
+		"languageVersion": {
+			"id": "b1585d18-f88c-4ca0-8d47-34f6c01eb6f3",
+			"language": "NEXTFLOW",
+			"name": "22.04.3"
+		},
+		"ownerId": "f030a442-4aa3-3bf1-acf0-25f76194603f",
+		"pipelineTags": {
+			"technicalTags": []
+		},
+		"tenantId": "02ea1bcf-6b20-4cbf-a9b2-724d1833eb07",
+		"tenantName": "sbimb-wits",
+		"timeCreated": "2024-07-16T11:09:08Z",
+		"timeModified": "2024-07-16T11:10:27Z",
+		"urn": "urn:ilmn:ica:pipeline:844921d7-1dc6-4079-a3c4-16b7fb8415e1#dragen_for_paired_end_bam_input"
+	},
+	"reference": "regan_dragen_bam_test_01-dragen_for_paired_end_bam_input-c7effc48-4f54-4660-a68d-9529eff616f6",
+	"startDate": "2024-07-17T08:55:27Z",
+	"status": "INPROGRESS",
+	"summary": "",
+	"tags": {
+		"referenceTags": [],
+		"technicalTags": [],
+		"userTags": [
+			"sgdp_bam"
+		]
+	},
+	"tenantId": "02ea1bcf-6b20-4cbf-a9b2-724d1833eb07",
+	"tenantName": "sbimb-wits",
+	"timeCreated": "2024-07-17T08:55:19Z",
+	"timeModified": "2024-07-17T09:25:09Z",
+	"userReference": "regan_dragen_bam_test_01"
+}
