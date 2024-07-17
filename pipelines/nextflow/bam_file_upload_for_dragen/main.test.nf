@@ -17,72 +17,81 @@ referenceFileId = params.referenceFileId
 localDownloadPath = params.localDownloadPath
 icaUploadPath = params.icaUploadPath
 
-process uploadReferenceFile {
-  debug true
+process checkAnalysisStatus {
+    debug true
+    
+    input:
+    path(analysisResponse)
+    val(analysisStatusCheckInterval)
 
-  input:
-  path(dataFilePath)
-  val(referenceFileId)
-  path(referenceFileUploadPath)
+    output:
+    stdout
 
-  output:
-  path "data.txt", emit: dataFile
+    script:
+    """
+    #!/bin/bash
 
-  script:
-  def reference_file = referenceFileUploadPath.baseName
-  """
-  #!/bin/bash
-  time_stamp=\$(date +"%Y-%m-%d %H:%M:%S")
-  reference_file_id=${referenceFileId}
-  reference_file_ica_path=${referenceFileIcaPath}
+    analysisStatusCheckCount=0
+    analysisStatusCheckLimit=10
+    analysisStatus="REQUESTED"
 
-  get_reference_file_response_file="get_reference_file_response.txt"
-  reference_file_upload_response_file="reference_file_upload_response.txt"
+    analysisId=\$(cat ${analysisResponse} | jq -r ".id")
+    analysisRef=\$(cat ${analysisResponse} | jq -r ".reference")
+    
+    timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
+    echo "[\${timeStamp}]: Checking status of analysis with id '\${analysisId}' every ${analysisStatusCheckInterval} seconds, until status is 'SUCCEEDED'..."
+    while true;
+    do
+        ((\${StatusCheckCount}+=1))
+        updatedAnalysisResponse=\$(icav2 projectanalyses get \${analysisId})
 
-  touch \${reference_file_response}
+        echo "Checking status of analysis with reference '\${analysisRef}'..."
+        analysisStatus=\$(echo \${updatedAnalysisResponse} | jq -r ".status")
 
-  printf "[\${time_stamp}]: "
-  printf "Checking if reference file id has been set in params.json...\n"
-  if [ -z "${referenceFileId}" ]; then 
-    printf "[\${time_stamp}]: "
-    printf "Reference file id has not been set in params.json. Checking if reference file exists in ICA path...\n"
+        timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
+        echo "[\${timeStamp}]: Current status of analysis is '\${analysisStatus}'..."
 
-    get_reference_file_response=\$(icav2 projectdata get ${referenceFileIcaPath} --project-id ${projectId})
-    echo "\${get_reference_file_response}" > \${get_reference_file_response_file}
-  else
-    printf "[\${time_stamp}]: "
-    printf "Reference file id has been set in params.json. Getting reference file data JSON response...\n"
-    get_reference_file_response=\$(icav2 projectdata get ${referenceFileId} --project-id ${projectId})
-    echo "\${get_reference_file_response}" > \${get_reference_file_response_file}
-  fi
+        if [[ \${analysisStatus} == "SUCCEEDED" ]]; then
+            echo "Analysis SUCCEEDED"
+            echo "Fetching analysis output response..."
+            analysisOutputResponse=\$(icav2 projectanalyses output \$analysisId)
+            analysisOutputFolderId=\$(echo \${analysisOutputResponse} | jq -r ".items[].data[].dataId")
+            echo "Analysis output folder ID is '\${analysisOutputFolderId}'"
 
-  if grep -iq "No data found" \${get_reference_file_response_file}; then
-    printf "[\${time_stamp}]: "
-    printf "Reference file not found in ICA. Uploading reference file '${reference_file}'... \n"
-    reference_file_upload_response=\$(icav2 projectdata upload ${referenceFileUploadPath} ${referenceFileIcaPath} --project-id ${projectId})
-    echo "\${reference_file_upload_response}" > \${reference_file_upload_response_file}
+            touch analysisOutputFolderId.txt
+            echo "\${analysisOutputFolderId}" > analysisOutputFolderId.txt
+            break;
 
-    printf "[\${time_stamp}]: "
-    printf "Extracting file_id of reference file '${reference_file}' from upload response... \n"
-    reference_file_id=\$(cat \${reference_file_upload_response_file} | grep -i '\"id\": \"fil' | grep -o 'fil.[^\"]*')
-  else
-      printf "[\${time_stamp}]: "
-      printf "Extracting file_id of reference file '${reference_file}' from get response... \n"
-      reference_file_id=\$(cat \${get_reference_file_response_file} | grep -i '\"id\": \"fil' | grep -o 'fil.[^\"]*')
-  fi
+        elif [[ \${analysisStatus} == "FAILED" ]]; then
+            echo "Analysis FAILED \n"
+            break;
 
-  printf "[\${time_stamp}]: "
-  printf "Writing file data to existing data file...\n"
+        elif [[ \${analysisStatus} == "FAILED_FINAL" ]]; then
+            echo "Analysis FAILED_FINAL"
+            break;
 
-  printf "${referenceAnalysisDataCode}:\${reference_file_id}\n" >> ${dataFilePath}
-  """
+        elif [[ \${analysisStatus} == "ABORTED" ]]; then
+            echo "Analysis ABORTED"
+            break;
+
+        elif [[ \${analysisStatusCheckCount} -gt \${analysisStatusCheckLimit} ]]; then
+            echo "Analysis status has been checked more than \${analysisStatusCheckLimit} times. Stopping..."
+            break;
+
+        else
+            echo "Analysis still in progress..."
+        fi
+
+        sleep ${analysisStatusCheckInterval};
+    done
+    """
 }
 
 workflow {
   bamFilePairsChannel = Channel.fromFilePairs(params.bamFilePairsUploadPath, checkIfExists:true) { 
     file -> file.name.replaceAll(/.bam|.bai$/,'') 
   }
-  dataFilePath = Channel.fromPath("data.txt", checkIfExists:true)
-  uploadReferenceFile(dataFilePath, referenceFileId, referenceFileIcaPath)
+  analysisResponsePath = Channel.fromPath("analysis_response_example.txt", checkIfExists:true)
+  checkAnalysisStatus(analysisResponsePath, analysisStatusCheckInterval)
 }
 
