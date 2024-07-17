@@ -12,8 +12,9 @@
     "analysisStatusCheckInterval": 300,
     "bamFilesUploadPath": "/Users/regancannell/Documents/RWCannell/ica-v2-poc/public/assets/ica_data_uploads/bam/*",
     "bamFilePairsUploadPath": "/Users/regancannell/Documents/RWCannell/ica-v2-poc/public/assets/ica_data_uploads/bam_test/*.{bam,bai}",
-    "referenceFileUploadPath": "/Users/regancannell/Documents/RWCannell/ica-v2-poc/public/assets/ica_data_uploads/fastq/reference_files/reference_file.txt",
-    "referenceFileIcaPath": "/bam/reference/",
+    "referenceFileUploadPath": "/Users/regancannell/Documents/RWCannell/ica-v2-poc/public/assets/ica_data_uploads/reference_files/reference.txt",
+    "referenceFileIcaPath": "/Illumina References/hg38_noalt_with_decoy.tar",
+    "referenceFileId": "fil.f01a17c3b8524532ddb608d9f05c7bca",
     "localDownloadPath": "/Users/regancannell/Documents/ica_data_downloads/",
     "icaUploadPath": "/fastq/my_own_fastq_files/"
 }

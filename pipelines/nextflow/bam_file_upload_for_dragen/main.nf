@@ -13,6 +13,7 @@ bamFilesUploadPath = params.bamFilesUploadPath
 bamFilePairsUploadPath = params.bamFilePairsUploadPath
 referenceFileUploadPath = params.referenceFileUploadPath
 referenceFileIcaPath = params.referenceFileIcaPath
+referenceFileId = params.referenceFileId
 localDownloadPath = params.localDownloadPath
 icaUploadPath = params.icaUploadPath
 
@@ -79,49 +80,38 @@ process uploadBamFiles {
       printf "Path of uploaded .bai file is '\${bai_file_uploaded_file_path}'. \n"
   fi
 
-  manifest_file="manifest.tsv"
-  manifest_tab=\$(printf "\t")
+  data_file="data.txt"
 
-  if ! [ -f \${manifest_file} ]; then
-      echo "Manifest file does not exist. Creating one..."
-      touch \${manifest_file}
-
-      manifest_header_1="file_name"
-      manifest_header_2="file_analysis_code"
-
-      printf "[\${time_stamp}]: "
-      printf "Writing file data to manifest...\n"
-
-      printf "\${manifest_header_1} \${manifest_tab} \${manifest_header_2}\n" >> \${manifest_file}
-      printf "\${bam_file_id} \${manifest_tab} ${bamAnalysisDataCode}:\${bam_file_id}\n" >> \${manifest_file}
-  else
-      printf "[\${time_stamp}]: "
-      printf "Writing file data to existing manifest...\n"
-
-      printf "\${bam_file_id} \${manifest_tab} ${bamAnalysisDataCode}:\${bam_file_id}\n" >> \${manifest_file}
+  if ! [ -f \${data_file} ]; then
+      echo "Data file does not exist. Creating one..."
+      touch \${data_file}
   fi
+
+  printf "[\${time_stamp}]: "
+  printf "Writing file data to existing data file...\n"
+
+  printf "sampleId:${sampleId}\n" >> \${data_file}
+  printf "${bamAnalysisDataCode}:\${bam_file_id}\n" >> \${data_file}
   """
 }
 
 process uploadReferenceFile {
   debug true
-  maxForks 3
 
   input:
-  path(manifestFile)
+  path(dataFile)
   path(referenceFileUploadPath)
-  path(referenceFileIcaPath)
 
   output:
-  path "manifest.tsv", emit: manifestFile
+  path "data.txt", emit: dataFile
 
   script:
   def reference_file = referenceFileUploadPath.baseName
   """
   #!/bin/bash
   time_stamp=\$(date +"%Y-%m-%d %H:%M:%S")
-  reference_file_id=""
-  reference_file_ica_path="/bam/$reference_file/"
+  reference_file_id=${referenceFileId}
+  reference_file_ica_path=${referenceFileIcaPath}
 
   get_reference_file_response_file="get_reference_file_response.txt"
   reference_file_upload_response_file="reference_file_upload_response.txt"
@@ -129,34 +119,111 @@ process uploadReferenceFile {
   touch \${reference_file_response}
 
   printf "[\${time_stamp}]: "
-  printf "Checking if reference file already exists in ICA...\n"
-  get_reference_file_response=\$(icav2 projectdata get ${referenceFileIcaPath} --project-id ${projectId})
-  echo "\${get_reference_file_response}" > \${get_reference_file_response_file}
+  printf "Checking if reference file id has been set in params.json...\n"
+  if [ -z "${referenceFileId}" ]; then 
+    printf "[\${time_stamp}]: "
+    printf "Reference file id has been set in params.json. Getting reference file data JSON response...\n"
+    get_reference_file_response=\$(icav2 projectdata get ${referenceFileId} --project-id ${projectId})
+    echo "\${get_reference_file_response}" > \${get_reference_file_response_file}
+  else 
+    printf "[\${time_stamp}]: "
+    printf "Reference file id has not been set in params.json. Checking if reference file exists in ICA path...\n"
 
-  if grep -iq "No data found for path" \${get_reference_file_response_file};then
-      printf "[\${time_stamp}]: "
-      printf "Reference file not found in ICA. Uploading reference file '${reference_file}'... \n"
-      reference_file_upload_response=\$(icav2 projectdata upload ${reference_file} ${referenceFileIcaPath} --project-id ${projectId})
-      echo "\${reference_file_upload_response}" > \${reference_file_upload_response_file}
+    get_reference_file_response=\$(icav2 projectdata get ${referenceFileUploadPath} --project-id ${projectId})
+    echo "\${get_reference_file_response}" > \${get_reference_file_response_file}
+  fi
 
-      # id of file starts with 'fil.'
-      printf "[\${time_stamp}]: "
-      printf "Extracting file_id of reference file '${reference_file}' from upload response... \n"
-      reference_file_id=\$(cat \${reference_file_upload_response_file} | grep -i '\"id\": \"fil' | grep -o 'fil.[^\"]*')
+  if grep -iq "No data found for path" \${get_reference_file_response_file}; then
+    printf "[\${time_stamp}]: "
+    printf "Reference file not found in ICA. Uploading reference file '${reference_file}'... \n"
+    reference_file_upload_response=\$(icav2 projectdata upload ${referenceFileUploadPath} \${reference_file_ica_path} --project-id ${projectId})
+    echo "\${reference_file_upload_response}" > \${reference_file_upload_response_file}
+
+    printf "[\${time_stamp}]: "
+    printf "Extracting file_id of reference file '${reference_file}' from upload response... \n"
+    reference_file_id=\$(cat \${reference_file_upload_response_file} | grep -i '\"id\": \"fil' | grep -o 'fil.[^\"]*')
   else
-      # id of file starts with 'fil.'
       printf "[\${time_stamp}]: "
       printf "Extracting file_id of reference file '${reference_file}' from get response... \n"
       reference_file_id=\$(cat \${get_reference_file_response_file} | grep -i '\"id\": \"fil' | grep -o 'fil.[^\"]*')
   fi
 
-  manifest_tab=\$(printf "\t")
-
   printf "[\${time_stamp}]: "
-  printf "Writing file data to existing manifest...\n"
+  printf "Writing file data to existing data file...\n"
 
-  printf "\${reference_file_id} \${manifest_tab} ${referenceAnalysisDataCode}:\${reference_file_id}\n" >> ${manifestFile}
+  printf "${referenceAnalysisDataCode}:\${reference_file_id}\n" >> ${dataFile}
   """
+}
+
+process checkAnalysisStatus {
+    debug true
+    
+    input:
+    path(analysisResponse)
+    val(analysisStatusCheckInterval)
+
+    output:
+    path "analysisOutputFolderId.txt", emit: analysisOutputFolderId
+
+    script:
+    analysisOutputFolderId = ""
+    """
+    #!/bin/bash
+
+    analysisStatusCheckCount=0
+    analysisStatusCheckLimit=10
+    analysisStatus="REQUESTED"
+
+    analysisId=\$(cat ${analysisResponse} | jq -r ".id")
+    analysisRef=\$(cat ${analysisResponse} | jq -r ".reference")
+    
+    timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
+    echo "[\${timeStamp}]: Checking status of analysis with id '\${analysisId}' every ${analysisStatusCheckInterval} seconds, until status is 'SUCCEEDED'..."
+    while true;
+    do
+        ((\${StatusCheckCount}+=1))
+        updatedAnalysisResponse=\$(icav2 projectanalyses get \${analysisId})
+
+        echo "Checking status of analysis with reference '\${analysisRef}'..."
+        analysisStatus=\$(echo \${updatedAnalysisResponse} | jq -r ".status")
+
+        timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
+        echo "[\${timeStamp}]: Current status of analysis is '\${analysisStatus}'..."
+
+        if [[ \${analysisStatus} == "SUCCEEDED" ]]; then
+            echo "Analysis SUCCEEDED"
+            echo "Fetching analysis output response..."
+            analysisOutputResponse=\$(icav2 projectanalyses output \$analysisId)
+            analysisOutputFolderId=\$(echo \${analysisOutputResponse} | jq -r ".items[].data[].dataId")
+            echo "Analysis output folder ID is '\${analysisOutputFolderId}'"
+
+            touch analysisOutputFolderId.txt
+            echo "\${analysisOutputFolderId}" > analysisOutputFolderId.txt
+            break;
+
+        elif [[ \${analysisStatus} == "FAILED" ]]; then
+            echo "Analysis FAILED \n"
+            break;
+
+        elif [[ \${analysisStatus} == "FAILED_FINAL" ]]; then
+            echo "Analysis FAILED_FINAL"
+            break;
+
+        elif [[ \${analysisStatus} == "ABORTED" ]]; then
+            echo "Analysis ABORTED"
+            break;
+
+        elif [[ \${analysisStatusCheckCount} -gt \${analysisStatusCheckLimit} ]]; then
+            echo "Analysis status has been checked more than \${analysisStatusCheckLimit} times. Stopping..."
+            break;
+
+        else
+            echo "Analysis still in progress..."
+        fi
+
+        sleep ${analysisStatusCheckInterval};
+    done
+    """
 }
 
 workflow {
