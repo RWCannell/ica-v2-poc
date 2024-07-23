@@ -153,7 +153,6 @@ process startAnalysis {
     path(dataFile)
 
     output:
-    path "data.txt", emit: dataFile
     path "analysisResponse.txt", emit: analysisResponse
 
     script:
@@ -163,14 +162,15 @@ process startAnalysis {
     #!/bin/bash
 
     sample_id=\$(cat ${dataFile} | grep -E "sampleId")
+
     read1_analysis_code=\$(cat ${dataFile} | grep -E "read1")
     read2_analysis_code=\$(cat ${dataFile} | grep -E "read2")
     reference_analysis_code=\$(cat ${dataFile} | grep -E "ref_tar")
-    output_directory="/output/\${sample_id}/"
+
+    output_directory="/output/${sampleId}/"
 
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
-    echo "[\${timeStamp}]: Starting Nextflow analysis...\n"
-
+    printf "[\${timeStamp}]: Starting Nextflow analysis...\n"
     analysisResponse=\$(icav2 projectpipelines start nextflow ${pipelineId} \
         --user-reference ${userReference} \
         --project-id ${projectId} \
@@ -180,9 +180,9 @@ process startAnalysis {
         --input \${reference_analysis_code} \
         --parameters enable-variant-caller:true \
         --parameters RGID:Illumina_RGID \
-        --parameters RGSM:\${sample_id} \
+        --parameters RGSM:${sampleId} \
         --parameters output-directory:\${output_directory} \
-        --parameters output-file-prefix:\${sample_id} 
+        --parameters output-file-prefix:${sampleId}) 
 
     touch "analysisResponse.txt"
     echo "\${analysisResponse}" > analysisResponse.txt
@@ -204,59 +204,113 @@ process checkAnalysisStatus {
     """
     #!/bin/bash
 
-    analysisStatusCheckCount=0
-    analysisStatusCheckLimit=10
-    analysisStatus="REQUESTED"
+    analysis_status_check_count=0
+    analysis_status_check_limit=10
+    analysis_status="REQUESTED"
 
-    analysisId=\$(cat ${analysisResponse} | jq -r ".id")
-    analysisRef=\$(cat ${analysisResponse} | jq -r ".reference")
+    analysis_id=\$(cat ${analysisResponse} | jq -r ".id")
+    analysis_ref=\$(cat ${analysisResponse} | jq -r ".reference")
     
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
-    echo "[\${timeStamp}]: Checking status of analysis with id '\${analysisId}' every ${analysisStatusCheckInterval} seconds, until status is 'SUCCEEDED'..."
+    printf "[\${timeStamp}]: Checking status of analysis with id '\${analysis_id}' every ${analysisStatusCheckInterval} seconds, until status is 'SUCCEEDED'...\n"
     while true;
     do
         ((\${StatusCheckCount}+=1))
-        updatedAnalysisResponse=\$(icav2 projectanalyses get \${analysisId})
+        updatedAnalysisResponse=\$(icav2 projectanalyses get \${analysis_id})
 
-        echo "Checking status of analysis with reference '\${analysisRef}'..."
-        analysisStatus=\$(echo \${updatedAnalysisResponse} | jq -r ".status")
+        printf "Checking status of analysis with reference '\${analysis_ref}'...\n"
+        analysis_status=\$(echo \${updatedAnalysisResponse} | jq -r ".status")
 
         timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
-        echo "[\${timeStamp}]: Current status of analysis is '\${analysisStatus}'..."
+        printf "[\${timeStamp}]: Current status of analysis is '\${analysis_status}'...\n"
 
-        if [[ \${analysisStatus} == "SUCCEEDED" ]]; then
-            echo "Analysis SUCCEEDED"
-            echo "Fetching analysis output response..."
-            analysisOutputResponse=\$(icav2 projectanalyses output \$analysisId)
+        if [[ \${analysis_status} == "SUCCEEDED" ]]; then
+            printf "Analysis SUCCEEDED\n"
+            printf "Fetching analysis output response...\n"
+            analysisOutputResponse=\$(icav2 projectanalyses output \$analysis_id)
             analysisOutputFolderId=\$(echo \${analysisOutputResponse} | jq -r ".items[].data[].dataId")
-            echo "Analysis output folder ID is '\${analysisOutputFolderId}'"
+            printf "Analysis output folder ID is '\${analysisOutputFolderId}'\n"
 
             touch analysisOutputFolderId.txt
             echo "\${analysisOutputFolderId}" > analysisOutputFolderId.txt
             break;
 
-        elif [[ \${analysisStatus} == "FAILED" ]]; then
-            echo "Analysis FAILED \n"
+        elif [[ \${analysis_status} == "FAILED" ]]; then
+            printf "Analysis FAILED \n"
             break;
 
-        elif [[ \${analysisStatus} == "FAILED_FINAL" ]]; then
-            echo "Analysis FAILED_FINAL"
+        elif [[ \${analysis_status} == "FAILED_FINAL" ]]; then
+            printf "Analysis FAILED_FINAL\n"
             break;
 
-        elif [[ \${analysisStatus} == "ABORTED" ]]; then
-            echo "Analysis ABORTED"
+        elif [[ \${analysis_status} == "ABORTED" ]]; then
+            printf "Analysis ABORTED\n"
             break;
 
-        elif [[ \${analysisStatusCheckCount} -gt \${analysisStatusCheckLimit} ]]; then
-            echo "Analysis status has been checked more than \${analysisStatusCheckLimit} times. Stopping..."
+        elif [[ \${analysis_status_check_count} -gt \${analysis_status_check_limit} ]]; then
+            printf "Analysis status has been checked more than \${analysis_status_check_limit} times. Stopping...\n"
             break;
 
         else
-            echo "Analysis still in progress..."
+            printf "Analysis still in progress...\n"
         fi
 
         sleep ${analysisStatusCheckInterval};
     done
+    """
+}
+
+process downloadAnalysisOutput {
+    debug true
+    
+    input:
+    path(analysisOutputFolderId)
+    val(localDownloadPath)
+
+    output:
+    path "outputFolderId.txt", emit: outputFolderId
+
+    script:
+    outputFolderId = ""
+    """
+    #!/bin/bash
+
+    outputFolderId=\$(cat ${analysisOutputFolderId})
+
+    timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
+    printf "[\${timeStamp}]: Downloading analysis output folder with ID '\${outputFolderId}' to '${localDownloadPath}'...\n"
+
+    icav2 projectdata download \${outputFolderId} ${localDownloadPath}
+
+    touch outputFolderId.txt
+    echo "\${outputFolderId}" > outputFolderId.txt
+    """
+}
+
+process deleteData {
+    debug true
+
+    input:
+    path(fileUploadResponse)
+    path(outputFolderId)
+
+    output:
+    stdout
+
+    script:
+    """
+    fileId=\$(cat ${fileUploadResponse} | grep -i '\"id\": \"fil' | grep -o 'fil.[^\"]*')
+
+    timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
+    printf "[\${timeStamp}]: Deleting uploaded file with ID '\${fileId}'...\n"
+    icav2 projectdata delete \${fileId}
+
+    folderId=\$(cat ${outputFolderId})
+    timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
+    printf "[\${timeStamp}]: Deleting analysis output folder with ID '\${folderId}'...\n"
+    icav2 projectdata delete \${folderId}
+
+    printf "Uploaded file and analysis output folder successfully deleted.\n"
     """
 }
 
@@ -267,7 +321,7 @@ workflow {
     uploadFastqFilePairs(fastqFilePairs, params.projectId)
     uploadReferenceFile(uploadFastqFilePairs.out.dataFile, referenceFilePath)
     startAnalysis(uploadReferenceFile.out.dataFile)
-    // checkAnalysisStatus(startAnalysis.out.analysisResponse, params.analysisStatusCheckInterval)
-    // downloadAnalysisOutput(checkAnalysisStatus.out.analysisOutputFolderId, params.localDownloadPath)
+    checkAnalysisStatus(startAnalysis.out.analysisResponse, params.analysisStatusCheckInterval)
+    downloadAnalysisOutput(checkAnalysisStatus.out.analysisOutputFolderId, params.localDownloadPath)
     // deleteData(uploadFile.out.fileUploadResponse.view(), downloadAnalysisOutput.out.outputFolderId)
 }
