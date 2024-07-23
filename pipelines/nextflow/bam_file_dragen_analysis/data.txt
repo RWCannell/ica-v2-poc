@@ -1,0 +1,3 @@
+sampleId:LP6005441-DNA_A11.md.recal
+Normal_BAM_File:fil.a9c4dd8b7fe04966b92108dc57772666
+ref_tar:fil.f01a17c3b8524532ddb608d9f05c7bca

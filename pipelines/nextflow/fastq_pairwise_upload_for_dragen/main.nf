@@ -96,7 +96,6 @@ process uploadFastqFilePairs {
 
 process uploadReferenceFile {
   debug true
-  maxForks 3
 
   input:
   path(dataFile)
