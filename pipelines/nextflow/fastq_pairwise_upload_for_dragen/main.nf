@@ -109,8 +109,8 @@ process uploadReferenceFile {
   """
   #!/bin/bash
   time_stamp=\$(date +"%Y-%m-%d %H:%M:%S")
-  reference_file_id=""
-  reference_file_ica_path="/fastq/${reference_file}/"
+  reference_file_id=${referenceFileId}
+  reference_file_ica_path=${referenceFileIcaPath}
 
   get_reference_file_response_file="get_reference_file_response.txt"
   reference_file_upload_response_file="reference_file_upload_response.txt"
@@ -118,22 +118,24 @@ process uploadReferenceFile {
   touch \${reference_file_response}
 
   printf "[\${time_stamp}]: "
-  printf "Checking if reference file already exists in ICA...\n"
-  get_reference_file_response=\$(icav2 projectdata get \${reference_file_ica_path} --project-id ${projectId})
-  echo "\${get_reference_file_response}" > \${get_reference_file_response_file}
+  printf "Checking if reference file id has been set in params.json...\n"
+  if [ -z "${referenceFileId}" ]; then 
+    printf "[\${time_stamp}]: "
+    printf "Reference file id has been set in params.json. Getting reference file data JSON response...\n"
+    get_reference_file_response=\$(icav2 projectdata get ${referenceFileId} --project-id ${projectId})
+    echo "\${get_reference_file_response}" > \${get_reference_file_response_file}
+  fi
 
-  if grep -iq "No data found for path" \${get_reference_file_response_file};then
-      printf "[\${time_stamp}]: "
-      printf "Reference file not found in ICA. Uploading reference file '${reference_file}'... \n"
-      reference_file_upload_response=\$(icav2 projectdata upload ${referenceFileUploadPath} \${reference_file_ica_path} --project-id ${projectId})
-      echo "\${reference_file_upload_response}" > \${reference_file_upload_response_file}
+  if grep -iq "No data found for path" \${get_reference_file_response_file}; then
+    printf "[\${time_stamp}]: "
+    printf "Reference file not found in ICA. Uploading reference file '${reference_file}'... \n"
+    reference_file_upload_response=\$(icav2 projectdata upload ${referenceFileUploadPath} \${reference_file_ica_path} --project-id ${projectId})
+    echo "\${reference_file_upload_response}" > \${reference_file_upload_response_file}
 
-      # id of file starts with 'fil.'
-      printf "[\${time_stamp}]: "
-      printf "Extracting file_id of reference file '${reference_file}' from upload response... \n"
-      reference_file_id=\$(cat \${reference_file_upload_response_file} | grep -i '\"id\": \"fil' | grep -o 'fil.[^\"]*')
+    printf "[\${time_stamp}]: "
+    printf "Extracting file_id of reference file '${reference_file}' from upload response... \n"
+    reference_file_id=\$(cat \${reference_file_upload_response_file} | grep -i '\"id\": \"fil' | grep -o 'fil.[^\"]*')
   else
-      # id of file starts with 'fil.'
       printf "[\${time_stamp}]: "
       printf "Extracting file_id of reference file '${reference_file}' from get response... \n"
       reference_file_id=\$(cat \${get_reference_file_response_file} | grep -i '\"id\": \"fil' | grep -o 'fil.[^\"]*')
@@ -323,5 +325,5 @@ workflow {
     startAnalysis(uploadReferenceFile.out.dataFile)
     checkAnalysisStatus(startAnalysis.out.analysisResponse, params.analysisStatusCheckInterval)
     downloadAnalysisOutput(checkAnalysisStatus.out.analysisOutputFolderId, params.localDownloadPath)
-    // deleteData(uploadFile.out.fileUploadResponse.view(), downloadAnalysisOutput.out.outputFolderId)
+    deleteData(uploadFile.out.fileUploadResponse.view(), downloadAnalysisOutput.out.outputFolderId)
 }
