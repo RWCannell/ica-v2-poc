@@ -3,6 +3,7 @@
     "pipelineId": "20d8a847-5b16-43d2-a3b7-252bfdd6ae73",
     "pipelineCode": "basic_dragen_nextflow_pipeline",
     "userReference": "regan_dragen_test_analysis_fastq_02",
+    "storageSize": "Small",
     "read1AnalysisDataCode": "read1",
     "read2AnalysisDataCode": "read2",
     "referenceAnalysisDataCode": "ref_tar",
