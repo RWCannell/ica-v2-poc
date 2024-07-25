@@ -293,7 +293,7 @@ process deleteData {
     debug true
 
     input:
-    path(fileUploadResponse)
+    path(dataFile)
     path(outputFolderId)
 
     output:
@@ -301,11 +301,22 @@ process deleteData {
 
     script:
     """
-    fileId=\$(cat ${fileUploadResponse} | grep -i '\"id\": \"fil' | grep -o 'fil.[^\"]*')
+    sample_id=$(cat data_file.txt | grep -o 'sampleId:.*' | cut -f2- -d:)
+    read_1_file_id=$(cat data_file.txt | grep -o 'read1:.*' | cut -f2- -d:)
+    read_2_file_id=$(cat data_file.txt | grep -o 'read2:.*' | cut -f2- -d:)
+    reference_file_id=$(cat data_file.txt | grep -o 'ref_tar:.*' | cut -f2- -d:)
 
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
-    printf "[\${timeStamp}]: Deleting uploaded file with ID '\${fileId}'...\n"
-    icav2 projectdata delete \${fileId}
+    printf "[\${timeStamp}]: Deleting uploaded read 1 file with ID '\${read_1_file_id}'...\n"
+    icav2 projectdata delete \${read_1_file_id}
+
+    timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
+    printf "[\${timeStamp}]: Deleting uploaded read 2 file with ID '\${read_2_file_id}'...\n"
+    icav2 projectdata delete \${read_2_file_id}
+
+    timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
+    printf "[\${timeStamp}]: Deleting uploaded reference file with ID '\${reference_file_id}'...\n"
+    icav2 projectdata delete \${reference_file_id}
 
     folderId=\$(cat ${outputFolderId})
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
