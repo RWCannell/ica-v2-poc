@@ -301,10 +301,10 @@ process deleteData {
 
     script:
     """
-    sample_id=$(cat data_file.txt | grep -o 'sampleId:.*' | cut -f2- -d:)
-    read_1_file_id=$(cat data_file.txt | grep -o 'read1:.*' | cut -f2- -d:)
-    read_2_file_id=$(cat data_file.txt | grep -o 'read2:.*' | cut -f2- -d:)
-    reference_file_id=$(cat data_file.txt | grep -o 'ref_tar:.*' | cut -f2- -d:)
+    sample_id=\$(cat data_file.txt | grep -o 'sampleId:.*' | cut -f2- -d:)
+    read_1_file_id=\$(cat data_file.txt | grep -o 'read1:.*' | cut -f2- -d:)
+    read_2_file_id=\$(cat data_file.txt | grep -o 'read2:.*' | cut -f2- -d:)
+    reference_file_id=\$(cat data_file.txt | grep -o 'ref_tar:.*' | cut -f2- -d:)
 
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
     printf "[\${timeStamp}]: Deleting uploaded read 1 file with ID '\${read_1_file_id}'...\n"
