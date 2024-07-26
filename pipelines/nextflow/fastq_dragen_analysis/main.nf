@@ -15,7 +15,6 @@ read1FileId = params.read1FileId
 read2FileId = params.read2FileId
 referenceFileId = params.referenceFileId
 localDownloadPath = params.localDownloadPath
-icaUploadPath = params.icaUploadPath
 
 process checkFileStatus {
     debug true
