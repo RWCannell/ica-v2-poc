@@ -184,7 +184,8 @@ process startAnalysis {
         --parameters RGID:Illumina_RGID \
         --parameters RGSM:${sampleId} \
         --parameters output-directory:\${output_directory} \
-        --parameters output-file-prefix:${sampleId}) 
+        --parameters output-file-prefix:${sampleId}) \
+        --parameters build-hash-table:true
 
     touch "analysisResponse.txt"
     echo "\${analysisResponse}" > analysisResponse.txt
@@ -209,6 +210,7 @@ process checkAnalysisStatus {
     analysis_status_check_count=0
     analysis_status_check_limit=10
     analysis_status="REQUESTED"
+    touch analysisOutputFolderId.txt
 
     analysis_id=\$(cat ${analysisResponse} | jq -r ".id")
     analysis_ref=\$(cat ${analysisResponse} | jq -r ".reference")
@@ -233,7 +235,6 @@ process checkAnalysisStatus {
             analysisOutputFolderId=\$(echo \${analysisOutputResponse} | jq -r ".items[].data[].dataId")
             printf "Analysis output folder ID is '\${analysisOutputFolderId}'\n"
 
-            touch analysisOutputFolderId.txt
             echo "\${analysisOutputFolderId}" > analysisOutputFolderId.txt
             break;
 
