@@ -105,13 +105,13 @@ process startAnalysis {
         --input \${read1_analysis_code} \
         --input \${read2_analysis_code} \
         --input \${reference_analysis_code} \
-        --enable-variant-caller:true \
-        --RGID:Illumina_RGID \
-        --RGSM:${sampleId} \
-        --output-directory:\${output_directory} \
-        --output-file-prefix:${sampleId}) \
-        --build-hash-table:true \
-        --ref-dir=${hashTableConfigFile}
+        --enable-variant-caller true \
+        --RGID Illumina_RGID \
+        --RGSM ${sampleId} \
+        --output-directory \${output_directory} \
+        --output-file-prefix ${sampleId}) \
+        --build-hash-table true \
+        --ref-dir ${hashTableConfigFile}
 
     touch "analysisResponse.txt"
     echo "\${analysisResponse}" > analysisResponse.txt
