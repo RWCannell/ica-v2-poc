@@ -9,6 +9,8 @@ pipelineCode = params.pipelineCode
 userReference = params.userReference
 storageSize = params.storageSize
 hashTableConfigFile = params.hashTableConfigFile
+referenceDirectory = params.referenceDirectory
+intermediateResultsDirectory = params.intermediateResultsDirectory
 fileUploadStatusCheckInterval = params.fileUploadStatusCheckInterval
 analysisStatusCheckInterval = params.analysisStatusCheckInterval
 sampleId = params.sampleId
@@ -106,12 +108,13 @@ process startAnalysis {
         --input \${read2_analysis_code} \
         --input \${reference_analysis_code} \
         --parameters enable-variant-caller:true \
-        --parameters RGID:"Illumina_RGID" \
+        --parameters intermediate-results-dir:${intermediateResultsDirectory} \
+        --parameters RGID:${sampleId} \
         --parameters RGSM:${sampleId} \
         --parameters output-directory:\${output_directory} \
         --parameters output-file-prefix:${sampleId} \
         --parameters build-hash-table:true \
-        --parameters ref-dir:${hashTableConfigFile})
+        --parameters ref-dir:${referenceDirectory})
 
     touch "analysisResponse.txt"
     echo "\${analysisResponse}" > analysisResponse.txt
