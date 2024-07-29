@@ -145,7 +145,7 @@ process checkAnalysisStatus {
     printf "[\${timeStamp}]: Checking status of analysis with id '\${analysis_id}' every ${analysisStatusCheckInterval} seconds, until status is 'SUCCEEDED'...\n"
     while true;
     do
-        ((\${StatusCheckCount}+=1))
+        ((\${analysis_status_check_count}+=1))
         updatedAnalysisResponse=\$(icav2 projectanalyses get \${analysis_id})
 
         printf "Checking status of analysis with reference '\${analysis_ref}'...\n"

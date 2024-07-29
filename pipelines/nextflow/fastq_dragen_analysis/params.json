@@ -10,7 +10,7 @@
     "hashTableConfigFile": "/scratch/reference/hash_table.cfg",
     "fileUploadStatusCheckInterval": 120,
     "analysisStatusCheckInterval": 300,
-    "sampleId": "ERR1019034",
+    "sampleId": "ERR1019038",
     "read1FileId": "fil.3f8f4528bb1946322da108dcad43d624",
     "read2FileId": "fil.0232d49c13664c8b2de908dcad43d624",
     "referenceFileId": "fil.2e3fd8d802ee4963da2208dc484ea8f0",
