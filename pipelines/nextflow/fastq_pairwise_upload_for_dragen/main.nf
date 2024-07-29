@@ -181,11 +181,11 @@ process startAnalysis {
         --input \${read2_analysis_code} \
         --input \${reference_analysis_code} \
         --parameters enable-variant-caller:true \
-        --parameters RGID:Illumina_RGID \
+        --parameters RGID:"Illumina_RGID" \
         --parameters RGSM:${sampleId} \
         --parameters output-directory:\${output_directory} \
-        --parameters output-file-prefix:${sampleId}) \
-        --parameters build-hash-table:true
+        --parameters output-file-prefix:${sampleId} \
+        --parameters build-hash-table:true)
 
     touch "analysisResponse.txt"
     echo "\${analysisResponse}" > analysisResponse.txt
