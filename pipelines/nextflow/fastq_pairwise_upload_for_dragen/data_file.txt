@@ -1,4 +1,0 @@
-sampleId:jul_16_501
-read1:fil.36666cf122064ccdd9d808dca25e9cfe
-read2:fil.da00e3e1fcf84482d9d908dca25e9cfe
-ref_tar:fil.eec19d31b8b345b25fd108dca22ec7d4

@@ -130,7 +130,7 @@ process uploadReferenceFile {
     echo "\${get_reference_file_response}" > \${get_reference_file_response_file}
   fi
 
-  if grep -iq "No data found for path" \${get_reference_file_response_file}; then
+  if grep -iq "No data found" \${get_reference_file_response_file}; then
     printf "[\${time_stamp}]: "
     printf "Reference file not found in ICA. Uploading reference file '${reference_file}'... \n"
     reference_file_upload_response=\$(icav2 projectdata upload ${referenceFileUploadPath} \${reference_file_ica_path} --project-id ${projectId})
@@ -180,23 +180,23 @@ process startAnalysis {
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
     printf "[\${timeStamp}]: Starting Nextflow analysis...\n"
 
-    analysisResponse=\$(icav2 projectpipelines start nextflow $pipelineId \
-        --user-reference $userReference \
-        --project-id $projectId \
-        --storage-size $storageSize \
+    analysisResponse=\$(icav2 projectpipelines start nextflow ${pipelineId} \
+        --user-reference ${userReference} \
+        --project-id ${projectId} \
+        --storage-size ${storageSize} \
         --input \${reference_analysis_code} \
         --input fastqs:"\${read_1_file_id},\${read_2_file_id}" \
         --parameters enable_map_align:true \
-        --parameters enable_map_align_output:true \
+        --parameters enable_map_align_output:false \
         --parameters output_format:BAM \
         --parameters enable_variant_caller:true \
         --parameters vc_emit_ref_confidence:BP_RESOLUTION \
         --parameters enable_cnv:false \
-        --parameters enable_sv:true \
-        --parameters repeat_genotype_enable:true \
+        --parameters enable_sv:false \
+        --parameters repeat_genotype_enable:false \
         --parameters enable_hla:false \
         --parameters enable_variant_annotation:false \
-        --parameters output_file_prefix:"\${sample_id}")
+        --parameters output_file_prefix:"${sampleId}")
 
     touch "analysisResponse.txt"
     echo "\${analysisResponse}" > analysisResponse.txt
@@ -229,7 +229,7 @@ process checkAnalysisStatus {
     printf "[\${timeStamp}]: Checking status of analysis with id '\${analysis_id}' every ${analysisStatusCheckInterval} seconds, until status is 'SUCCEEDED'...\n"
     while true;
     do
-        ((\${StatusCheckCount}+=1))
+        ((analysis_status_check_count +=1 ))
         updatedAnalysisResponse=\$(icav2 projectanalyses get \${analysis_id})
 
         printf "Checking status of analysis with reference '\${analysis_ref}'...\n"
@@ -241,7 +241,7 @@ process checkAnalysisStatus {
         if [[ \${analysis_status} == "SUCCEEDED" ]]; then
             printf "Analysis SUCCEEDED\n"
             printf "Fetching analysis output response...\n"
-            analysisOutputResponse=\$(icav2 projectanalyses output \$analysis_id)
+            analysisOutputResponse=\$(icav2 projectanalyses output \${analysis_id})
             analysisOutputFolderId=\$(echo \${analysisOutputResponse} | jq -r ".items[].data[].dataId")
             printf "Analysis output folder ID is '\${analysisOutputFolderId}'\n"
 

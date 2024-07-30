@@ -165,7 +165,7 @@ process checkAnalysisStatus {
         if [[ \${analysis_status} == "SUCCEEDED" ]]; then
             printf "Analysis SUCCEEDED\n"
             printf "Fetching analysis output response...\n"
-            analysisOutputResponse=\$(icav2 projectanalyses output \$analysis_id)
+            analysisOutputResponse=\$(icav2 projectanalyses output \${analysis_id})
             analysisOutputFolderId=\$(echo \${analysisOutputResponse} | jq -r ".items[].data[].dataId")
             printf "Analysis output folder ID is '\${analysisOutputFolderId}'\n"
 
