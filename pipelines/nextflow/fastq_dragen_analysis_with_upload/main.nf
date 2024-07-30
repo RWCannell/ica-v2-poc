@@ -274,12 +274,10 @@ process downloadAnalysisOutput {
     printf "Writing id of analysis output folder to existing data file...\n"
     printf "outputFolderId:\${analysis_output_folder_id}\n" >> ${dataFile}
 
-    output_folder_id=\$(cat ${dataFile} | grep -o 'outputFolderId:.*' | cut -f2- -d:)
-
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
-    printf "[\${timeStamp}]: Downloading analysis output folder with ID '\${output_folder_id}' to '${localDownloadPath}'...\n"
+    printf "[\${timeStamp}]: Downloading analysis output folder with ID '\${analysis_output_folder_id}' to '${localDownloadPath}'...\n"
 
-    icav2 projectdata download \${output_folder_id} ${localDownloadPath}
+    icav2 projectdata download \${analysis_output_folder_id} ${localDownloadPath}
     """
 }
 
