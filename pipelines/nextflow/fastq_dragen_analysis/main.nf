@@ -16,6 +16,7 @@ analysisStatusCheckInterval = params.analysisStatusCheckInterval
 sampleId = params.sampleId
 read1FileId = params.read1FileId
 read2FileId = params.read2FileId
+fastqsDataCode = params.fastqsDataCode
 referenceFileId = params.referenceFileId
 localDownloadPath = params.localDownloadPath
 
@@ -104,8 +105,7 @@ process startAnalysis {
         --user-reference ${userReference} \
         --project-id ${projectId} \
         --storage-size ${storageSize} \
-        --input \${read1_analysis_code} \
-        --input \${read2_analysis_code} \
+        --input ${fastqsDataCode}:\${read1_analysis_code},\${read2_analysis_code}
         --input \${reference_analysis_code} \
         --parameters enable-variant-caller:true \
         --parameters intermediate-results-dir:${intermediateResultsDirectory} \
