@@ -295,7 +295,7 @@ process deleteData {
     sample_id=\$(cat ${dataFile} | grep -o 'sampleId:.*' | cut -f2- -d:)
     read_1_file_id=\$(cat ${dataFile} | grep -o 'read1:.*' | cut -f2- -d:)
     read_2_file_id=\$(cat ${dataFile} | grep -o 'read2:.*' | cut -f2- -d:)
-    output_folder_id=\$(cat ${dataFile} | grep -o 'outputFolderId:.*' | cut -f2- -d:)
+    analysis_output_folder_id=\$(cat ${dataFile} | grep -o 'outputFolderId:.*' | cut -f2- -d:)
 
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
     printf "[\${timeStamp}]: Deleting uploaded read 1 file with ID '\${read_1_file_id}'...\n"
@@ -306,8 +306,8 @@ process deleteData {
     icav2 projectdata delete \${read_2_file_id}
 
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
-    printf "[\${timeStamp}]: Deleting analysis output folder with ID '\${output_folder_id}'...\n"
-    icav2 projectdata delete \${output_folder_id}
+    printf "[\${timeStamp}]: Deleting analysis output folder with ID '\${analysis_output_folder_id}'...\n"
+    icav2 projectdata delete \${analysis_output_folder_id}
 
     printf "Uploaded file and analysis output folder successfully deleted.\n"
     """
