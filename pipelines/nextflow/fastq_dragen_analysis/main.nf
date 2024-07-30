@@ -105,16 +105,14 @@ process startAnalysis {
         --user-reference ${userReference} \
         --project-id ${projectId} \
         --storage-size ${storageSize} \
-        --input ${fastqsDataCode}:\${read1_analysis_code},\${read2_analysis_code} \
+        --input \${read1_analysis_code} \
+        --input \${read2_analysis_code} \
         --input \${reference_analysis_code} \
         --parameters enable-variant-caller:true \
-        --parameters intermediate-results-dir:${intermediateResultsDirectory} \
-        --parameters RGID:${sampleId} \
-        --parameters RGSM:${sampleId} \
+        --parameters RGID:"${sampleId}" \
+        --parameters RGSM:"${sampleId}" \
         --parameters output-directory:\${output_directory} \
-        --parameters output-file-prefix:${sampleId} \
-        --parameters build-hash-table:true \
-        --parameters ref-dir:${referenceDirectory})
+        --parameters output-file-prefix:"${sampleId}")
 
     touch "analysisResponse.txt"
     echo "\${analysisResponse}" > analysisResponse.txt
@@ -149,6 +147,7 @@ process checkAnalysisStatus {
     while true;
     do
         ((\${analysis_status_check_count}+=1))
+        ((analysis_status_check_count += 1))
         updatedAnalysisResponse=\$(icav2 projectanalyses get \${analysis_id})
 
         printf "Checking status of analysis with reference '\${analysis_ref}'...\n"
