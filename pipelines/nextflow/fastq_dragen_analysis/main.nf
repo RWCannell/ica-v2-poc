@@ -13,6 +13,7 @@ referenceDirectory = params.referenceDirectory
 intermediateResultsDirectory = params.intermediateResultsDirectory
 fileUploadStatusCheckInterval = params.fileUploadStatusCheckInterval
 analysisStatusCheckInterval = params.analysisStatusCheckInterval
+analysisStatusCheckLimit = params.analysisStatusCheckLimit
 sampleId = params.sampleId
 read1FileId = params.read1FileId
 read2FileId = params.read2FileId
@@ -142,7 +143,6 @@ process checkAnalysisStatus {
     #!/bin/bash
 
     analysis_status_check_count=0
-    analysis_status_check_limit=1000
     analysis_status="REQUESTED"
     touch analysisOutputFolderId.txt
 
@@ -184,8 +184,8 @@ process checkAnalysisStatus {
             printf "Analysis ABORTED\n"
             break;
 
-        elif [[ \${analysis_status_check_count} -gt \${analysis_status_check_limit} ]]; then
-            printf "Analysis status has been checked more than \${analysis_status_check_limit} times. Stopping...\n"
+        elif [[ \${analysis_status_check_count} -gt ${analysisStatusCheckLimit} ]]; then
+            printf "Analysis status has been checked more than ${analysisStatusCheckLimit} times. Stopping...\n"
             break;
 
         else
