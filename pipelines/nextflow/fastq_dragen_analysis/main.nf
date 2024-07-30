@@ -103,12 +103,12 @@ process startAnalysis {
 
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
     printf "[\${timeStamp}]: Starting Nextflow analysis...\n"
-    analysis_response=$(icav2 projectpipelines start nextflow $pipelineId \
+    analysisResponse=\$(icav2 projectpipelines start nextflow $pipelineId \
         --user-reference $userReference \
         --project-id $projectId \
         --storage-size $storageSize \
         --input \${reference_analysis_code} \
-        --input fastqs:"\$read_1_file_id,\$read_2_file_id" \
+        --input fastqs:"\${read_1_file_id},\${read_2_file_id}" \
         --parameters enable_map_align:true \
         --parameters enable_map_align_output:true \
         --parameters output_format:BAM \

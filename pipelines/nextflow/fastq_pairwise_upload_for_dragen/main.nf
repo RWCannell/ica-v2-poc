@@ -166,55 +166,36 @@ process startAnalysis {
     """
     #!/bin/bash
 
-    sample_id=\$(cat ${dataFile} | grep -E "sampleId")
+    sample_id=\$(cat ${dataFile} | grep -o 'sampleId:.*' | cut -f2- -d:)
+    read_1_file_id=\$(cat ${dataFile} | grep -o 'read1:.*' | cut -f2- -d:)
+    read_2_file_id=\$(cat ${dataFile} | grep -o 'read2:.*' | cut -f2- -d:)
 
-    read1_analysis_code=\$(cat ${dataFile} | grep -E "read1")
-    read2_analysis_code=\$(cat ${dataFile} | grep -E "read2")
+    read_1_analysis_code=\$(cat ${dataFile} | grep -E "read1")
+    read_2_analysis_code=\$(cat ${dataFile} | grep -E "read2")
     reference_analysis_code=\$(cat ${dataFile} | grep -E "ref_tar")
 
     output_directory="/output/${sampleId}/"
 
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
     printf "[\${timeStamp}]: Starting Nextflow analysis...\n"
-    analysisResponse=\$(icav2 projectpipelines start nextflow ${pipelineId} \
-        --user-reference ${userReference} \
-        --project-id ${projectId} \
-        --storage-size ${storageSize} \
-        --input \${read1_analysis_code} \
-        --input \${read2_analysis_code} \
-        --input \${reference_analysis_code} \
-        --parameters enable-variant-caller:true \
-        --parameters RGID:${sampleId} \
-        --parameters RGSM:${sampleId} \
-        --parameters output-directory:\${output_directory} \
-        --parameters output-file-prefix:${sampleId} \
-        --parameters build-hash-table:true)
 
-                --output-directory ./ \\
-            -1 ${read1} \\
-            -2 ${read2} \\
-            --intermediate-results-dir /scratch \\
-            --output-file-prefix ${sample_id} \\
-            --RGID ${sample_id} \\
-            --RGSM ${sample_id} \\
-            --ref-dir /scratch/reference \\
-            --enable-variant-caller true
-
-    analysisResponse=\$(icav2 projectpipelines start nextflow ${pipelineId} \
-        --user-reference ${userReference} \
-        --project-id ${projectId} \
-        --storage-size ${storageSize} \
-        --input \${read1_analysis_code} \
-        --input \${read2_analysis_code} \
+    analysisResponse=\$(icav2 projectpipelines start nextflow $pipelineId \
+        --user-reference $userReference \
+        --project-id $projectId \
+        --storage-size $storageSize \
         --input \${reference_analysis_code} \
-        --parameters enable-variant-caller:true \
-        --parameters intermediate-results-dir:${intermediateResultsDirectory} \
-        --parameters RGID:${sampleId} \
-        --parameters RGSM:${sampleId} \
-        --parameters output-directory:\${output_directory} \
-        --parameters output-file-prefix:${sampleId} \
-        --parameters build-hash-table:true \
-        --parameters ref-dir:${referenceDirectory})
+        --input fastqs:"\${read_1_file_id},\${read_2_file_id}" \
+        --parameters enable_map_align:true \
+        --parameters enable_map_align_output:true \
+        --parameters output_format:BAM \
+        --parameters enable_variant_caller:true \
+        --parameters vc_emit_ref_confidence:BP_RESOLUTION \
+        --parameters enable_cnv:false \
+        --parameters enable_sv:true \
+        --parameters repeat_genotype_enable:true \
+        --parameters enable_hla:false \
+        --parameters enable_variant_annotation:false \
+        --parameters output_file_prefix:"\${sample_id}")
 
     touch "analysisResponse.txt"
     echo "\${analysisResponse}" > analysisResponse.txt
