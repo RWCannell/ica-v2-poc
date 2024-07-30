@@ -155,7 +155,7 @@ process startAnalysis {
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
     printf "[\${timeStamp}]: Starting Nextflow analysis...\n"
 
-    analysisResponse=\$(icav2 projectpipelines start nextflow ${pipelineId} \
+    analysis_response=\$(icav2 projectpipelines start nextflow ${pipelineId} \
         --user-reference ${userReference} \
         --project-id ${projectId} \
         --storage-size ${storageSize} \
@@ -177,8 +177,8 @@ process startAnalysis {
     touch \${analysis_response_file}
     echo "\${analysis_response}" > \${analysis_response_file}
 
-    analysis_id=\$(cat \${analysis_response} | jq -r ".id")
-    analysis_ref=\$(cat \${analysis_response} | jq -r ".reference")
+    analysis_id=\$(cat \${analysis_response_file} | jq -r ".id")
+    analysis_ref=\$(cat \${analysis_response_file} | jq -r ".reference")
 
     printf "[\${time_stamp}]: "
     printf "Writing id of analysis '\${analysis_ref}' to existing data file...\n"

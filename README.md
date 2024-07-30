@@ -411,3 +411,15 @@ nextflow run main.small.test.nf -params-file params.json
 
 This pipeline is still undergoing tests.   
 
+The idea is to write all necessary data to a `.txt` file as the workflow implements the different processes. This is an example of what the `data.txt` file would look like:   
+
+```txt
+sampleId:ERR1019050
+read1:fil.85255ad2588d4e5fe75a08dcaabcc45f
+read2:fil.6bcfeca6252941dde75b08dcaabcc45f
+ref_tar:fil.2e3fd8d802ee4963da2208dc484ea8f0
+analysisId:9aa57a35-7e66-4d4e-9c05-729767ff0290
+analysisRef:regan_dragen_germline_whole_genome_test_05-DRAGEN Germline Whole Genome 4-3-6-a7f59145-3f93-4579-9129-c2b726dc4414
+outputFolderId:output/folder/
+```
+
