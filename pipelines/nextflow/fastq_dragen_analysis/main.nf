@@ -105,7 +105,7 @@ process startAnalysis {
         --user-reference ${userReference} \
         --project-id ${projectId} \
         --storage-size ${storageSize} \
-        --input ${fastqsDataCode}:\${read1_analysis_code},\${read2_analysis_code}
+        --input ${fastqsDataCode}:\${read1_analysis_code},\${read2_analysis_code} \
         --input \${reference_analysis_code} \
         --parameters enable-variant-caller:true \
         --parameters intermediate-results-dir:${intermediateResultsDirectory} \
