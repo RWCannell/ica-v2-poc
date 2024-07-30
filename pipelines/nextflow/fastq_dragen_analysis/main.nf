@@ -103,10 +103,10 @@ process startAnalysis {
 
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
     printf "[\${timeStamp}]: Starting Nextflow analysis...\n"
-    analysis_response=$(icav2 projectpipelines start nextflow $pipeline_id \
-        --user-reference $user_reference \
-        --project-id $project_id \
-        --storage-size $storage_size \
+    analysis_response=$(icav2 projectpipelines start nextflow $pipelineId \
+        --user-reference $userReference \
+        --project-id $projectId \
+        --storage-size $storageSize \
         --input \${reference_analysis_code} \
         --input fastqs:"\$read_1_file_id,\$read_2_file_id" \
         --parameters enable_map_align:true \
@@ -119,7 +119,7 @@ process startAnalysis {
         --parameters repeat_genotype_enable:true \
         --parameters enable_hla:false \
         --parameters enable_variant_annotation:false \
-        --parameters output_file_prefix:"${sample_id}")
+        --parameters output_file_prefix:"\${sample_id}")
 
     touch "analysisResponse.txt"
     echo "\${analysisResponse}" > analysisResponse.txt
