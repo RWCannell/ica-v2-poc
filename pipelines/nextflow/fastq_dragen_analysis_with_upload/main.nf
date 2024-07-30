@@ -246,15 +246,6 @@ process checkAnalysisStatus {
             printf "Analysis still in progress...\n"
         fi
 
-        printf "Fetching analysis output response...\n"
-        analysis_output_response=\$(icav2 projectanalyses output \${analysis_id})
-        analysis_output_folder_id=\$(echo \${analysis_output_response} | jq -r ".items[].data[].dataId")
-        printf "Analysis output folder ID is '\${analysis_output_folder_id}'\n"
-
-        printf "[\${time_stamp}]: "
-        printf "Writing id of analysis output folder to existing data file...\n"
-        printf "outputFolderId:\${analysis_output_folder_id}\n" >> ${dataFile}
-
         sleep ${analysisStatusCheckInterval};
     done
     """
@@ -268,11 +259,19 @@ process downloadAnalysisOutput {
     val(localDownloadPath)
 
     output:
-    stdout
+    path "data.txt", emit: dataFile
 
     script:
     """
     #!/bin/bash
+    printf "Fetching analysis output response...\n"
+    analysis_output_response=\$(icav2 projectanalyses output \${analysis_id})
+    analysis_output_folder_id=\$(echo \${analysis_output_response} | jq -r ".items[].data[].dataId")
+    printf "Analysis output folder ID is '\${analysis_output_folder_id}'\n"
+
+    printf "[\${time_stamp}]: "
+    printf "Writing id of analysis output folder to existing data file...\n"
+    printf "outputFolderId:\${analysis_output_folder_id}\n" >> ${dataFile}
 
     output_folder_id=\$(cat ${dataFile} | grep -o 'outputFolderId:.*' | cut -f2- -d:)
 
@@ -324,5 +323,5 @@ workflow {
     startAnalysis(getReferenceFile.out.dataFile)
     checkAnalysisStatus(startAnalysis.out.dataFile, params.analysisStatusCheckInterval)
     downloadAnalysisOutput(checkAnalysisStatus.out.dataFile, params.localDownloadPath)
-    deleteData(checkAnalysisStatus.out.dataFile)
+    deleteData(downloadAnalysisOutput.out.dataFile)
 }
