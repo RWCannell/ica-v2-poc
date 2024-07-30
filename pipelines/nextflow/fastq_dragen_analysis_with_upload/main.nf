@@ -264,12 +264,13 @@ process downloadAnalysisOutput {
     script:
     """
     #!/bin/bash
+    analysis_id=\$(cat ${dataFile} | grep -o 'analysisId:.*' | cut -f2- -d:)
+
+    printf "[\${time_stamp}]: "
     printf "Fetching analysis output response...\n"
     analysis_output_response=\$(icav2 projectanalyses output \${analysis_id})
     analysis_output_folder_id=\$(echo \${analysis_output_response} | jq -r ".items[].data[].dataId")
     printf "Analysis output folder ID is '\${analysis_output_folder_id}'\n"
-
-    printf "[\${time_stamp}]: "
     printf "Writing id of analysis output folder to existing data file...\n"
     printf "outputFolderId:\${analysis_output_folder_id}\n" >> ${dataFile}
 
