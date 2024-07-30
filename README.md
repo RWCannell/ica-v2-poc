@@ -391,7 +391,6 @@ Deleting a folder follows the same logic as deleting a file. For instance, the f
 icav2 projectdata delete $folder_ica_storage_path --project-id $project_id
 ```
 The script [delete_folder_by_path](bash/helper_scripts/delete_folder_by_path.sh) contains logic for extracting the folder path by filtering a list of project data by the folder name. The folder path is then used to delete the folder.   
-![Delete Folder from ICA Storage](public/assets/images/delete_folder_by_path_script.png "Delete Folder from ICA Storage")  
 
 ## Single File Upload-Analyse-Download Process 
 The entire process is to be run with `bash` commands in a Nextflow pipeline (not to be confused with the Nextflow pipeline that resides in the ICA and that will perform the analysis).   
@@ -407,6 +406,7 @@ The bash script for the full process of uploading a multiple files, analysing ea
 The Nextflow pipeline that implements the aforementioned bash scripts can be found over [here](pipelines/nextflow/single_file_upload/main.nf). The pipeline can be run with the command (inside the directory containing `main.nf` and `params.json`):
 ```bash
 nextflow run main.nf -params-file params.json
+nextflow run main.small.test.nf -params-file params.json
 ```   
 
 This pipeline is still undergoing tests.   
