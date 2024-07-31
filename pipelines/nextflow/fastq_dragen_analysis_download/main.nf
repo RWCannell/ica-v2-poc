@@ -26,8 +26,11 @@ process checkAnalysisStatus {
     path "data.txt", emit: dataFile
 
     script:
+    def dataFile = "data.txt" 
     """
     #!/bin/bash
+
+    touch ${dataFile}
 
     analysis_status_check_count=0
     analysis_status="REQUESTED"
