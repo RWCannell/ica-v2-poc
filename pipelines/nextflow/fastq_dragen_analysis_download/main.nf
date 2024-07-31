@@ -40,6 +40,8 @@ process checkAnalysisStatus {
     analysis_status_check_count=0
     analysis_status="REQUESTED"
 
+    while_loop_completion_message="Exiting WHILE loop. Moving on to 'downloadData' process..."
+
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
     printf "[\${timeStamp}]: Checking status of analysis with id '${analysisId}' every ${analysisStatusCheckInterval} seconds, until status is 'SUCCEEDED'...\n"
     while true;
@@ -54,26 +56,31 @@ process checkAnalysisStatus {
         if [[ \${analysis_status} == "SUCCEEDED" ]]; then
             printf "Analysis SUCCEEDED\n"
             printf "analysisStatus:SUCCEEDED\n" >> ${dataFile}
+            printf "\${while_loop_completion_message}\n"
             break;
 
         elif [[ \${analysis_status} == "FAILED" ]]; then
             printf "Analysis FAILED \n"
             printf "analysisStatus:FAILED\n" >> ${dataFile}
+            printf "\${while_loop_completion_message}\n"
             break;
 
         elif [[ \${analysis_status} == "FAILED_FINAL" ]]; then
             printf "Analysis FAILED_FINAL\n"
             printf "analysisStatus:FAILED_FINAL\n" >> ${dataFile}
+            printf "\${while_loop_completion_message}\n"
             break;
 
         elif [[ \${analysis_status} == "ABORTED" ]]; then
             printf "Analysis ABORTED\n"
             printf "analysisStatus:ABORTED\n" >> ${dataFile}
+            printf "\${while_loop_completion_message}\n"
             break;
 
         elif [[ \${analysis_status_check_count} -gt ${analysisStatusCheckLimit} ]]; then
             printf "Analysis status has been checked more than ${analysisStatusCheckLimit} times. Stopping...\n"
             printf "analysisStatus:TIMEOUT\n" >> ${dataFile}
+            printf "\${while_loop_completion_message}\n"
             break;
 
         else
@@ -137,7 +144,7 @@ process deleteData {
         timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
         printf "[\${timeStamp}]: Deleting uploaded read 1 file with ID '\${read_1_file_id}'...\n"
         icav2 projectdata delete \${read_1_file_id}
-        
+
         timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
         printf "[\${timeStamp}]: Deleting uploaded read 2 file with ID '\${read_2_file_id}'...\n"
         icav2 projectdata delete \${read_2_file_id}
