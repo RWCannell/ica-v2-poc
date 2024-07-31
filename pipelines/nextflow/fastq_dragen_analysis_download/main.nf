@@ -46,8 +46,6 @@ process checkAnalysisStatus {
     do
         ((analysis_status_check_count +=1 ))
         updated_analysis_response=\$(icav2 projectanalyses get ${analysisId})
-
-        printf "Checking status of analysis with id '${analysisId}'...\n"
         analysis_status=\$(echo \${updated_analysis_response} | jq -r ".status")
 
         timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
@@ -114,6 +112,8 @@ process downloadAnalysisOutput {
     printf "[\${timeStamp}]: Downloading analysis output folder with ID '\${analysis_output_folder_id}' to '${localDownloadPath}'...\n"
 
     icav2 projectdata download \${analysis_output_folder_id} ${localDownloadPath}
+
+    printf "downloadComplete:true\n" >> ${dataFile}
     """
 }
 
@@ -131,19 +131,21 @@ process deleteData {
     read_1_file_id=\$(cat ${dataFile} | grep -o 'read1:.*' | cut -f2- -d:)
     read_2_file_id=\$(cat ${dataFile} | grep -o 'read2:.*' | cut -f2- -d:)
     analysis_output_folder_id=\$(cat ${dataFile} | grep -o 'outputFolderId:.*' | cut -f2- -d:)
+    download_complete=\$(cat ${dataFile} | grep -o 'downloadComplete:.*' | cut -f2- -d:)
 
-    timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
-    printf "[\${timeStamp}]: Deleting uploaded read 1 file with ID '\${read_1_file_id}'...\n"
-    icav2 projectdata delete \${read_1_file_id}
+    if [ "\${download_complete}" = true ]; then  
+        timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
+        printf "[\${timeStamp}]: Deleting uploaded read 1 file with ID '\${read_1_file_id}'...\n"
+        icav2 projectdata delete \${read_1_file_id}
+        
+        timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
+        printf "[\${timeStamp}]: Deleting uploaded read 2 file with ID '\${read_2_file_id}'...\n"
+        icav2 projectdata delete \${read_2_file_id}
 
-    timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
-    printf "[\${timeStamp}]: Deleting uploaded read 2 file with ID '\${read_2_file_id}'...\n"
-    icav2 projectdata delete \${read_2_file_id}
-
-    timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
-    printf "[\${timeStamp}]: Deleting analysis output folder with ID '\${analysis_output_folder_id}'...\n"
-    icav2 projectdata delete \${analysis_output_folder_id}
-
+        timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
+        printf "[\${timeStamp}]: Deleting analysis output folder with ID '\${analysis_output_folder_id}'...\n"
+        icav2 projectdata delete \${analysis_output_folder_id}
+    fi
     printf "Uploaded file and analysis output folder successfully deleted.\n"
     """
 }
