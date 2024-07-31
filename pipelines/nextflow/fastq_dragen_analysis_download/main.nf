@@ -8,6 +8,8 @@ storageSize = params.storageSize
 fileUploadStatusCheckInterval = params.fileUploadStatusCheckInterval
 analysisStatusCheckInterval = params.analysisStatusCheckInterval
 analysisStatusCheckLimit = params.analysisStatusCheckLimit
+read1FileId = params.read1FileId
+read2FileId = params.read2FileId
 analysisId = params.analysisId
 readsFileUploadPath = params.readsFileUploadPath
 referenceFileId = params.referenceFileId
@@ -31,6 +33,9 @@ process checkAnalysisStatus {
     #!/bin/bash
 
     touch ${dataFile}
+    printf "read1:${read1FileId}\n" >> ${dataFile}
+    printf "read2:${read2FileId}\n" >> ${dataFile}
+    printf "analysisId:${analysisId}\n" >> ${dataFile}
 
     analysis_status_check_count=0
     analysis_status="REQUESTED"
@@ -123,7 +128,6 @@ process deleteData {
 
     script:
     """
-    sample_id=\$(cat ${dataFile} | grep -o 'sampleId:.*' | cut -f2- -d:)
     read_1_file_id=\$(cat ${dataFile} | grep -o 'read1:.*' | cut -f2- -d:)
     read_2_file_id=\$(cat ${dataFile} | grep -o 'read2:.*' | cut -f2- -d:)
     analysis_output_folder_id=\$(cat ${dataFile} | grep -o 'outputFolderId:.*' | cut -f2- -d:)
