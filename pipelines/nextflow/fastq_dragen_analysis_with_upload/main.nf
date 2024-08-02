@@ -17,7 +17,6 @@ analysisStatusCheckLimit = params.analysisStatusCheckLimit
 readsFileUploadPath = params.readsFileUploadPath
 referenceFileId = params.referenceFileId
 readsPairFilesUploadPath = params.readsPairFilesUploadPath
-referenceFileUploadPath = params.referenceFileUploadPath
 localDownloadPath = params.localDownloadPath
 
 process uploadFastqFilePairs {
@@ -320,7 +319,6 @@ process deleteData {
 
 workflow {
     fastqFilePairs = Channel.fromFilePairs(readsPairFilesUploadPath, checkIfExists:true)
-    referenceFilePath = Channel.fromPath(params.referenceFileUploadPath, checkIfExists: true)
 
     uploadFastqFilePairs(fastqFilePairs, params.projectId)
     getReferenceFile(uploadFastqFilePairs.out.dataFile)
