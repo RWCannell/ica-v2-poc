@@ -40,7 +40,7 @@ process checkAnalysisStatus {
     analysis_status_check_count=0
     analysis_status="REQUESTED"
 
-    while_loop_completion_message="Exiting WHILE loop. Moving on to 'downloadData' process..."
+    while_loop_completion_message="Exiting WHILE loop. Moving on to 'downloadAnalysisOutput' process..."
 
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
     printf "[\${timeStamp}]: Checking status of analysis with id '${analysisId}' every ${analysisStatusCheckInterval} seconds, until status is 'SUCCEEDED'...\n"
