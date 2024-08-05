@@ -1,4 +1,0 @@
-[monitor-2024-08-05 12:31:41.429520+00:00: INFO] Debugging Service started with database /ces/scheduler/run/37dfe2e5-5c9f-4b64-b218-89505c822f37/data/.ica/user/debugging-commands.db, now listening for incoming debugging commands...
-[1pre-2024-08-05 12:32:22.835857+00:00: INFO] Disabled Command Manager created with database /ces/scheduler/run/37dfe2e5-5c9f-4b64-b218-89505c822f37/data/.ica/user/debugging-commands.db and options (None, None, False).
-[2uwf-2024-08-05 12:35:22.768239+00:00: INFO] Disabled Command Manager created with database /ces/scheduler/run/37dfe2e5-5c9f-4b64-b218-89505c822f37/data/.ica/user/debugging-commands.db and options (None, None, False).
-[3post-2024-08-05 12:38:20.668321+00:00: INFO] Disabled Command Manager created with database /ces/scheduler/run/37dfe2e5-5c9f-4b64-b218-89505c822f37/data/.ica/user/debugging-commands.db and options (None, None, False).
