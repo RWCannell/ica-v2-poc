@@ -1,5 +1,6 @@
 .DS_Store
 .env
+public/assets/ica_data_downloads/*
 public/assets/ica_data_uploads/*
 public/assets/ica_data_uploads/fasta
 public/assets/ica_data_uploads/fastq
