@@ -10,7 +10,6 @@ analysisStatusCheckInterval = params.analysisStatusCheckInterval
 analysisStatusCheckLimit = params.analysisStatusCheckLimit
 read1FileId = params.read1FileId
 read2FileId = params.read2FileId
-fastaFileId = params.fastaFileId
 analysisId = params.analysisId
 readsFileUploadPath = params.readsFileUploadPath
 referenceFileId = params.referenceFileId
@@ -36,7 +35,6 @@ process checkAnalysisStatus {
     touch ${dataFile}
     printf "read1:${read1FileId}\n" >> ${dataFile}
     printf "read2:${read2FileId}\n" >> ${dataFile}
-    printf "fasta:${fastaFileId}\n" >> ${dataFile}
     printf "analysisId:${analysisId}\n" >> ${dataFile}
 
     analysis_status_check_count=0
@@ -139,14 +137,16 @@ process deleteData {
     """
     read_1_file_id=\$(cat ${dataFile} | grep -o 'read1:.*' | cut -f2- -d:)
     read_2_file_id=\$(cat ${dataFile} | grep -o 'read2:.*' | cut -f2- -d:)
-    fasta_file_id=\$(cat ${dataFile} | grep -o 'fasta:.*' | cut -f2- -d:)
     analysis_output_folder_id=\$(cat ${dataFile} | grep -o 'outputFolderId:.*' | cut -f2- -d:)
     download_complete=\$(cat ${dataFile} | grep -o 'downloadComplete:.*' | cut -f2- -d:)
 
     if [ "\${download_complete}" = true ]; then  
         timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
-        printf "[\${timeStamp}]: Deleting uploaded FASTA file with ID '\${fasta_file_id}'...\n"
-        icav2 projectdata delete \${fasta_file_id}
+        printf "[\${timeStamp}]: Deleting uploaded read 1 file with ID '\${read_1_file_id}'...\n"
+        icav2 projectdata delete \${read_1_file_id}
+        timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
+        printf "[\${timeStamp}]: Deleting uploaded read 2 file with ID '\${read_2_file_id}'...\n"
+        icav2 projectdata delete \${read_2_file_id}
 
         timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
         printf "[\${timeStamp}]: Deleting analysis output folder with ID '\${analysis_output_folder_id}'...\n"
