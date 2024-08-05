@@ -27,14 +27,14 @@ process uploadFile {
     #!/bin/bash
     time_stamp=\$(date +"%Y-%m-%d %H:%M:%S")
     file_id=""
-    ica_upload_path="/fasta/$sampleId/"
+    ica_upload_path="/fasta/${sampleId}/"
 
     upload_response_file="file_upload_response.txt"
     touch \${upload_response_file}
 
     printf "[\${time_stamp}]: "
     printf "Uploading file '${sampleId}'... \n"
-    file_upload_response=\$(icav2 projectdata upload ${sampleId} \${ica_upload_path} --project-id ${projectId})
+    file_upload_response=\$(icav2 projectdata upload ${filePath} \${ica_upload_path} --project-id ${projectId})
     echo "\${file_upload_response}" > \${upload_response_file}
 
     # id of file starts with 'fil.'
@@ -45,7 +45,7 @@ process uploadFile {
     printf "[\${time_stamp}]: "
     printf "Writing file data to existing data file...\n"
 
-    printf "sampleId:${sampleId}\n" >> \${data_file}
+    printf "sampleId:${sampleId}\n" >> ${dataFile}
     printf "in:\${file_id}\n" >> ${dataFile}
     """
 }
@@ -95,14 +95,13 @@ process checkAnalysisStatus {
     debug true
     
     input:
-    path(analysisResponse)
+    path(dataFile)
     val(analysisStatusCheckInterval)
 
     output:
     path "data.txt", emit: dataFile
 
     script:
-    analysisOutputFolderId = ""
     """
     #!/bin/bash
 
@@ -228,5 +227,5 @@ workflow {
 
     downloadAnalysisOutput(checkAnalysisStatus.out.dataFile, params.localDownloadPath)
 
-    deleteData(downloadAnalysisOutput.out.dataFile, downloadAnalysisOutput.out.outputFolderId)
+    deleteData(downloadAnalysisOutput.out.dataFile)
 }

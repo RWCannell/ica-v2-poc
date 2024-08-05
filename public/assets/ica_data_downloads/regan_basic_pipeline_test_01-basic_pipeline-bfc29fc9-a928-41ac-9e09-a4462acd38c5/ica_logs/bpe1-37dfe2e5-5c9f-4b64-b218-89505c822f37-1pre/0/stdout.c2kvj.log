@@ -1,0 +1,8 @@
+2024-08-05 12:32:23.403764 [NOTICE] [Context.cc:310] Downloading 1 item(s)
+2024-08-05 12:32:23.405215 [NOTICE] [Context.cc:310] Downloading 1 item(s)
+2024-08-05 12:32:23.407660 [NOTICE] [Context.cc:310] Downloading 1 item(s)
+2024-08-05 12:32:23.409387 [NOTICE] [Context.cc:310] Downloading 1 item(s)
+2024-08-05 12:32:23.456334 [NOTICE] [RequestGroup.cc:1213] Download complete: //ces/scheduler/run/37dfe2e5-5c9f-4b64-b218-89505c822f37/data/defaultNextflow.config
+2024-08-05 12:32:23.461713 [NOTICE] [RequestGroup.cc:1213] Download complete: //ces/scheduler/run/37dfe2e5-5c9f-4b64-b218-89505c822f37/data/userNextflow.config
+2024-08-05 12:32:23.486150 [NOTICE] [RequestGroup.cc:1213] Download complete: //ces/scheduler/run/37dfe2e5-5c9f-4b64-b218-89505c822f37/data/nextflow.config
+2024-08-05 12:32:23.491749 [NOTICE] [RequestGroup.cc:1213] Download complete: //ces/scheduler/run/37dfe2e5-5c9f-4b64-b218-89505c822f37/data/NZ_JH417860.fa

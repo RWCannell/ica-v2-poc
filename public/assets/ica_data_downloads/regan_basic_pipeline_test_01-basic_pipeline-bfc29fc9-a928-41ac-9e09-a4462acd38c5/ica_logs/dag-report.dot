@@ -1,0 +1,10 @@
+digraph "dagreport" {
+p0 [shape=point,label="",fixedsize=true,width=0.1];
+p1 [label="splitSequences"];
+p0 -> p1 [label="input.fa"];
+
+p1 [label="splitSequences"];
+p2 [label="reverse"];
+p1 -> p2 [label="records"];
+
+}

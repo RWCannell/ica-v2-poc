@@ -1,0 +1,7 @@
+task_id	hash	native_id	process	tag	name	status	exit	module	container	cpus	time	disk	memory	attempt	submit	start	complete	duration	realtime	queue	%cpu	%mem	rss	vmem	peak_rss	peak_vmem	rchar	wchar	syscr	syscw	read_bytes	write_bytes	vol_ctxt	inv_ctxt	env	workdir	script	scratch	error_action
+1	0a/7658e7	nf-0a7658e740cb5996b950afd420d3bf56	splitSequences	-	splitSequences	COMPLETED	0	-	public.ecr.aws/lts/ubuntu:22.04	1	-	-	1 MB	1	2024-08-05 12:35:34.724	2024-08-05 12:37:52.000	2024-08-05 12:37:52.000	2m 17s	63ms	-	14.3%	0.0%	4.3 MB	7.1 MB	4.3 MB	7.1 MB	69.5 KB	11.8 KB	161	40	16 KB	108 KB	66	19	-	/ces/scheduler/run/37dfe2e5-5c9f-4b64-b218-89505c822f37/data/work/0a/7658e740cb5996b950afd420d3bf56	
+    csplit input.fa '%^>%' '/^>/' '{*}' -f seq_
+    	-	-
+2	63/dca618	nf-63dca618a2dfa3002e071fc1799def83	reverse	-	reverse	COMPLETED	0	-	public.ecr.aws/lts/ubuntu:22.04	1	-	-	1 MB	1	2024-08-05 12:37:58.221	2024-08-05 12:38:01.000	2024-08-05 12:38:01.000	2.8s	69ms	-	26.7%	0.0%	5.5 MB	13.7 MB	5.5 MB	13.7 MB	85.3 KB	23.1 KB	250	774	112 KB	12 KB	76	55	-	/ces/scheduler/run/37dfe2e5-5c9f-4b64-b218-89505c822f37/data/work/63/dca618a2dfa3002e071fc1799def83	
+    cat seq_00 seq_01 seq_02 seq_03 seq_04 seq_05 seq_06 seq_07 seq_08 seq_09 seq_10 seq_11 seq_12 seq_13 seq_14 seq_15 seq_16 seq_17 seq_18 seq_19 seq_20 seq_21 seq_22 seq_23 seq_24 seq_25 seq_26 | rev > test.txt
+    	-	-

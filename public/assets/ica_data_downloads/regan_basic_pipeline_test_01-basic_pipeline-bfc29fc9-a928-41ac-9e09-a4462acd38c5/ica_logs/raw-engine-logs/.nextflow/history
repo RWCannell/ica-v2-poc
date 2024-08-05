@@ -1,0 +1,1 @@
+2024-08-05 12:35:31	2m 33s	adoring_swirles	OK	e35d401c2f5312a24e9199158f620485	e0732d84-0a25-4154-a116-f24e0f148420	/usr/local/bin/nextflow-20.10.0 -c defaultNextflow.config -c userNextflow.config -c nextflow.config run main.nf -params-file input.json -resume -with-weblog 'http://127.0.0.1:8181'
