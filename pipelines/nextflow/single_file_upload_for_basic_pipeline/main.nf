@@ -6,8 +6,8 @@ pipelineId = params.pipelineId
 pipelineCode = params.pipelineCode
 userReference = params.userReference
 storageSize = params.storageSize
-fileUploadStatusCheckInterval = params.fileUploadStatusCheckInterval
 analysisStatusCheckInterval = params.analysisStatusCheckInterval
+analysisStatusCheckLimit = params.analysisStatusCheckLimit
 localUploadPath = params.localUploadPath
 localDownloadPath = params.localDownloadPath
 
@@ -18,72 +18,35 @@ process uploadFile {
     val(projectId)
 
     output:
-    path "${fileName}.txt", emit: fileUploadResponse
+    path "data.txt", emit: dataFile
 
     script:
-    fileName = filePath.baseName
+    sampleId = filePath.baseName
+    dataFile="data.txt"
     """
     #!/bin/bash
-    timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
-    echo "[\${timeStamp}]: Uploading file '${fileName}' to project with id '${projectId}'..."
+    time_stamp=\$(date +"%Y-%m-%d %H:%M:%S")
+    file_id=""
+    ica_upload_path="/fasta/$sampleId/"
 
-    touch ${fileName}.txt
+    upload_response_file="file_upload_response.txt"
+    touch \${upload_response_file}
 
-    fileUploadResponse=\$(icav2 projectdata upload ${filePath} --project-id ${projectId})
+    printf "[\${time_stamp}]: "
+    printf "Uploading file '${sampleId}'... \n"
+    file_upload_response=\$(icav2 projectdata upload ${sampleId} \${ica_upload_path} --project-id ${projectId})
+    echo "\${file_upload_response}" > \${upload_response_file}
 
-    echo "Successfully uploaded file '${fileName}' to project with id '${projectId}'."
+    # id of file starts with 'fil.'
+    file_id=\$(cat \${upload_response_file} | grep -i '\"id\": \"fil' | grep -o 'fil.[^\"]*')
 
-    echo "\${fileUploadResponse}" > ${fileName}.txt
-    """
-}
+    touch ${dataFile}
 
-process constructFileReference {
-    debug true
-    
-    input:
-    path(fileUploadResponse)
-    val(analysisDataCode)
+    printf "[\${time_stamp}]: "
+    printf "Writing file data to existing data file...\n"
 
-    output:
-    path "fileReference.txt", emit: fileRef
-
-    script:
-    fileReference = ""
-    """
-    #!/bin/bash
-    
-    fileUploadStatusCheckCount=0
-    fileUploadStatusCheckLimit=10
-    fileUploadStatus="PARTIAL"
-
-    fileId=\$(cat ${fileUploadResponse} | grep -i '\"id\": \"fil' | grep -o 'fil.[^\"]*')
-
-    timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
-    echo "[\${timeStamp}]: Checking status of uploaded file with id '\${fileId}' every ${fileUploadStatusCheckInterval} seconds, until status is 'AVAILABLE'..."
-    while true;
-    do
-        ((\${fileUploadStatusCheckCount}+=1))
-        uploadedFileResponse=\$(icav2 projectdata get \${fileId})
-
-        echo "Checking status of file with id '\${fileId}'..."
-        fileUploadStatus=\$(echo \${uploadedFileResponse} | jq -r ".details.status")
-
-        echo "Current status of uploaded file is '\${fileUploadStatus}'."
-        if [[ \${fileUploadStatus} == "AVAILABLE" ]]; then
-            echo "Uploaded file is AVAILABLE"
-            fileReference="${analysisDataCode}:\${fileId}"
-            echo "File Reference:\${fileReference}"
-            touch fileReference.txt
-            echo "\${fileReference}" > fileReference.txt
-            break;
-        elif [[ \${fileUploadStatusCheckCount} -gt \${fileUploadStatusCheckLimit} ]]; then
-            echo "Uploaded file status has been checked more than \${fileUploadStatusCheckLimit} times. Stopping..."
-            break;
-        else
-            echo "Uploaded file is still not AVAILABLE. Checking again..."
-        fi
-        sleep ${fileUploadStatusCheckInterval};
-    done
+    printf "sampleId:${sampleId}\n" >> \${data_file}
+    printf "in:\${file_id}\n" >> ${dataFile}
     """
 }
 
@@ -91,30 +54,40 @@ process startAnalysis {
     debug true
     
     input:
-    path(fileRef)
+    path(dataFile)
 
     output:
-    path "analysisResponse.txt", emit: analysisResponse
+    path "data.txt", emit: dataFile
 
     script:
-    analysisResponse = ""
-
     """
     #!/bin/bash
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
     echo "[\${timeStamp}]: Starting Nextflow analysis..."
 
-    fileReference=\$(cat ${fileRef})
+    sample_id=\$(cat ${dataFile} | grep -o 'sampleId:.*' | cut -f2- -d:)
+    file_id=\$(cat ${dataFile} | grep -o 'in:.*' | cut -f2- -d:)
+    file_analysis_code=\$(cat ${dataFile} | grep -E "in")
 
-    echo "File Ref: \${fileReference}"
-
-    analysisResponse=\$(icav2 projectpipelines start nextflow ${pipelineId} \
+    analysis_response=\$(icav2 projectpipelines start nextflow ${pipelineId} \
         --user-reference ${userReference} \
         --project-id ${projectId} \
         --storage-size ${storageSize} \
-        --input \${fileReference})
+        --input \${file_analysis_code})
+    
+    analysis_response_file="analysis_response.txt"
+    touch \${analysis_response_file}
+    echo "\${analysis_response}" > \${analysis_response_file}
 
-    echo "\${analysisResponse}" > analysisResponse.txt
+    analysis_id=\$(cat \${analysis_response_file} | jq -r ".id")
+    analysis_ref=\$(cat \${analysis_response_file} | jq -r ".reference")
+
+    printf "[\${time_stamp}]: "
+    printf "Writing id of analysis '\${analysis_ref}' to existing data file...\n"
+    printf "analysisId:\${analysis_id}\n" >> ${dataFile}
+
+    printf "Writing reference of analysis '\${analysis_ref}' to existing data file...\n"
+    printf "analysisRef:\${analysis_ref}\n" >> ${dataFile}
     """
 }
 
@@ -126,62 +99,59 @@ process checkAnalysisStatus {
     val(analysisStatusCheckInterval)
 
     output:
-    path "analysisOutputFolderId.txt", emit: analysisOutputFolderId
+    path "data.txt", emit: dataFile
 
     script:
     analysisOutputFolderId = ""
     """
     #!/bin/bash
 
-    analysisStatusCheckCount=0
-    analysisStatusCheckLimit=10
-    analysisStatus="REQUESTED"
+    analysis_status_check_count=0
+    analysis_status="REQUESTED"
 
-    analysisId=\$(cat ${analysisResponse} | jq -r ".id")
-    analysisRef=\$(cat ${analysisResponse} | jq -r ".reference")
+    analysis_id=\$(cat ${dataFile} | grep -o 'analysisId:.*' | cut -f2- -d:)
+    analysis_ref=\$(cat ${dataFile} | grep -o 'analysisRef:.*' | cut -f2- -d:)
     
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
-    echo "[\${timeStamp}]: Checking status of analysis with id '\${analysisId}' every ${analysisStatusCheckInterval} seconds, until status is 'SUCCEEDED'..."
+    printf "[\${timeStamp}]: Checking status of analysis with id '\${analysis_id}' every ${analysisStatusCheckInterval} seconds, until status is 'SUCCEEDED'...\n"
     while true;
     do
-        ((\${StatusCheckCount}+=1))
-        updatedAnalysisResponse=\$(icav2 projectanalyses get \${analysisId})
+        ((analysis_status_check_count +=1 ))
+        updated_analysis_response=\$(icav2 projectanalyses get \${analysis_id})
 
-        echo "Checking status of analysis with reference '\${analysisRef}'..."
-        analysisStatus=\$(echo \${updatedAnalysisResponse} | jq -r ".status")
+        printf "Checking status of analysis with reference '\${analysis_ref}'...\n"
+        analysis_status=\$(echo \${updated_analysis_response} | jq -r ".status")
 
         timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
-        echo "[\${timeStamp}]: Current status of analysis is '\${analysisStatus}'..."
+        printf "[\${timeStamp}]: Current status of analysis is '\${analysis_status}'...\n"
 
-        if [[ \${analysisStatus} == "SUCCEEDED" ]]; then
-            echo "Analysis SUCCEEDED"
-            echo "Fetching analysis output response..."
-            analysisOutputResponse=\$(icav2 projectanalyses output \$analysisId)
-            analysisOutputFolderId=\$(echo \${analysisOutputResponse} | jq -r ".items[].data[].dataId")
-            echo "Analysis output folder ID is '\${analysisOutputFolderId}'"
-
-            touch analysisOutputFolderId.txt
-            echo "\${analysisOutputFolderId}" > analysisOutputFolderId.txt
+        if [[ \${analysis_status} == "SUCCEEDED" ]]; then
+            printf "Analysis SUCCEEDED\n"
+            printf "analysisStatus:SUCCEEDED\n" >> ${dataFile}
             break;
 
-        elif [[ \${analysisStatus} == "FAILED" ]]; then
-            echo "Analysis FAILED \n"
+        elif [[ \${analysis_status} == "FAILED" ]]; then
+            printf "Analysis FAILED \n"
+            printf "analysisStatus:FAILED\n" >> ${dataFile}
             break;
 
-        elif [[ \${analysisStatus} == "FAILED_FINAL" ]]; then
-            echo "Analysis FAILED_FINAL"
+        elif [[ \${analysis_status} == "FAILED_FINAL" ]]; then
+            printf "Analysis FAILED_FINAL\n"
+            printf "analysisStatus:FAILED_FINAL\n" >> ${dataFile}
             break;
 
-        elif [[ \${analysisStatus} == "ABORTED" ]]; then
-            echo "Analysis ABORTED"
+        elif [[ \${analysis_status} == "ABORTED" ]]; then
+            printf "Analysis ABORTED\n"
+            printf "analysisStatus:ABORTED\n" >> ${dataFile}
             break;
 
-        elif [[ \${analysisStatusCheckCount} -gt \${analysisStatusCheckLimit} ]]; then
-            echo "Analysis status has been checked more than \${analysisStatusCheckLimit} times. Stopping..."
+        elif [[ \${analysis_status_check_count} -gt ${analysisStatusCheckLimit} ]]; then
+            printf "Analysis status has been checked more than ${analysisStatusCheckLimit} times. Stopping...\n"
+            printf "analysisStatus:TIMEOUT\n" >> ${dataFile}
             break;
 
         else
-            echo "Analysis still in progress..."
+            printf "Analysis still in progress...\n"
         fi
 
         sleep ${analysisStatusCheckInterval};
@@ -193,26 +163,29 @@ process downloadAnalysisOutput {
     debug true
     
     input:
-    path(analysisOutputFolderId)
+    path(dataFile)
     val(localDownloadPath)
 
     output:
-    path "outputFolderId.txt", emit: outputFolderId
+    path "data.txt", emit: dataFile
 
     script:
-    outputFolderId = ""
     """
     #!/bin/bash
+    analysis_id=\$(cat ${dataFile} | grep -o 'analysisId:.*' | cut -f2- -d:)
 
-    outputFolderId=\$(cat ${analysisOutputFolderId})
+    printf "[\${time_stamp}]: "
+    printf "Fetching analysis output response...\n"
+    analysis_output_response=\$(icav2 projectanalyses output \${analysis_id})
+    analysis_output_folder_id=\$(echo \${analysis_output_response} | jq -r ".items[].data[].dataId")
+    printf "Analysis output folder ID is '\${analysis_output_folder_id}'\n"
+    printf "Writing id of analysis output folder to existing data file...\n"
+    printf "outputFolderId:\${analysis_output_folder_id}\n" >> ${dataFile}
 
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
-    echo "[\${timeStamp}]: Downloading analysis output folder with ID '\${outputFolderId}' to '${localDownloadPath}'..."
+    printf "[\${timeStamp}]: Downloading analysis output folder with ID '\${analysis_output_folder_id}' to '${localDownloadPath}'...\n"
 
-    icav2 projectdata download \${outputFolderId} ${localDownloadPath}
-
-    touch outputFolderId.txt
-    echo "\${outputFolderId}" > outputFolderId.txt
+    icav2 projectdata download \${analysis_output_folder_id} ${localDownloadPath}
     """
 }
 
@@ -220,27 +193,28 @@ process deleteData {
     debug true
 
     input:
-    path(fileUploadResponse)
-    path(outputFolderId)
+    path(dataFile)
 
     output:
     stdout
 
     script:
     """
-    fileId=\$(cat ${fileUploadResponse} | grep -i '\"id\": \"fil' | grep -o 'fil.[^\"]*')
+    sample_id=\$(cat ${dataFile} | grep -o 'sampleId:.*' | cut -f2- -d:)
+    file_id=\$(cat ${dataFile} | grep -o 'in:.*' | cut -f2- -d:)
+    analysis_output_folder_id=\$(cat ${dataFile} | grep -o 'outputFolderId:.*' | cut -f2- -d:)
 
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
-    echo "[\${timeStamp}]: Deleting uploaded file with ID '\${fileId}'..."
-    icav2 projectdata delete \${fileId}
+    printf "[\${timeStamp}]: Deleting uploaded file with ID '\${file_id}'...\n"
+    icav2 projectdata delete \${file_id}
 
-    folderId=\$(cat ${outputFolderId})
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
-    echo "[\${timeStamp}]: Deleting analysis output folder with ID '\${folderId}'..."
-    icav2 projectdata delete \${folderId}
+    printf "[\${timeStamp}]: Deleting analysis output folder with ID '\${analysis_output_folder_id}'...\n"
+    icav2 projectdata delete \${analysis_output_folder_id}
 
-    echo "Uploaded file and analysis output folder successfully deleted."
+    printf "Uploaded file and analysis output folder successfully deleted.\n"
     """
+
 }
 
 workflow {
@@ -248,13 +222,11 @@ workflow {
 
     uploadFile(filePath, params.projectId)
     
-    constructFileReference(uploadFile.out.fileUploadResponse.view(), params.analysisDataCode)
+    startAnalysis(uploadFile.out.dataFile)
 
-    startAnalysis(constructFileReference.out.fileRef)
+    checkAnalysisStatus(startAnalysis.out.dataFile, params.analysisStatusCheckInterval)
 
-    checkAnalysisStatus(startAnalysis.out.analysisResponse, params.analysisStatusCheckInterval)
+    downloadAnalysisOutput(checkAnalysisStatus.out.dataFile, params.localDownloadPath)
 
-    downloadAnalysisOutput(checkAnalysisStatus.out.analysisOutputFolderId, params.localDownloadPath)
-
-    deleteData(uploadFile.out.fileUploadResponse.view(), downloadAnalysisOutput.out.outputFolderId)
+    deleteData(downloadAnalysisOutput.out.dataFile, downloadAnalysisOutput.out.outputFolderId)
 }
