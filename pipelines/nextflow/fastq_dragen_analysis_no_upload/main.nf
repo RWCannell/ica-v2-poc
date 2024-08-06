@@ -263,7 +263,7 @@ process deleteData {
 workflow {
     checkFileStatus()
     startAnalysis(checkFileStatus.out.dataFile)
-    checkAnalysisStatus(startAnalysis.out.analysisResponse, params.analysisStatusCheckInterval)
-    downloadAnalysisOutput(checkAnalysisStatus.out.analysisOutputFolderId, params.localDownloadPath)
-    deleteData(uploadFile.out.fileUploadResponse.view(), downloadAnalysisOutput.out.outputFolderId)
+    checkAnalysisStatus(startAnalysis.out.dataFile, params.analysisStatusCheckInterval)
+    downloadAnalysisOutput(checkAnalysisStatus.out.dataFile, params.localDownloadPath)
+    deleteData(downloadAnalysisOutput.out.dataFile)
 }
