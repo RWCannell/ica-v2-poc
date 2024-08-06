@@ -10,13 +10,12 @@
     "referenceAnalysisDataCode": "ref_tar",
     "referenceDirectory": "/scratch/reference",
     "intermediateResultsDirectory": "/scratch",
-    "hashTableConfigFile": "/scratch/reference/hash_table.cfg",
     "fileUploadStatusCheckInterval": 120,
     "analysisStatusCheckInterval": 300,
     "analysisStatusCheckLimit": 50,
     "sampleId": "ERR1019052",
-    "read1FileId": "fil.7268e6810bb24d6b978d08dcaaee06d9",
-    "read2FileId": "fil.f1e95d34d124472f19bd08dcaac709b2",
+    "read1FileId": "fil.b1071eec05c74357097308dcb50024bc",
+    "read2FileId": "fil.6ab632f0e10f432ad8b308dc954b73dc",
     "referenceFileId": "fil.2e3fd8d802ee4963da2208dc484ea8f0",
     "localDownloadPath": "./ica_data_downloads/"
 }

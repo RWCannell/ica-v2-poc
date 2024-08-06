@@ -8,7 +8,6 @@ pipelineId = params.pipelineId
 pipelineCode = params.pipelineCode
 userReference = params.userReference
 storageSize = params.storageSize
-hashTableConfigFile = params.hashTableConfigFile
 referenceDirectory = params.referenceDirectory
 intermediateResultsDirectory = params.intermediateResultsDirectory
 fileUploadStatusCheckInterval = params.fileUploadStatusCheckInterval
