@@ -17,12 +17,8 @@ readsPairFilesUploadPath = params.readsPairFilesUploadPath
 referenceFileUploadPath = params.referenceFileUploadPath
 localDownloadPath = params.localDownloadPath
 
-process checkAnalysisStatus {
+process createDataFile {
     debug true
-    
-    input:
-    val(analysisId)
-    val(analysisStatusCheckInterval)
 
     output:
     path "data.txt", emit: dataFile
@@ -31,23 +27,44 @@ process checkAnalysisStatus {
     def dataFile = "data.txt" 
     """
     #!/bin/bash
-
+    timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
+    printf "[\${timeStamp}]: Creating data file...\n"
+    
     touch ${dataFile}
+
     printf "read1:${read1FileId}\n" >> ${dataFile}
     printf "read2:${read2FileId}\n" >> ${dataFile}
     printf "analysisId:${analysisId}\n" >> ${dataFile}
+    """
+
+}
+process checkAnalysisStatus {
+    debug true
+    
+    input:
+    path(dataFile)
+
+    output:
+    path "data.txt", emit: dataFile
+
+    script:
+    """
+    #!/bin/bash
 
     analysis_status_check_count=0
     analysis_status="REQUESTED"
 
+    analysis_id=\$(cat ${dataFile} | grep -o 'analysisId:.*' | cut -f2- -d:)
+    echo "\${analysis_id}"
     while_loop_completion_message="Exiting WHILE loop. Moving on to 'downloadAnalysisOutput' process..."
 
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
-    printf "[\${timeStamp}]: Checking status of analysis with id '${analysisId}' every ${analysisStatusCheckInterval} seconds, until status is 'SUCCEEDED'...\n"
+    printf "[\${timeStamp}]: Checking status of analysis with id '\${analysis_id}' every ${analysisStatusCheckInterval} seconds, until status is 'SUCCEEDED'...\n"
+
     while true;
     do
         ((analysis_status_check_count +=1 ))
-        updated_analysis_response=\$(icav2 projectanalyses get ${analysisId})
+        updated_analysis_response=\$(icav2 projectanalyses get \${analysis_id})
         analysis_status=\$(echo \${updated_analysis_response} | jq -r ".status")
 
         timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
@@ -55,32 +72,23 @@ process checkAnalysisStatus {
 
         if [[ \${analysis_status} == "SUCCEEDED" ]]; then
             printf "Analysis SUCCEEDED\n"
-            printf "analysisStatus:SUCCEEDED\n" >> ${dataFile}
-            printf "\${while_loop_completion_message}\n"
             break;
 
         elif [[ \${analysis_status} == "FAILED" ]]; then
             printf "Analysis FAILED \n"
-            printf "analysisStatus:FAILED\n" >> ${dataFile}
-            printf "\${while_loop_completion_message}\n"
             break;
 
         elif [[ \${analysis_status} == "FAILED_FINAL" ]]; then
             printf "Analysis FAILED_FINAL\n"
-            printf "analysisStatus:FAILED_FINAL\n" >> ${dataFile}
-            printf "\${while_loop_completion_message}\n"
             break;
 
         elif [[ \${analysis_status} == "ABORTED" ]]; then
             printf "Analysis ABORTED\n"
-            printf "analysisStatus:ABORTED\n" >> ${dataFile}
-            printf "\${while_loop_completion_message}\n"
             break;
 
         elif [[ \${analysis_status_check_count} -gt ${analysisStatusCheckLimit} ]]; then
             printf "Analysis status has been checked more than ${analysisStatusCheckLimit} times. Stopping...\n"
             printf "analysisStatus:TIMEOUT\n" >> ${dataFile}
-            printf "\${while_loop_completion_message}\n"
             break;
 
         else
@@ -89,6 +97,10 @@ process checkAnalysisStatus {
 
         sleep ${analysisStatusCheckInterval};
     done
+
+    printf "analysisStatus:\${analysis_status}\n" >> ${dataFile}
+
+    printf "\${while_loop_completion_message}\n"
     """
 }
 
@@ -97,7 +109,6 @@ process downloadAnalysisOutput {
     
     input:
     path(dataFile)
-    val(localDownloadPath)
 
     output:
     path "data.txt", emit: dataFile
@@ -140,7 +151,7 @@ process deleteData {
     analysis_output_folder_id=\$(cat ${dataFile} | grep -o 'outputFolderId:.*' | cut -f2- -d:)
     download_complete=\$(cat ${dataFile} | grep -o 'downloadComplete:.*' | cut -f2- -d:)
 
-    if [ "\${download_complete}" = true ]; then  
+    if [ "\${download_complete}" = "true" ]; then  
         timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
         printf "[\${timeStamp}]: Deleting uploaded read 1 file with ID '\${read_1_file_id}'...\n"
         icav2 projectdata delete \${read_1_file_id}
@@ -157,7 +168,16 @@ process deleteData {
 }
 
 workflow {
-    checkAnalysisStatus(params.analysisId, params.analysisStatusCheckInterval)
-    downloadAnalysisOutput(checkAnalysisStatus.out.dataFile, params.localDownloadPath)
+    // dataFilePath = Channel.fromPath("${projectDir}/data.txt", checkIfExists: true)
+    createDataFile()
+    // def dataFileChannel = createDataFile.out.dataFile
+    def dataFileChannel = Channel.fromPath("${projectDir}/data.txt")
+    dataFileChannel.view()
+
+    println "dataFileChannel: ${dataFileChannel}"
+
+    checkAnalysisStatus(createDataFile.out.dataFile)
+
+    downloadAnalysisOutput(checkAnalysisStatus.out.dataFile)
     deleteData(downloadAnalysisOutput.out.dataFile)
 }

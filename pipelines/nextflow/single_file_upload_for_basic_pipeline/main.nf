@@ -6,6 +6,8 @@ pipelineId = params.pipelineId
 pipelineCode = params.pipelineCode
 userReference = params.userReference
 storageSize = params.storageSize
+fileStatusCheckInterval = params.fileStatusCheckInterval
+fileStatusCheckLimit = params.fileStatusCheckLimit
 analysisStatusCheckInterval = params.analysisStatusCheckInterval
 analysisStatusCheckLimit = params.analysisStatusCheckLimit
 localUploadPath = params.localUploadPath
@@ -62,13 +64,35 @@ process startAnalysis {
     script:
     """
     #!/bin/bash
+    file_status_check_count=0
+    file_status="PARTIAL"
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
-    echo "[\${timeStamp}]: Starting Nextflow analysis..."
 
     sample_id=\$(cat ${dataFile} | grep -o 'sampleId:.*' | cut -f2- -d:)
     file_id=\$(cat ${dataFile} | grep -o 'in:.*' | cut -f2- -d:)
     file_analysis_code=\$(cat ${dataFile} | grep -E "in")
+    while true;
+    do
+        ((file_status_check_count +=1 ))
+        file_data_response=\$(icav2 projectdata get \${file_id})
+        file_status=\$(echo \${file_data_response} | jq -r ".details.status")
 
+        if [[ \${file_status} == "AVAILABLE" ]]; then
+            printf "File is AVAILABLE\n"
+            break;
+        elif [[ \${file_status} == "PARTIAL" ]]; then
+            printf "File upload is PARTIAL\n"
+        elif [[ \${file_status_check_count} -gt ${fileStatusCheckLimit} ]]; then
+            printf "File status has been checked more than ${fileStatusCheckLimit} times. Stopping...\n"
+            printf "analysisStatus:TIMEOUT\n" >> ${dataFile}
+            break;
+        else
+            printf "File is not AVAILABLE\n"
+        fi
+        sleep ${fileStatusCheckInterval};
+    done
+
+    echo "[\${timeStamp}]: Starting Nextflow analysis..."
     analysis_response=\$(icav2 projectpipelines start nextflow ${pipelineId} \
         --user-reference ${userReference} \
         --project-id ${projectId} \

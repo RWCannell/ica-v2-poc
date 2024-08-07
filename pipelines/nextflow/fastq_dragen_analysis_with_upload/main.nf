@@ -3,6 +3,7 @@ nextflow.enable.dsl=2
 projectId = params.projectId
 read1AnalysisDataCode = params.read1AnalysisDataCode
 read2AnalysisDataCode = params.read2AnalysisDataCode
+fastqsAnalysisDataCode = params.fastqsAnalysisDataCode
 referenceAnalysisDataCode = params.referenceAnalysisDataCode
 pipelineId = params.pipelineId
 pipelineCode = params.pipelineCode
@@ -159,7 +160,7 @@ process startAnalysis {
         --project-id ${projectId} \
         --storage-size ${storageSize} \
         --input \${reference_analysis_code} \
-        --input fastqs:"\${read_1_file_id},\${read_2_file_id}" \
+        --input ${fastqsAnalysisDataCode}:"\${read_1_file_id},\${read_2_file_id}" \
         --parameters enable_map_align:true \
         --parameters enable_map_align_output:false \
         --parameters output_format:BAM \

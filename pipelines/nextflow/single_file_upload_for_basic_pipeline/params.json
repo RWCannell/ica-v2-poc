@@ -5,8 +5,10 @@
     "userReference": "regan_basic_pipeline_test_01",
     "storageSize": "Small",
     "analysisDataCode": "in",
+    "fileStatusCheckInterval": 180,
+    "fileStatusCheckLimit": 10,
     "analysisStatusCheckInterval": 300,
     "analysisStatusCheckLimit": 50,
-    "localUploadPath": "/Users/regancannell/Documents/RWCannell/ica-v2-poc/public/assets/ica_data_uploads/fasta/Yokenella_regensburgei_ATCC_43003_uid65133/NZ_AGCL00000000.scaffold.fa/NZ_JH417860.fa",
-    "localDownloadPath": "/Users/regancannell/Documents/RWCannell/ica-v2-poc/public/assets/ica_data_downloads/"
+    "localUploadPath": "/Users/regancannell/Documents/RWCannell/ica-v2-poc/public/assets/ica_data_uploads/fasta/Yokenella_regensburgei_ATCC_43003_uid65133/NZ_AGCL00000000.scaffold.fa/NZ_JH417862.fa",
+    "localDownloadPath": "~/Documents/ica_data_downloads/"
 }
