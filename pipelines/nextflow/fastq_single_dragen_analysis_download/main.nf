@@ -24,17 +24,24 @@ process createDataFile {
     path "data.txt", emit: dataFile
 
     script:
-    def dataFile = "data.txt" 
     """
     #!/bin/bash
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
     printf "[\${timeStamp}]: Creating data file...\n"
     
-    touch ${dataFile}
+    data_file="data.txt"
 
-    printf "read1:${read1FileId}\n" >> ${dataFile}
-    printf "read2:${read2FileId}\n" >> ${dataFile}
-    printf "analysisId:${analysisId}\n" >> ${dataFile}
+    if ! [ -f \${data_file} ]; then
+        echo "Data file does not exist. Creating one..."
+        touch \${data_file}
+    fi
+
+    printf "[\${time_stamp}]: "
+    printf "Writing file data to existing data file...\n"
+
+    printf "read1:${read1FileId}\n" >> \${data_file}
+    printf "read2:${read2FileId}\n" >> \${data_file}
+    printf "analysisId:${analysisId}\n" >> \${data_file}
     """
 
 }

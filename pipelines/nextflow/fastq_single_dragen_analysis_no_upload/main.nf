@@ -27,7 +27,6 @@ process checkFileStatus {
     path "data.txt", emit: dataFile
 
     script:
-    def dataFile = "data.txt"
     """
     #!/bin/bash
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
@@ -62,16 +61,21 @@ process checkFileStatus {
     else
         printf "Reference file is not AVAILABLE\n"
     fi
-    
-    touch ${dataFile}
 
-    timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
-    printf "[\${timeStamp}]: Writing data to data file...\n"
+    data_file="data.txt"
 
-    printf "sampleId:${sampleId}\n" >> ${dataFile}
-    printf "\${read_1_analysis_code}\n" >> ${dataFile}
-    printf "\${read_2_analysis_code}\n" >> ${dataFile}
-    printf "\${reference_file_analysis_code}\n" >> ${dataFile}
+    if ! [ -f \${data_file} ]; then
+        echo "Data file does not exist. Creating one..."
+        touch \${data_file}
+    fi
+
+    printf "[\${time_stamp}]: "
+    printf "Writing file data to existing data file...\n"
+
+    printf "sampleId:${sampleId}\n" >> \${data_file}
+    printf "\${read_1_analysis_code}\n" >> \${data_file}
+    printf "\${read_2_analysis_code}\n" >> \${data_file}
+    printf "\${reference_file_analysis_code}\n" >> \${data_file}
     """
 }
 
