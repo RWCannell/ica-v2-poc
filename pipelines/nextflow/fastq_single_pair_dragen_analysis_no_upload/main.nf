@@ -107,7 +107,8 @@ process startAnalysis {
         --project-id ${projectId} \
         --storage-size ${storageSize} \
         --input \${reference_analysis_code} \
-        --input fastqs:"\${read_1_file_id},\${read_2_file_id}" \
+        --input fastq-file1:\${read_1_file_id} \
+        --input fastq-file2:\${read_2_file_id} \
         --parameters enable_map_align:true \
         --parameters enable_map_align_output:false \
         --parameters output_format:BAM \
