@@ -69,6 +69,8 @@ process uploadFastqFilePairs {
         printf "Failed to fetch data about file with id '\${read_1_file_id}'. \n"
         exit 1
     else
+        read_1_uploaded_file_name=\$(echo \${read_1_uploaded_file_data_response} | jq -r ".details.name")
+        printf "Name of uploaded file is '\${read_1_uploaded_file_name}'. \n"
         read_1_uploaded_file_path=\$(echo \${read_1_uploaded_file_data_response} | jq -r ".details.path")
         printf "Path of uploaded file is '\${read_1_uploaded_file_path}'. \n"
     fi
@@ -78,6 +80,8 @@ process uploadFastqFilePairs {
         printf "Failed to fetch data about file with id '\${read_2_file_id}'. \n"
         exit 1
     else
+        read_2_uploaded_file_name=\$(echo \${read_2_uploaded_file_data_response} | jq -r ".details.name")
+        printf "Name of uploaded file is '\${read_2_uploaded_file_name}'. \n"
         read_2_uploaded_file_path=\$(echo \${read_2_uploaded_file_data_response} | jq -r ".details.path")
         printf "Path of uploaded file is '\${read_2_uploaded_file_path}'. \n"
     fi
@@ -95,6 +99,61 @@ process uploadFastqFilePairs {
     printf "sampleId:${sampleId}\n" >> \${data_file}
     printf "${read1AnalysisDataCode}:\${read_1_file_id}\n" >> \${data_file}
     printf "${read2AnalysisDataCode}:\${read_2_file_id}\n" >> \${data_file}
+    printf "read1Name:\${read_1_uploaded_file_name}\n" >> \${data_file}
+    printf "read2Name:\${read_2_uploaded_file_name}\n" >> \${data_file}
+    """
+}
+
+process uploadFastqFileList {
+    debug true
+    maxForks 2
+    input:
+    path(dataFile)
+
+    output:
+    path "data.txt", emit: dataFile
+
+    script:
+    """
+    #!/bin/bash
+    time_stamp=\$(date +"%Y-%m-%d %H:%M:%S")
+    fastq_list_file_id=""
+
+    printf "[\${time_stamp}]: "
+    printf "Creating FASTQ list file... \n"
+    sample_id=\$(cat ${dataFile} | grep -o 'sampleId:.*' | cut -f2- -d:)
+    read_1_file_name=\$(cat ${dataFile} | grep -o 'read1Name:.*' | cut -f2- -d:)
+    read_2_file_name=\$(cat ${dataFile} | grep -o 'read2Name:.*' | cut -f2- -d:)
+
+    fastq_list_file="fastq-list-\${sample_id}.csv"
+    touch \${fastq_list_file}
+
+    printf "[\${time_stamp}]: "
+    printf "Writing to FASTQ list file... \n"
+    printf "RGID,RGSM,RGLB,Lane,Read1File,Read2File\n" >> \${fastq_list_file}
+    printf "\${sample_id},\${sample_id},RGLB,1,\${read_1_file_name},\${read_2_file_name}\n" >> \${fastq_list_file}
+
+    fastq_list_file_response="fastq_list_file_response.txt"
+    touch \${fastq_list_file_response}
+
+    printf "[\${time_stamp}]: "
+    printf "Uploading FASTQ list file... \n"
+    fastq_list_upload_response=\$(icav2 projectdata upload \${fastq_list_file} --project-id ${projectId})
+    echo "\${fastq_list_upload_response}" > \${fastq_list_file_response}
+
+    # id of file starts with 'fil.'
+    fastq_list_file_id=\$(cat \${fastq_list_file_response} | grep -i '\"id\": \"fil' | grep -o 'fil.[^\"]*')
+
+    fastq_list_uploaded_file_data_response=\$(icav2 projectdata get \${fastq_list_file_id})
+    if [[ \$? != 0 ]]; then
+        printf "Failed to fetch data about FASTQ list file with id '\${fastq_list_file_id}'. \n"
+        exit 1
+    fi
+
+    printf "[\${time_stamp}]: "
+    printf "Writing FASTQ list file id to existing data file...\n"
+
+    printf "fastq_list:\${fastq_list_file_id}\n" >> ${dataFile}
     """
 }
 
@@ -161,6 +220,7 @@ process startAnalysis {
         --storage-size ${storageSize} \
         --input \${reference_analysis_code} \
         --input ${fastqsAnalysisDataCode}:"\${read_1_file_id},\${read_2_file_id}" \
+        --input ${fastqListDataCode}: \
         --parameters enable_map_align:true \
         --parameters enable_map_align_output:false \
         --parameters output_format:BAM \
