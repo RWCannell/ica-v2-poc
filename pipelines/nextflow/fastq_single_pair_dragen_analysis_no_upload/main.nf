@@ -3,6 +3,7 @@ nextflow.enable.dsl=2
 projectId = params.projectId
 read1AnalysisDataCode = params.read1AnalysisDataCode
 read2AnalysisDataCode = params.read2AnalysisDataCode
+fastqListDataCode = params.fastqListDataCode
 referenceAnalysisDataCode = params.referenceAnalysisDataCode
 pipelineId = params.pipelineId
 pipelineCode = params.pipelineCode
@@ -16,6 +17,7 @@ analysisStatusCheckLimit = params.analysisStatusCheckLimit
 sampleId = params.sampleId
 read1FileId = params.read1FileId
 read2FileId = params.read2FileId
+fastqListFileId = params.fastqListFileId
 fastqsDataCode = params.fastqsDataCode
 referenceFileId = params.referenceFileId
 localDownloadPath = params.localDownloadPath
@@ -107,8 +109,8 @@ process startAnalysis {
         --project-id ${projectId} \
         --storage-size ${storageSize} \
         --input \${reference_analysis_code} \
-        --input fastq-file1:\${read_1_file_id} \
-        --input fastq-file2:\${read_2_file_id} \
+        --input ${fastqsDataCode}:"\${read_1_file_id},\${read_2_file_id}" \
+        --input ${fastqListDataCode}:${fastqListFileId} \
         --parameters enable_map_align:true \
         --parameters enable_map_align_output:false \
         --parameters output_format:BAM \
@@ -270,5 +272,5 @@ workflow {
     startAnalysis(checkFileStatus.out.dataFile)
     checkAnalysisStatus(startAnalysis.out.dataFile, params.analysisStatusCheckInterval)
     downloadAnalysisOutput(checkAnalysisStatus.out.dataFile, params.localDownloadPath)
-    deleteData(downloadAnalysisOutput.out.dataFile)
+    // deleteData(downloadAnalysisOutput.out.dataFile)
 }
