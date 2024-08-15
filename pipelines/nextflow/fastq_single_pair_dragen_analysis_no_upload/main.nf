@@ -112,8 +112,8 @@ process startAnalysis {
         --input ${fastqsDataCode}:"\${read_1_file_id},\${read_2_file_id}" \
         --input ${fastqListDataCode}:${fastqListFileId} \
         --parameters enable_map_align:true \
-        --parameters enable_map_align_output:false \
-        --parameters output_format:BAM \
+        --parameters enable_map_align_output:true \
+        --parameters output_format:CRAM \
         --parameters enable_variant_caller:true \
         --parameters vc_emit_ref_confidence:BP_RESOLUTION \
         --parameters enable_cnv:false \

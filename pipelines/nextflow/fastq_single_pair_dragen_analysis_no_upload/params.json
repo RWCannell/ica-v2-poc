@@ -2,7 +2,7 @@
     "projectId": "049307d6-85dd-4cdc-b88d-a740e4e9e550",
     "pipelineId": "858708e9-6cdd-42ae-ad97-8b86ee07cdc5",
     "pipelineCode": "DRAGEN Germline Whole Genome 4-3-6",
-    "userReference": "dragen_germline_whole_genome_ERR1019038",
+    "userReference": "dragen_germline_whole_genome_ERR1019076",
     "storageSize": "Medium",
     "read1AnalysisDataCode": "read1",
     "read2AnalysisDataCode": "read2",
@@ -14,10 +14,10 @@
     "fileUploadStatusCheckInterval": 120,
     "analysisStatusCheckInterval": 300,
     "analysisStatusCheckLimit": 50,
-    "sampleId": "ERR1019038",
-    "read1FileId": "fil.3f8f4528bb1946322da108dcad43d624",
-    "read2FileId": "fil.0232d49c13664c8b2de908dcad43d624",
-    "fastqListFileId": "fil.671b6023699c483bb58908dcb6e628b4",
+    "sampleId": "ERR1019076",
+    "read1FileId": "fil.bfd8496191bb4d1ab2cf08dcb1b64d4b",
+    "read2FileId": "fil.31cdca0408214b6543f008dcb6b54c7f",
+    "fastqListFileId": "fil.7098b0ba7dc04a3e39f408dcbcde83f4",
     "referenceFileId": "fil.2e3fd8d802ee4963da2208dc484ea8f0",
     "localDownloadPath": "./ica_data_downloads/"
 }
