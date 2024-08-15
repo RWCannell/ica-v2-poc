@@ -94,11 +94,9 @@ process uploadBamFileIndexPair {
 
   printf "sampleId:${sampleId}\n" >> \${data_file}
   printf "${bamAnalysisDataCode}:\${bam_file_id}\n" >> \${data_file}
-
-  echo "${bamFiles}"
-  echo "${bam_file}"
-  echo "${bai_file}"
-
+  printf "${bamIndexAnalysisDataCode}:\${bai_file_id}\n" >> \${data_file}
+  printf "bamFileName:${bam_file_name}\n" >> \${data_file}
+  printf "baiFileName:${bai_file_name}\n" >> \${data_file}
   """
 }
 
