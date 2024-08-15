@@ -382,7 +382,8 @@ workflow {
     fastqFilePairs = Channel.fromFilePairs(readsPairFilesUploadPath, checkIfExists:true)
 
     uploadFastqFilePairs(fastqFilePairs, params.projectId)
-    getReferenceFile(uploadFastqFilePairs.out.dataFile)
+    uploadFastqFileList(uploadFastqFilePairs.out.dataFile)
+    getReferenceFile(uploadFastqFileList.out.dataFile)
     startAnalysis(getReferenceFile.out.dataFile)
     checkAnalysisStatus(startAnalysis.out.dataFile, params.analysisStatusCheckInterval)
     downloadAnalysisOutput(checkAnalysisStatus.out.dataFile, params.localDownloadPath)
