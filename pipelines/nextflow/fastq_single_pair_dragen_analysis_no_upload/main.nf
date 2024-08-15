@@ -272,5 +272,5 @@ workflow {
     startAnalysis(checkFileStatus.out.dataFile)
     checkAnalysisStatus(startAnalysis.out.dataFile, params.analysisStatusCheckInterval)
     downloadAnalysisOutput(checkAnalysisStatus.out.dataFile, params.localDownloadPath)
-    // deleteData(downloadAnalysisOutput.out.dataFile)
+    deleteData(downloadAnalysisOutput.out.dataFile)
 }
