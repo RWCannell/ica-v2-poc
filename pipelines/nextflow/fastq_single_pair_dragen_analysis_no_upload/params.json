@@ -17,7 +17,7 @@
     "sampleId": "HG003-pcrFree-1X",
     "read1FileId": "fil.1db2cc03a4a6435b48db08da6c2ea9ab",
     "read2FileId": "fil.8c9b7ac6e104449e0e4008da70b3e33e",
-    "fastqListFileId": "fil.f62a7d3faf994c25fe9008dcb1b64d4b",
+    "fastqListFileId": "fil.46e3f1ea50b345df3d7d08dcb6e5c3e6",
     "referenceFileId": "fil.2e3fd8d802ee4963da2208dc484ea8f0",
     "localDownloadPath": "./ica_data_downloads/"
 }
