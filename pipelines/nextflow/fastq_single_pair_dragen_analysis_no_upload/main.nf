@@ -40,6 +40,9 @@ process checkFileStatus {
     read_2_file_data_response=\$(icav2 projectdata get ${read2FileId})
     read_2_file_status=\$(echo \${read_2_file_data_response} | jq -r ".details.status")
 
+    fastq_list_file_data_response=\$(icav2 projectdata get ${fastqListFileId})
+    fastq_list_file_status=\$(echo \${fastq_list_file_data_response} | jq -r ".details.status")
+
     reference_file_data_response=\$(icav2 projectdata get ${referenceFileId})
     reference_file_status=\$(echo \${reference_file_data_response} | jq -r ".details.status")
 
@@ -48,6 +51,7 @@ process checkFileStatus {
         read_1_analysis_code="${read1AnalysisDataCode}:${read1FileId}"
     else
         printf "Read 1 file is not AVAILABLE\n"
+        exit 1
     fi
 
     if [[ \${read_2_file_status} == "AVAILABLE" ]]; then
@@ -55,6 +59,15 @@ process checkFileStatus {
         read_2_analysis_code="${read2AnalysisDataCode}:${read2FileId}"
     else
         printf "Read 2 file is not AVAILABLE\n"
+        exit 1
+    fi
+
+    if [[ \${fastq_list_file_status} == "AVAILABLE" ]]; then
+        printf "FASTQ list file is AVAILABLE\n"
+        fastq_list_analysis_code="${fastqListDataCode}:${fastqListFileId}"
+    else
+        printf "FASTQ list file is not AVAILABLE\n"
+        exit 1
     fi
 
     if [[ \${reference_file_status} == "AVAILABLE" ]]; then
@@ -62,6 +75,7 @@ process checkFileStatus {
         reference_file_analysis_code="${referenceAnalysisDataCode}:${referenceFileId}"
     else
         printf "Reference file is not AVAILABLE\n"
+        exit 1
     fi
 
     data_file="data.txt"
@@ -274,5 +288,5 @@ workflow {
     startAnalysis(checkFileStatus.out.dataFile)
     checkAnalysisStatus(startAnalysis.out.dataFile, params.analysisStatusCheckInterval)
     downloadAnalysisOutput(checkAnalysisStatus.out.dataFile, params.localDownloadPath)
-    deleteData(downloadAnalysisOutput.out.dataFile)
+    // deleteData(downloadAnalysisOutput.out.dataFile)
 }
