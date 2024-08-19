@@ -54,6 +54,8 @@ The reference file to be used is the __chm13_v2-cnv.hla.methylation_combined.rna
 
 The Nextflow pipeline (or workflow) responsible for the uploading, triggering of DRAGEN analysis, polling analysis status, downloading output, and then deleting the analysis output and uploaded files can be found over [here](pipelines/nextflow/fastq_single_pair_dragen_analysis_with_upload/main.nf).    
 
+![FASTQ-Upload-Analyse-Download-Delete Workflow](public/assets/images/fastq_upload_analyse_download_delete.png "FASTQ-Upload-Analyse-Download-Delete Workflow")    
+
 The workflow passes data from process to process in the form of a .txt file called `data.txt`. All necessary data (like ids) gets written to the `.txt` file as the workflow implements the different processes. This is an example of what the `data.txt` file would look like:   
 ```txt
 sampleId:ERR1019050
@@ -69,7 +71,11 @@ outputFolderId:fol.7cdafdb7363062eef75b08edbbcdd56a
 
 If the files are already in ICA and don't need to be uploaded, then a shorter workflow can be used, i.e. the [fastq_single_pair_dragen_analysis_no_upload](pipelines/nextflow/fastq_single_pair_dragen_analysis_no_upload/) workflow. This workflow skips the upload process. Consequently, the file ids of the already uploaded files will need to be provided in the `params.json`.   
 
+![FASTQ-Analyse-Download-Delete Workflow](public/assets/images/fastq_analyse_download_delete.png "FASTQ-Analyse-Download-Delete Workflow")    
+
 Finally, an even shorter workflow exists, i.e. the [fastq_single_pair_dragen_analysis_download](pipelines/nextflow/fastq_single_pair_dragen_analysis_download/) workflow. This one is to be used when files have already been uploaded and the DRAGEN analysis has already run to completion. In that case, only the download and delete processes are required.   
+
+![FASTQ-Download-Delete Workflow](public/assets/images/fastq_download_delete.png "FASTQ-Download-Delete Workflow")    
 
 To run any of these workflows, simply enter the directory where the `main.nf` and `params.json` files are in, and then run:
 ```
@@ -91,6 +97,3 @@ analysisId:9aa57a35-7e66-4d4e-9c05-729767ff0290
 analysisRef:regan_dragen_germline_whole_genome_test_05-DRAGEN Germline Whole Genome 4-3-6-a7f59145-3f93-4579-9129-c2b726dc4414
 outputFolderId:fol.7cdafdb7363062eef75b08edbbcdd56a
 ```   
-  
-
-
