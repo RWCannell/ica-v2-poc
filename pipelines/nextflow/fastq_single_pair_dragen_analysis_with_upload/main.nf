@@ -222,10 +222,11 @@ process startAnalysis {
         --input ${fastqsAnalysisDataCode}:"\${read_1_file_id},\${read_2_file_id}" \
         --input ${fastqListDataCode}: \
         --parameters enable_map_align:true \
-        --parameters enable_map_align_output:false \
-        --parameters output_format:BAM \
+        --parameters enable_map_align_output:true \
+        --parameters output_format:CRAM \
         --parameters enable_variant_caller:true \
         --parameters vc_emit_ref_confidence:BP_RESOLUTION \
+        --parameters vc_enable_vcf_output:true \
         --parameters enable_cnv:false \
         --parameters enable_sv:false \
         --parameters repeat_genotype_enable:false \
@@ -290,22 +291,22 @@ process checkAnalysisStatus {
         elif [[ \${analysis_status} == "FAILED" ]]; then
             printf "Analysis FAILED \n"
             printf "analysisStatus:FAILED\n" >> ${dataFile}
-            break;
+            exit 1
 
         elif [[ \${analysis_status} == "FAILED_FINAL" ]]; then
             printf "Analysis FAILED_FINAL\n"
             printf "analysisStatus:FAILED_FINAL\n" >> ${dataFile}
-            break;
+            exit 1
 
         elif [[ \${analysis_status} == "ABORTED" ]]; then
             printf "Analysis ABORTED\n"
             printf "analysisStatus:ABORTED\n" >> ${dataFile}
-            break;
+            exit 1
 
         elif [[ \${analysis_status_check_count} -gt ${analysisStatusCheckLimit} ]]; then
             printf "Analysis status has been checked more than ${analysisStatusCheckLimit} times. Stopping...\n"
             printf "analysisStatus:TIMEOUT\n" >> ${dataFile}
-            break;
+            exit 1
 
         else
             printf "Analysis still in progress...\n"
