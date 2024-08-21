@@ -92,6 +92,7 @@ process checkFileStatus {
     printf "\${read_1_analysis_code}\n" >> \${data_file}
     printf "\${read_2_analysis_code}\n" >> \${data_file}
     printf "\${reference_file_analysis_code}\n" >> \${data_file}
+    printf "\${fastq_list_analysis_code}\n" >> \${data_file}
     """
 }
 
@@ -151,7 +152,8 @@ process startAnalysis {
     printf "analysisId:\${analysis_id}\n" >> ${dataFile}
 
     printf "Writing reference of analysis '\${analysis_ref}' to existing data file...\n"
-    printf "analysisRef:\${analysis_ref}\n" >> ${dataFile}    """
+    printf "analysisRef:\${analysis_ref}\n" >> ${dataFile}
+    """
 }
 
 process checkAnalysisStatus {
@@ -195,22 +197,22 @@ process checkAnalysisStatus {
         elif [[ \${analysis_status} == "FAILED" ]]; then
             printf "Analysis FAILED \n"
             printf "analysisStatus:FAILED\n" >> ${dataFile}
-            break;
+            exit 1
 
         elif [[ \${analysis_status} == "FAILED_FINAL" ]]; then
             printf "Analysis FAILED_FINAL\n"
             printf "analysisStatus:FAILED_FINAL\n" >> ${dataFile}
-            break;
+            exit 1
 
         elif [[ \${analysis_status} == "ABORTED" ]]; then
             printf "Analysis ABORTED\n"
             printf "analysisStatus:ABORTED\n" >> ${dataFile}
-            break;
+            exit 1
 
         elif [[ \${analysis_status_check_count} -gt ${analysisStatusCheckLimit} ]]; then
             printf "Analysis status has been checked more than ${analysisStatusCheckLimit} times. Stopping...\n"
             printf "analysisStatus:TIMEOUT\n" >> ${dataFile}
-            break;
+            exit 1
 
         else
             printf "Analysis still in progress...\n"
