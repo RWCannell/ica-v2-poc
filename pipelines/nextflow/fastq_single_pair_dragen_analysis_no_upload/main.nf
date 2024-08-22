@@ -116,11 +116,12 @@ process startAnalysis {
     read_1_analysis_code=\$(cat ${dataFile} | grep -E "read1")
     read_2_analysis_code=\$(cat ${dataFile} | grep -E "read2")
     reference_analysis_code=\$(cat ${dataFile} | grep -E "ref_tar")
+    user_reference=${userReference}-\${sample_id}
 
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
     printf "[\${timeStamp}]: Starting Nextflow analysis...\n"
     analysis_response=\$(icav2 projectpipelines start nextflow ${pipelineId} \
-        --user-reference ${userReference} \
+        --user-reference \${user_reference} \
         --project-id ${projectId} \
         --storage-size ${storageSize} \
         --input \${reference_analysis_code} \
