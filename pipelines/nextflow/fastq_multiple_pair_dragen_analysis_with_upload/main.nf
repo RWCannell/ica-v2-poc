@@ -452,8 +452,8 @@ workflow {
     uploadFastqFileList(uploadFastqFilePairs.out.dataFile)
     getReferenceFile(uploadFastqFileList.out.dataFile)
     checkFileStatus(getReferenceFile.out.dataFile)
-    // startAnalysis(checkFileStatus.out.dataFile)
-    // checkAnalysisStatus(startAnalysis.out.dataFile, params.analysisStatusCheckInterval)
-    // downloadAnalysisOutput(checkAnalysisStatus.out.dataFile, params.localDownloadPath)
-    // deleteData(downloadAnalysisOutput.out.dataFile)
+    startAnalysis(checkFileStatus.out.dataFile)
+    checkAnalysisStatus(startAnalysis.out.dataFile, params.analysisStatusCheckInterval)
+    downloadAnalysisOutput(checkAnalysisStatus.out.dataFile, params.localDownloadPath)
+    deleteData(downloadAnalysisOutput.out.dataFile)
 }
