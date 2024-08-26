@@ -3,6 +3,7 @@
 **/.nextflow/
 **/work
 **/.nextflow.*
+**/venv
 public/assets/ica_data_downloads/*
 public/assets/ica_data_uploads/*
 config/

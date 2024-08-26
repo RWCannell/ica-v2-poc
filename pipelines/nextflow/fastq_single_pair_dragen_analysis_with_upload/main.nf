@@ -23,7 +23,7 @@ localDownloadPath = params.localDownloadPath
 
 process uploadFastqFilePairs {
     debug true
-    maxForks 2
+    maxForks 4
     input:
     tuple val(sampleId), file(reads)
     val(projectId)
@@ -39,11 +39,6 @@ process uploadFastqFilePairs {
     read_1_file_id=""
     read_2_file_id=""
     ica_upload_path="/fastq/$sampleId/"
-
-    printf "sampleId: $sampleId \n"
-    printf "reads: $reads \n"
-    printf "read_1_file: $read_1_file \n"
-    printf "read_2_file: $read_2_file \n"
 
     read_1_file_response="read_1_file_response.txt"
     read_2_file_response="read_2_file_response.txt"
@@ -107,7 +102,6 @@ process uploadFastqFilePairs {
 
 process uploadFastqFileList {
     debug true
-    maxForks 2
     input:
     path(dataFile)
 
@@ -275,11 +269,13 @@ process startAnalysis {
     read_2_analysis_code=\$(cat ${dataFile} | grep -E "read2")
     reference_analysis_code=\$(cat ${dataFile} | grep -E "ref_tar")
 
+    user_reference=${userReference}-\${sample_id}
+
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
     printf "[\${timeStamp}]: Starting Nextflow analysis...\n"
 
     analysis_response=\$(icav2 projectpipelines start nextflow ${pipelineId} \
-        --user-reference ${userReference} \
+        --user-reference \${user_reference} \
         --project-id ${projectId} \
         --storage-size ${storageSize} \
         --input \${reference_analysis_code} \
@@ -292,8 +288,8 @@ process startAnalysis {
         --parameters enable_variant_caller:true \
         --parameters vc_emit_ref_confidence:BP_RESOLUTION \
         --parameters vc_enable_vcf_output:true \
-        --parameters enable_cnv:false \
-        --parameters enable_sv:false \
+        --parameters enable_cnv:true \
+        --parameters enable_sv:true \
         --parameters repeat_genotype_enable:false \
         --parameters enable_hla:false \
         --parameters enable_variant_annotation:false \
@@ -456,8 +452,8 @@ workflow {
     uploadFastqFileList(uploadFastqFilePairs.out.dataFile)
     getReferenceFile(uploadFastqFileList.out.dataFile)
     checkFileStatus(getReferenceFile.out.dataFile)
-    // startAnalysis(checkFileStatus.out.dataFile)
-    // checkAnalysisStatus(startAnalysis.out.dataFile, params.analysisStatusCheckInterval)
-    // downloadAnalysisOutput(checkAnalysisStatus.out.dataFile, params.localDownloadPath)
-    // deleteData(downloadAnalysisOutput.out.dataFile)
+    startAnalysis(checkFileStatus.out.dataFile)
+    checkAnalysisStatus(startAnalysis.out.dataFile, params.analysisStatusCheckInterval)
+    downloadAnalysisOutput(checkAnalysisStatus.out.dataFile, params.localDownloadPath)
+    deleteData(downloadAnalysisOutput.out.dataFile)
 }
