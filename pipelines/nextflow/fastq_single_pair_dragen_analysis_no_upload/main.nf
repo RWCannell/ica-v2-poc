@@ -79,11 +79,7 @@ process checkFileStatus {
     fi
 
     data_file="data.txt"
-
-    if ! [ -f \${data_file} ]; then
-        echo "Data file does not exist. Creating one..."
-        touch \${data_file}
-    fi
+    touch \${data_file}
 
     printf "[\${time_stamp}]: "
     printf "Writing file data to existing data file...\n"

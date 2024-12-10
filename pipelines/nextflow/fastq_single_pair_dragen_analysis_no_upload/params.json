@@ -19,5 +19,5 @@
     "read2FileId": "fil.5ad809f33564489584db08dd19036686",
     "fastqListFileId": "fil.8b12acffcb534b329d1608dd1871a7d4",
     "referenceFileId": "fil.2e3fd8d802ee4963da2208dc484ea8f0",
-    "localDownloadPath": "./ica_data_downloads/"
+    "localDownloadPath": "/home/regan/ica_data_downloads"
 }
