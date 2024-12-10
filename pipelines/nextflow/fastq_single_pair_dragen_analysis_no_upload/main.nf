@@ -22,8 +22,39 @@ fastqsDataCode = params.fastqsDataCode
 referenceFileId = params.referenceFileId
 localDownloadPath = params.localDownloadPath
 
+process createDataFile {
+    debug true
+
+    output:
+    path "data.txt", emit: dataFile
+
+    script:
+    """
+    #!/bin/bash
+    timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
+    printf "[\${timeStamp}]: Creating data file...\n"
+    
+    data_file="data.txt"
+    touch \${data_file}
+
+    printf "[\${time_stamp}]: "
+    printf "Writing file data to existing data file...\n"
+
+    printf "sampleId:${sampleId}\n" >> \${data_file}
+    printf "${read1AnalysisDataCode}:\${read_1_file_id}\n" >> \${data_file}
+    printf "${read2AnalysisDataCode}:\${read_2_file_id}\n" >> \${data_file}
+    printf "read1Name:\${read_1_uploaded_file_name}\n" >> \${data_file}
+    printf "read2Name:\${read_2_uploaded_file_name}\n" >> \${data_file}
+    printf "${fastqListDataCode}:\${fastq_list_file_id}\n" >> \${data_file}
+    """
+
+}
+
 process checkFileStatus {
     debug true
+
+    input:
+    path(dataFile)
     
     output:
     path "data.txt", emit: dataFile
@@ -289,7 +320,8 @@ process deleteData {
 }
 
 workflow {
-    checkFileStatus()
+    createDataFile()
+    checkFileStatus(createDataFile.out.dataFile)
     startAnalysis(checkFileStatus.out.dataFile)
     checkAnalysisStatus(startAnalysis.out.dataFile, params.analysisStatusCheckInterval)
     downloadAnalysisOutput(checkAnalysisStatus.out.dataFile, params.localDownloadPath)
