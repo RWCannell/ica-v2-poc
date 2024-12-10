@@ -31,7 +31,7 @@ analysis_response=$(icav2 projectpipelines start nextflow $pipeline_id \
 --parameters vc_emit_ref_confidence:BP_RESOLUTION \
 --parameters enable_cnv:false \
 --parameters enable_sv:true \
---parameters repeat_genotype_enable:true \
+--parameters repeat_genotype_enable:false \
 --parameters enable_hla:false \
 --parameters enable_variant_annotation:false \
 --parameters output_file_prefix:"$sample_id")
