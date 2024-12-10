@@ -286,7 +286,7 @@ process startAnalysis {
         --parameters output_format:CRAM \
         --parameters enable_duplicate_marking:true \
         --parameters enable_variant_caller:true \
-        --parameters vc_emit_ref_confidence:BP_RESOLUTION \
+        --parameters vc_emit_ref_confidence:GVCF \
         --parameters vc_enable_vcf_output:true \
         --parameters enable_cnv:true \
         --parameters enable_sv:true \

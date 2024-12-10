@@ -2,7 +2,7 @@
     "projectId": "049307d6-85dd-4cdc-b88d-a740e4e9e550",
     "pipelineId": "858708e9-6cdd-42ae-ad97-8b86ee07cdc5",
     "pipelineCode": "DRAGEN Germline Whole Genome 4-3-6",
-    "userReference": "dragen_germline_whole_genome_cnv_sv_enabled",
+    "userReference": "dragen_germline_whole_genome",
     "storageSize": "Medium",
     "read1AnalysisDataCode": "read1",
     "read2AnalysisDataCode": "read2",
