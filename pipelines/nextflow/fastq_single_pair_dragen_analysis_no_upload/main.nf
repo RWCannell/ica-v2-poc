@@ -144,7 +144,7 @@ process startAnalysis {
     read_1_analysis_code=\$(cat ${dataFile} | grep -E "read1")
     read_2_analysis_code=\$(cat ${dataFile} | grep -E "read2")
     reference_analysis_code=\$(cat ${dataFile} | grep -E "ref_tar")
-    user_reference=${userReference}-\${sample_id}
+    user_reference=${userReference}-${sampleId}
 
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
     printf "[\${timeStamp}]: Starting Nextflow analysis...\n"
@@ -152,9 +152,9 @@ process startAnalysis {
         --user-reference \${user_reference} \
         --project-id ${projectId} \
         --storage-size ${storageSize} \
-        --input \${reference_analysis_code} \
-        --input ${fastqsAnalysisDataCode}:"\${read_1_file_id},\${read_2_file_id}" \
-        --input ${fastqListDataCode}:\${fastq_list_file_id} \
+        --input ${referenceAnalysisDataCode}:${referenceFileId} \
+        --input ${fastqsAnalysisDataCode}:"${read1FileId},${read2FileId}" \
+        --input ${fastqListDataCode}:${fastqListFileId} \
         --parameters enable_map_align:true \
         --parameters enable_map_align_output:true \
         --parameters output_format:CRAM \
@@ -167,7 +167,7 @@ process startAnalysis {
         --parameters repeat_genotype_enable:false \
         --parameters enable_hla:false \
         --parameters enable_variant_annotation:false \
-        --parameters output_file_prefix:"\${sample_id}")
+        --parameters output_file_prefix:${sampleId})
 
     analysis_response_file="analysis_response.txt"
     touch \${analysis_response_file}
