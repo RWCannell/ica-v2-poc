@@ -18,7 +18,7 @@ sampleId = params.sampleId
 read1FileId = params.read1FileId
 read2FileId = params.read2FileId
 fastqListFileId = params.fastqListFileId
-fastqsDataCode = params.fastqsDataCode
+fastqsAnalysisDataCode = params.fastqsAnalysisDataCode
 referenceFileId = params.referenceFileId
 localDownloadPath = params.localDownloadPath
 

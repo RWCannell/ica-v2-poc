@@ -6,7 +6,7 @@
     "storageSize": "Medium",
     "read1AnalysisDataCode": "read1",
     "read2AnalysisDataCode": "read2",
-    "fastqsDataCode": "fastqs",
+    "fastqsAnalysisDataCode": "fastqs",
     "fastqListDataCode": "fastq_list",
     "referenceAnalysisDataCode": "ref_tar",
     "referenceDirectory": "/scratch/reference",
