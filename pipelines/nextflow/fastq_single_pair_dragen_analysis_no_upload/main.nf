@@ -112,6 +112,7 @@ process startAnalysis {
     sample_id=\$(cat ${dataFile} | grep -o 'sampleId:.*' | cut -f2- -d:)
     read_1_file_id=\$(cat ${dataFile} | grep -o 'read1:.*' | cut -f2- -d:)
     read_2_file_id=\$(cat ${dataFile} | grep -o 'read2:.*' | cut -f2- -d:)
+    fastq_list_file_id=\$(cat ${dataFile} | grep -o 'fastq_list:.*' | cut -f2- -d:)
 
     read_1_analysis_code=\$(cat ${dataFile} | grep -E "read1")
     read_2_analysis_code=\$(cat ${dataFile} | grep -E "read2")
@@ -125,21 +126,21 @@ process startAnalysis {
         --project-id ${projectId} \
         --storage-size ${storageSize} \
         --input \${reference_analysis_code} \
-        --input ${fastqsDataCode}:"\${read_1_file_id},\${read_2_file_id}" \
-        --input ${fastqListDataCode}:${fastqListFileId} \
+        --input ${fastqsAnalysisDataCode}:"\${read_1_file_id},\${read_2_file_id}" \
+        --input ${fastqListDataCode}:\${fastq_list_file_id} \
         --parameters enable_map_align:true \
         --parameters enable_map_align_output:true \
         --parameters output_format:CRAM \
         --parameters enable_duplicate_marking:true \
         --parameters enable_variant_caller:true \
-        --parameters vc_emit_ref_confidence:BP_RESOLUTION \
+        --parameters vc_emit_ref_confidence:GVCF \
         --parameters vc_enable_vcf_output:true \
-        --parameters enable_cnv:false \
-        --parameters enable_sv:false \
-        --parameters repeat_genotype_enable:false \
-        --parameters enable_hla:false \
+        --parameters enable_cnv:true \
+        --parameters enable_sv:true \
+        --parameters repeat_genotype_enable:true \
+        --parameters enable_hla:true \
         --parameters enable_variant_annotation:false \
-        --parameters output_file_prefix:"${sampleId}")
+        --parameters output_file_prefix:"\${sample_id}")
 
     analysis_response_file="analysis_response.txt"
     touch \${analysis_response_file}
@@ -296,5 +297,5 @@ workflow {
     startAnalysis(checkFileStatus.out.dataFile)
     checkAnalysisStatus(startAnalysis.out.dataFile, params.analysisStatusCheckInterval)
     downloadAnalysisOutput(checkAnalysisStatus.out.dataFile, params.localDownloadPath)
-    // deleteData(downloadAnalysisOutput.out.dataFile)
+    deleteData(downloadAnalysisOutput.out.dataFile)
 }
