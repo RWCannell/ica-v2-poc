@@ -11,6 +11,7 @@ analysisStatusCheckLimit = params.analysisStatusCheckLimit
 sampleId = params.sampleId
 read1FileId = params.read1FileId
 read2FileId = params.read2FileId
+fastqListFileId = params.fastqListFileId
 analysisId = params.analysisId
 readsFileUploadPath = params.readsFileUploadPath
 referenceFileId = params.referenceFileId
