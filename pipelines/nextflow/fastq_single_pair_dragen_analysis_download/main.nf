@@ -10,6 +10,7 @@ analysisStatusCheckInterval = params.analysisStatusCheckInterval
 analysisStatusCheckLimit = params.analysisStatusCheckLimit
 read1AnalysisDataCode = params.read1AnalysisDataCode
 read2AnalysisDataCode = params.read2AnalysisDataCode
+fastqListDataCode = params.fastqListDataCode
 sampleId = params.sampleId
 read1FileId = params.read1FileId
 read2FileId = params.read2FileId
