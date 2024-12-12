@@ -188,7 +188,7 @@ process deleteData {
     printf "Uploaded file and analysis output folder successfully deleted.\n"
     """
 
-    
+
     """
     sample_id=\$(cat ${dataFile} | grep -o 'sampleId:.*' | cut -f2- -d:)
     read_1_file_id=\$(cat ${dataFile} | grep -o 'read1:.*' | cut -f2- -d:)
@@ -211,11 +211,6 @@ process deleteData {
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
     printf "[\${timeStamp}]: Deleting analysis output folder with ID '\${analysis_output_folder_id}'...\n"
     icav2 projectdata delete \${analysis_output_folder_id}
-
-    ica_upload_path="/fastq/\${sample_id}/"
-    timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
-    printf "[\${timeStamp}]: Deleting folder containing pair of FASTQ files with path '\${ica_upload_path}'...\n"
-    icav2 projectdata delete \${ica_upload_path} --project-id ${projectId}
 
     printf "Uploaded file and analysis output folder successfully deleted.\n"
     """
