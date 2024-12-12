@@ -15,8 +15,8 @@ sampleId = params.sampleId
 read1FileId = params.read1FileId
 read2FileId = params.read2FileId
 fastqListFileId = params.fastqListFileId
+outputFolderId = params.outputFolderId
 analysisId = params.analysisId
-readsFileUploadPath = params.readsFileUploadPath
 referenceFileId = params.referenceFileId
 readsPairFilesUploadPath = params.readsPairFilesUploadPath
 referenceFileUploadPath = params.referenceFileUploadPath
@@ -41,9 +41,9 @@ process createDataFile {
     printf "Writing file data to existing data file...\n"
 
     printf "sampleId:${sampleId}\n" >> \${data_file}
-    printf "${read1AnalysisDataCode}:\${read_1_file_id}\n" >> \${data_file}
-    printf "${read2AnalysisDataCode}:\${read_2_file_id}\n" >> \${data_file}
-    printf "${fastqListDataCode}:\${fastq_list_file_id}\n" >> \${data_file}
+    printf "${read1AnalysisDataCode}:${read1FileId}\n" >> \${data_file}
+    printf "${read2AnalysisDataCode}:${read2FileId}\n" >> \${data_file}
+    printf "${fastqListDataCode}:${fastqListFileId}\n" >> \${data_file}
     """
 }
 
@@ -60,17 +60,13 @@ process downloadAnalysisOutput {
     """
     #!/bin/bash
     printf "[\${time_stamp}]: "
-    printf "Fetching analysis output response...\n"
-    analysis_output_response=\$(icav2 projectanalyses output ${analysisId})
-    analysis_output_folder_id=\$(echo \${analysis_output_response} | jq -r ".items[].data[].dataId")
-    printf "Analysis output folder ID is '\${analysis_output_folder_id}'\n"
     printf "Writing id of analysis output folder to existing data file...\n"
-    printf "outputFolderId:\${analysis_output_folder_id}\n" >> ${dataFile}
+    printf "outputFolderId:${outputFolderId}\n" >> ${dataFile}
 
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
-    printf "[\${timeStamp}]: Downloading analysis output folder with ID '\${analysis_output_folder_id}' to '${localDownloadPath}'...\n"
+    printf "[\${timeStamp}]: Downloading analysis output folder with ID '${outputFolderId}' to '${localDownloadPath}'...\n"
 
-    icav2 projectdata download \${analysis_output_folder_id} ${localDownloadPath}
+    icav2 projectdata download ${outputFolderId} ${localDownloadPath}
 
     printf "downloadComplete:true\n" >> ${dataFile}
     """
@@ -108,11 +104,6 @@ process deleteData {
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
     printf "[\${timeStamp}]: Deleting analysis output folder with ID '\${analysis_output_folder_id}'...\n"
     icav2 projectdata delete \${analysis_output_folder_id}
-
-    ica_upload_path="/fastq/\${sample_id}/"
-    timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
-    printf "[\${timeStamp}]: Deleting folder containing pair of FASTQ files with path '\${ica_upload_path}'...\n"
-    icav2 projectdata delete \${ica_upload_path} --project-id ${projectId}
 
     printf "Uploaded file and analysis output folder successfully deleted.\n"
     """
