@@ -43,6 +43,7 @@ process createDataFile {
     printf "sampleId:${sampleId}\n" >> \${data_file}
     printf "read1:${read1FileId}\n" >> \${data_file}
     printf "read2:${read2FileId}\n" >> \${data_file}
+    printf "fastq_list:${fastqListFileId}\n >> \${data_file}
     printf "analysisId:${analysisId}\n" >> \${data_file}
     """
 
@@ -178,6 +179,38 @@ process deleteData {
         printf "[\${timeStamp}]: Deleting analysis output folder with ID '\${analysis_output_folder_id}'...\n"
         icav2 projectdata delete \${analysis_output_folder_id}
     fi
+
+    ica_upload_path="/fastq/\${sample_id}/"
+    timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
+    printf "[\${timeStamp}]: Deleting folder containing pair of FASTQ files with path '\${ica_upload_path}'...\n"
+    icav2 projectdata delete \${ica_upload_path} --project-id ${projectId}
+
+    printf "Uploaded file and analysis output folder successfully deleted.\n"
+    """
+
+    
+    """
+    sample_id=\$(cat ${dataFile} | grep -o 'sampleId:.*' | cut -f2- -d:)
+    read_1_file_id=\$(cat ${dataFile} | grep -o 'read1:.*' | cut -f2- -d:)
+    read_2_file_id=\$(cat ${dataFile} | grep -o 'read2:.*' | cut -f2- -d:)
+    fastq_list_file_id=\$(cat ${dataFile} | grep -o 'fastq_list:.*' | cut -f2- -d:)
+    analysis_output_folder_id=\$(cat ${dataFile} | grep -o 'outputFolderId:.*' | cut -f2- -d:)
+
+    timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
+    printf "[\${timeStamp}]: Deleting uploaded read 1 file with ID '\${read_1_file_id}'...\n"
+    icav2 projectdata delete \${read_1_file_id}
+
+    timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
+    printf "[\${timeStamp}]: Deleting uploaded read 2 file with ID '\${read_2_file_id}'...\n"
+    icav2 projectdata delete \${read_2_file_id}
+
+    timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
+    printf "[\${timeStamp}]: Deleting uploaded CSV file with ID '\${fastq_list_file_id}'...\n"
+    icav2 projectdata delete \${fastq_list_file_id}
+
+    timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
+    printf "[\${timeStamp}]: Deleting analysis output folder with ID '\${analysis_output_folder_id}'...\n"
+    icav2 projectdata delete \${analysis_output_folder_id}
 
     ica_upload_path="/fastq/\${sample_id}/"
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
