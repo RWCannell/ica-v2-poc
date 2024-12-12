@@ -41,7 +41,6 @@ process createDataFile {
     printf "read1:${read1FileId}\n" >> \${data_file}
     printf "read2:${read2FileId}\n" >> \${data_file}
     printf "fastq_list:${fastqListFileId}\n >> \${data_file}
-    printf "analysisId:${analysisId}\n" >> \${data_file}
     """
 
 }
