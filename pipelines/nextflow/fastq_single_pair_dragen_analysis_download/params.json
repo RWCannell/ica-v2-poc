@@ -9,6 +9,8 @@
     "analysisStatusCheckLimit": 100,
     "fastqsAnalysisDataCode": "fastqs",
     "fastqListDataCode": "fastq_list",
+    "read1AnalysisDataCode": "read1",
+    "read2AnalysisDataCode": "read2",
     "analysisId": "eba1aa7d-5bef-4c47-991f-cca8535d0cd7",
     "sampleId": "ERR1019042",
     "read1FileId": "fil.eb35e53fb9c34424e39d08dd1871a7d4",

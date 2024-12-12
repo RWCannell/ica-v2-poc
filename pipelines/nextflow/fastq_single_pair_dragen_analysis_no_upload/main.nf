@@ -43,11 +43,8 @@ process createDataFile {
     printf "sampleId:${sampleId}\n" >> \${data_file}
     printf "${read1AnalysisDataCode}:\${read_1_file_id}\n" >> \${data_file}
     printf "${read2AnalysisDataCode}:\${read_2_file_id}\n" >> \${data_file}
-    printf "read1Name:\${read_1_uploaded_file_name}\n" >> \${data_file}
-    printf "read2Name:\${read_2_uploaded_file_name}\n" >> \${data_file}
     printf "${fastqListDataCode}:\${fastq_list_file_id}\n" >> \${data_file}
     """
-
 }
 
 process checkFileStatus {

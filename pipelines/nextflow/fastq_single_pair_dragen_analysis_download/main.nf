@@ -8,6 +8,8 @@ storageSize = params.storageSize
 fileUploadStatusCheckInterval = params.fileUploadStatusCheckInterval
 analysisStatusCheckInterval = params.analysisStatusCheckInterval
 analysisStatusCheckLimit = params.analysisStatusCheckLimit
+read1AnalysisDataCode = params.read1AnalysisDataCode
+read2AnalysisDataCode = params.read2AnalysisDataCode
 sampleId = params.sampleId
 read1FileId = params.read1FileId
 read2FileId = params.read2FileId
@@ -38,11 +40,10 @@ process createDataFile {
     printf "Writing file data to existing data file...\n"
 
     printf "sampleId:${sampleId}\n" >> \${data_file}
-    printf "read1:${read1FileId}\n" >> \${data_file}
-    printf "read2:${read2FileId}\n" >> \${data_file}
-    printf "fastq_list:${fastqListFileId}\n >> \${data_file}
+    printf "${read1AnalysisDataCode}:\${read_1_file_id}\n" >> \${data_file}
+    printf "${read2AnalysisDataCode}:\${read_2_file_id}\n" >> \${data_file}
+    printf "${fastqListDataCode}:\${fastq_list_file_id}\n" >> \${data_file}
     """
-
 }
 
 process downloadAnalysisOutput {
