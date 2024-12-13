@@ -13,7 +13,6 @@ storageSize = params.storageSize
 hashTableConfigFile = params.hashTableConfigFile
 referenceDirectory = params.referenceDirectory
 intermediateResultsDirectory = params.intermediateResultsDirectory
-fileUploadStatusCheckInterval = params.fileUploadStatusCheckInterval
 analysisStatusCheckInterval = params.analysisStatusCheckInterval
 analysisStatusCheckLimit = params.analysisStatusCheckLimit
 readsFileUploadPath = params.readsFileUploadPath
