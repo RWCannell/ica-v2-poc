@@ -26,7 +26,6 @@ process uploadFastqFilePairs {
     maxForks 4
     input:
     tuple val(sampleId), file(reads)
-    val(projectId)
 
     output:
     path "data.txt", emit: dataFile
@@ -448,7 +447,7 @@ process deleteData {
 workflow {
     fastqFilePairs = Channel.fromFilePairs(readsPairFilesUploadPath, checkIfExists:true)
 
-    uploadFastqFilePairs(fastqFilePairs, params.projectId)
+    uploadFastqFilePairs(fastqFilePairs)
     uploadFastqFileList(uploadFastqFilePairs.out.dataFile)
     getReferenceFile(uploadFastqFileList.out.dataFile)
     checkFileStatus(getReferenceFile.out.dataFile)
