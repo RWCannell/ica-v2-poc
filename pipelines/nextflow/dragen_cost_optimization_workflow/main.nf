@@ -36,7 +36,6 @@ process uploadFastqFilePairs {
     time_stamp=\$(date +"%Y-%m-%d %H:%M:%S")
     read_1_file_id=""
     read_2_file_id=""
-    ica_upload_path="/fastq/$sampleId/"
 
     read_1_file_response="read_1_file_response.txt"
     read_2_file_response="read_2_file_response.txt"
@@ -46,12 +45,12 @@ process uploadFastqFilePairs {
 
     printf "[\${time_stamp}]: "
     printf "Uploading read 1 file '${read_1_file}'... \n"
-    read_1_upload_response=\$(icav2 projectdata upload ${read_1_file} \${ica_upload_path} --project-id ${projectId})
+    read_1_upload_response=\$(icav2 projectdata upload ${read_1_file} --project-id ${projectId})
     echo "\${read_1_upload_response}" > \${read_1_file_response}
 
     printf "[\${time_stamp}]: "
     printf "Uploading read 2 file '${read_2_file}'... \n"
-    read_2_upload_response=\$(icav2 projectdata upload ${read_2_file} \${ica_upload_path} --project-id ${projectId})
+    read_2_upload_response=\$(icav2 projectdata upload ${read_2_file} --project-id ${projectId})
     echo "\${read_2_upload_response}" > \${read_2_file_response}
 
     # id of file starts with 'fil.'
