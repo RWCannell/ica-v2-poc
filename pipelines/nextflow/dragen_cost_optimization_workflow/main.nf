@@ -315,7 +315,6 @@ process checkAnalysisStatus {
     
     input:
     path(dataFile)
-    val(analysisStatusCheckInterval)
 
     output:
     path "data.txt", emit: dataFile
@@ -382,7 +381,6 @@ process downloadAnalysisOutput {
     
     input:
     path(dataFile)
-    val(localDownloadPath)
 
     output:
     path "data.txt", emit: dataFile
@@ -452,7 +450,7 @@ workflow {
     getReferenceFile(uploadFastqFileList.out.dataFile)
     checkFileStatus(getReferenceFile.out.dataFile)
     startAnalysis(checkFileStatus.out.dataFile)
-    checkAnalysisStatus(startAnalysis.out.dataFile, params.analysisStatusCheckInterval)
-    downloadAnalysisOutput(checkAnalysisStatus.out.dataFile, params.localDownloadPath)
+    checkAnalysisStatus(startAnalysis.out.dataFile)
+    downloadAnalysisOutput(checkAnalysisStatus.out.dataFile)
     deleteData(downloadAnalysisOutput.out.dataFile)
 }
