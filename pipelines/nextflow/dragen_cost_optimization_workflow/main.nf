@@ -234,6 +234,7 @@ process checkFileStatus {
             printf "Read 1 file is AVAILABLE\n"
             printf "Read 2 file is AVAILABLE\n"
             printf "FASTQ list file is AVAILABLE\n"
+            break;
 
         elif [ \${file_status_check_count} -gt ${fileStatusCheckLimit} ]; then
             printf "File status has been checked more than ${fileStatusCheckLimit} times. Stopping...\n"
