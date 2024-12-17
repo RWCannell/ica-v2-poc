@@ -14,10 +14,10 @@
     "fileUploadStatusCheckInterval": 120,
     "analysisStatusCheckInterval": 300,
     "analysisStatusCheckLimit": 100,
-    "sampleId": "ERR1019052",
-    "read1FileId": "fil.74796244f42045fd315f08dd1b9d68de",
-    "read2FileId": "fil.18aea7053607411356f008dd1ba2a475",
-    "fastqListFileId": "fil.e159f2cc4bf94bcac52908dd1ba97012",
+    "sampleId": "ERR1019054",
+    "read1FileId": "fil.5296f477f76845c38e3908dd1b9ac843",
+    "read2FileId": "fil.8c4e7625c12c4f7f72b208dd1e66a160",
+    "fastqListFileId": "fil.e167f55230eb464eeee408dd1e67bccf",
     "referenceFileId": "fil.2e3fd8d802ee4963da2208dc484ea8f0",
     "localDownloadPath": "/home/regan/ica_data_downloads"
 }
