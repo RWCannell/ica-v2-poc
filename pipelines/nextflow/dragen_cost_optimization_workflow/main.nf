@@ -13,6 +13,8 @@ storageSize = params.storageSize
 hashTableConfigFile = params.hashTableConfigFile
 referenceDirectory = params.referenceDirectory
 intermediateResultsDirectory = params.intermediateResultsDirectory
+fileStatusCheckInterval = params.fileStatusCheckInterval
+fileStatusCheckLimit = params.fileStatusCheckLimit
 analysisStatusCheckInterval = params.analysisStatusCheckInterval
 analysisStatusCheckLimit = params.analysisStatusCheckLimit
 readsFileUploadPath = params.readsFileUploadPath
@@ -200,38 +202,52 @@ process checkFileStatus {
     fastq_list_file_id=\$(cat ${dataFile} | grep -o 'fastq_list:.*' | cut -f2- -d:)
     reference_file_id=\$(cat ${dataFile} | grep -o 'ref_tar:.*' | cut -f2- -d:)
 
-    read_1_file_data_response=\$(icav2 projectdata get \${read_1_file_id})
-    read_1_file_status=\$(echo \${read_1_file_data_response} | jq -r ".details.status")
+    file_status_check_count=0
 
-    read_2_file_data_response=\$(icav2 projectdata get \${read_2_file_id})
-    read_2_file_status=\$(echo \${read_2_file_data_response} | jq -r ".details.status")
+    while true;
+    do
+        ((file_status_check_count +=1 ))
 
-    fastq_list_file_data_response=\$(icav2 projectdata get \${fastq_list_file_id})
-    fastq_list_file_status=\$(echo \${fastq_list_file_data_response} | jq -r ".details.status")
+        read_1_file_data_response=\$(icav2 projectdata get \${read_1_file_id})
+
+        printf "Checking status of read 1 file with id '\${read_1_file_id}'...\n"
+        read_1_file_status=\$(echo \${read_1_file_data_response} | jq -r ".details.status")
+        printf "[\${timeStamp}]: Current status of read 1 file is '\${read_2_file_status}'...\n"
+
+        read_2_file_data_response=\$(icav2 projectdata get \${read_2_file_id})
+
+        printf "Checking status of read 2 file with id '\${read_2_file_id}'...\n"
+        read_2_file_status=\$(echo \${read_2_file_data_response} | jq -r ".details.status")
+
+        timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
+        printf "[\${timeStamp}]: Current status of read 2 file is '\${read_2_file_status}'...\n"
+
+        fastq_list_file_data_response=\$(icav2 projectdata get \${fastq_list_file_id})
+
+        printf "Checking status of fastq list file with id '\${fastq_list_file_id}'...\n"
+        fastq_list_file_status=\$(echo \${fastq_list_file_data_response} | jq -r ".details.status")
+
+        timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
+        printf "[\${timeStamp}]: Current status of fastq list file is '\${fastq_list_file_status}'...\n"
+
+        if [ \${read_1_file_status} == "AVAILABLE" ] && [ \${read_2_file_status} == "AVAILABLE" ] && [ \${fastq_list_file_status} == "AVAILABLE" ]; then
+            printf "Read 1 file is AVAILABLE\n"
+            printf "Read 2 file is AVAILABLE\n"
+            printf "FASTQ list file is AVAILABLE\n"
+
+        elif [ \${file_status_check_count} -gt ${fileStatusCheckLimit} ]; then
+            printf "File status has been checked more than ${fileStatusCheckLimit} times. Stopping...\n"
+            exit 1
+
+        else
+            printf "File availability still in progress...\n"
+        fi
+
+        sleep ${fileStatusCheckInterval};
+    done
 
     reference_file_data_response=\$(icav2 projectdata get \${reference_file_id})
     reference_file_status=\$(echo \${reference_file_data_response} | jq -r ".details.status")
-
-    if [[ \${read_1_file_status} == "AVAILABLE" ]]; then
-        printf "Read 1 file is AVAILABLE\n"
-    else
-        printf "Read 1 file is not AVAILABLE\n"
-        exit 1
-    fi
-
-    if [[ \${read_2_file_status} == "AVAILABLE" ]]; then
-        printf "Read 2 file is AVAILABLE\n"
-    else
-        printf "Read 2 file is not AVAILABLE\n"
-        exit 1
-    fi
-
-    if [[ \${fastq_list_file_status} == "AVAILABLE" ]]; then
-        printf "FASTQ list file is AVAILABLE\n"
-    else
-        printf "FASTQ list file is not AVAILABLE\n"
-        exit 1
-    fi
 
     if [[ \${reference_file_status} == "AVAILABLE" ]]; then
         printf "Reference file is AVAILABLE\n"
