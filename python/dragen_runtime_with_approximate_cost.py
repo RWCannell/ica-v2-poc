@@ -3,13 +3,12 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-csv_file = "python/dragen_runtime_with_output_size.csv"
+csv_file = "python/dragen_runtime_with_approximate_cost.csv"
     
 df = pd.read_csv(csv_file)  
    
 dragen_runtime_values = df['dragen_runtime'].values
 sample_id_size_values = df['sample_id_size'].values
-output_size_values = df['output_size'].values
-total_workflow_runtime_values = df['total_workflow_runtime'].values
+approximate_cost_values = df['approximate_cost'].values
 
 print(df.describe())
