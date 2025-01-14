@@ -1,4 +1,4 @@
-﻿sample_id,sample_id_size,dragen_runtime,approximate_cost
+﻿sample_id,sample_size,dragen_runtime,approximate_cost
 ERR1019034,85,7760,10.35
 ERR1019042,74,8570,11.43
 ERR1019043,82,8669,11.56

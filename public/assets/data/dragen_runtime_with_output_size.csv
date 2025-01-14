@@ -1,4 +1,4 @@
-﻿sample_id,sample_id_size,output_size,dragen_runtime,total_workflow_runtime
+﻿sample_id,sample_size,output_size,dragen_runtime,total_workflow_runtime
 ERR1019034,85,56,7760,16308
 ERR1019042,74,50,8570,20597
 ERR1019043,82,54,8669,17406

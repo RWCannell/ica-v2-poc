@@ -8,7 +8,7 @@ csv_file = "python/dragen_runtime_with_approximate_cost.csv"
 df = pd.read_csv(csv_file)  
    
 dragen_runtime_values = df['dragen_runtime'].values
-sample_id_size_values = df['sample_id_size'].values
+sample_size_values = df['sample_size'].values
 approximate_cost_values = df['approximate_cost'].values
 
 print(df.describe())
