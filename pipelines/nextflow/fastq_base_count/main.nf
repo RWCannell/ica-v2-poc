@@ -14,8 +14,8 @@ process getFastqFileSize {
     """
     #!/bin/bash
     time_stamp=\$(date +"%Y-%m-%d %H:%M:%S")
-    read_1_sum_len=""
-    read_2_sum_len=""
+    read_1_size=""
+    read_2_size=""
 
     read_1_size_response_file="read_1_size_response.tsv"
     read_2_size_response_file="read_2_size_response.tsv"
@@ -35,6 +35,12 @@ process getFastqFileSize {
 
     read_1_sum_len=\$(awk '{if (\$5); print \$5}' \${read_1_size_response_file})
     read_2_sum_len=\$(awk '{if (\$5); print \$5}' \${read_2_size_response_file})
+
+    echo "\${read_1_sum_len}" > read_1_sum_len.txt
+    echo "\${read_2_sum_len}" > read_2_sum_len.txt
+
+    read_1_size=\$(cat read_1_sum_len.txt | sed -n '2 p')
+    read_2_size=\$(cat read_2_sum_len.txt | sed -n '2 p')
     
     data_file="data.txt"
 
@@ -47,8 +53,8 @@ process getFastqFileSize {
     printf "Writing file data to existing data file...\n"
 
     printf "sampleId:${sampleId}\n" >> \${data_file}
-    printf "read_1_size:\${read_1_sum_len}\n" >> \${data_file}
-    printf "read_2_size:\${read_2_sum_len}\n" >> \${data_file}
+    printf "read_1_size:\${read_1_size}\n" >> \${data_file}
+    printf "read_2_size:\${read_2_size}\n" >> \${data_file}
     """
 }
 
