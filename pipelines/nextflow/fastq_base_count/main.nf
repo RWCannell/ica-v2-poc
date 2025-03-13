@@ -17,24 +17,24 @@ process getFastqFileSize {
     read_1_size=""
     read_2_size=""
 
-    read_1_size_response_file="read_1_size_response.tsv"
-    read_2_size_response_file="read_2_size_response.tsv"
+    read_1_stats_response_file="read_1_stats_response.tsv"
+    read_2_stats_response_file="read_2_stats_response.tsv"
 
-    touch \${read_1_size_response_file}
-    touch \${read_2_size_response_file}
-
-    printf "[\${time_stamp}]: "
-    printf "Getting size of read 1 file '${read_1_file}'... \n"
-    read_1_size_response=\$(seqkit stats ${read_1_file})
-    echo "\${read_1_size_response}" > \${read_1_size_response_file}
+    touch \${read_1_stats_response_file}
+    touch \${read_2_stats_response_file}
 
     printf "[\${time_stamp}]: "
-    printf "Getting size of read 2 file '${read_2_file}'... \n"
-    read_2_size_response=\$(seqkit stats ${read_2_file})
-    echo "\${read_2_size_response}" > \${read_2_size_response_file}
+    printf "Getting stats of read 1 file '${read_1_file}'... \n"
+    read_1_stats_response=\$(seqkit stats ${read_1_file})
+    echo "\${read_1_stats_response}" > \${read_1_stats_response_file}
 
-    read_1_sum_len=\$(awk '{if (\$5); print \$5}' \${read_1_size_response_file})
-    read_2_sum_len=\$(awk '{if (\$5); print \$5}' \${read_2_size_response_file})
+    printf "[\${time_stamp}]: "
+    printf "Getting stats of read 2 file '${read_2_file}'... \n"
+    read_2_stats_response=\$(seqkit stats ${read_2_file})
+    echo "\${read_2_stats_response}" > \${read_2_stats_response_file}
+
+    read_1_sum_len=\$(awk '{if (\$5); print \$5}' \${read_1_stats_response_file})
+    read_2_sum_len=\$(awk '{if (\$5); print \$5}' \${read_2_stats_response_file})
 
     echo "\${read_1_sum_len}" > read_1_sum_len.txt
     echo "\${read_2_sum_len}" > read_2_sum_len.txt
