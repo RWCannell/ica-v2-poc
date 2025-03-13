@@ -33,8 +33,8 @@ process getFastqFileSize {
     read_2_size_response=\$(seqkit stats ${read_2_file})
     echo "\${read_2_size_response}" > \${read_2_size_response_file}
 
-    read_1_sum_len=\$(awk '{if ($5); print $5}' \${read_1_size_response_file})
-    read_2_sum_len=\$(awk '{if ($5); print $5}' \${read_2_size_response_file})
+    read_1_sum_len=\$(awk '{if (\$5); print \$5}' \${read_1_size_response_file})
+    read_2_sum_len=\$(awk '{if (\$5); print \$5}' \${read_2_size_response_file})
     
     data_file="data.txt"
 
