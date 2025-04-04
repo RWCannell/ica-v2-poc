@@ -96,21 +96,3 @@ To run any of these workflows, simply enter the directory where the `main.nf` an
 ```
 nextflow main.nf -params-file params.json
 ```
-
-## DRAGEN Pipeline for BAM Files
-When running the **DRAGEN Germline Whole Genome 4-3-6** pipeline using a .bam file as input, the .bam indexes (.bai) are required when _realignment is disabled_. Since all the .bam files are stored in a single directory, the _sampleId_ needs to be provided in the `params.json` so that we know which file to upload and analyse. The corresponding index file (.bam.bai) will also be uploaded. The workflow for the uploading, triggering of DRAGEN analysis, polling analysis status, downloading analysis output, and deleting output and uploaded files can be found over [here](pipelines/nextflow/bam_single_dragen_analysis_with_upload/).   
-
-Similarly to the workflow logic for the .fastq files, data gets written to a .txt file called `data.txt`. This is an example of what the `data.txt` file would look like:   
-```txt
-sampleId:myBamFile
-bam:fil.85255ad2588d4e5fe75a08dcaabcc45f
-bai:fil.6bcfeca6252941dde75b08dcaabcc45f
-ref_tar:fil.2e3fd8d802ee4963da2208dc484ea8f0
-bamFileName:myBamFile.bam
-baiFileName:myBamFile.bam.bai
-analysisId:9aa57a35-7e66-4d4e-9c05-729767ff0290
-analysisRef:regan_dragen_germline_whole_genome_test_05-DRAGEN Germline Whole Genome 4-3-6-a7f59145-3f93-4579-9129-c2b726dc4414
-outputFolderId:fol.7cdafdb7363062eef75b08edbbcdd56a
-``` 
-
-## DRAGEN Pipeline for BAM Files
