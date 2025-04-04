@@ -56,6 +56,21 @@ The Nextflow pipeline (or workflow) responsible for the uploading, triggering of
 
 ![FASTQ-Upload-Analyse-Download-Delete Workflow](public/assets/images/fastq_upload_analyse_download_delete.png "FASTQ-Upload-Analyse-Download-Delete Workflow")    
 
+(The above diagram was generated using the [Mermaid Live Editor](https://mermaid.live/) with the following markup code:   
+```bash
+flowchart LR
+    A[FASTQ reads] --> D(upload to ICA)
+    B[reference file] --> D(upload to ICA)
+    C[CSV file of FASTQ reads] --> D(upload to ICA)
+    D(upload to ICA) --> |write file ids to data.txt| E(start DRAGEN analysis)
+    E(start DRAGEN analysis) --> |write analysis_id to data.txt| F{check analysis status}
+    F{analysis status?} --> |SUCCEEDED| G(dowload analysis output)
+    F{analysis status?} --> |SUCCEEDED| G(dowload analysis output)
+    F{analysis status?} --> |FAILED| H(end workflow)
+    G(dowload analysis output) --> |write output_folder_id to data.txt| I(delete output folder & uploaded files)
+```
+)   
+
 The workflow passes data from process to process in the form of a .txt file called `data.txt`. All necessary data (like ids) gets written to the `.txt` file as the workflow implements the different processes. This is an example of what the `data.txt` file would look like:   
 ```txt
 sampleId:ERR1019050
@@ -96,4 +111,6 @@ baiFileName:myBamFile.bam.bai
 analysisId:9aa57a35-7e66-4d4e-9c05-729767ff0290
 analysisRef:regan_dragen_germline_whole_genome_test_05-DRAGEN Germline Whole Genome 4-3-6-a7f59145-3f93-4579-9129-c2b726dc4414
 outputFolderId:fol.7cdafdb7363062eef75b08edbbcdd56a
-```   
+``` 
+
+## DRAGEN Pipeline for BAM Files
