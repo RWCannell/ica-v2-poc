@@ -8,15 +8,13 @@
     "fastqsAnalysisDataCode": "fastqs",
     "fastqListDataCode": "fastq_list",
     "referenceAnalysisDataCode": "ref_tar",
-    "fileStatusCheckInterval": 120,
-    "fileStatusCheckLimit": 10,
+    "fileStatusCheckInterval": 180,
+    "fileStatusCheckLimit": 100,
     "analysisStatusCheckInterval": 300,
     "analysisStatusCheckLimit": 100,
-    "readsFileUploadPath": "/home/regan/ica_data_uploads/1000G/SRR1291036/*",
-    "readsPairFilesUploadPath": "/home/regan/ica_data_uploads/1000G/**/*_{1,2}.fastq.gz",
-    "referenceFileUploadPath": "./ica_data_uploads/reference/chm13_v2-cnv.hla.methylated_combined.rna-10-r4.0-1.tar.gz",
-    "referenceFileIcaPath": "/Illumina DRAGEN v10 References/chm13_v2-cnv.hla.methylation_combined.rna_v4.tar.gz",
-    "referenceFileId": "fil.2e3fd8d802ee4963da2208dc484ea8f0",
+    "readsPairFilesUploadPath": "/home/regan/ica_data_uploads/gerrit_samples/**/*_L02_read_{1,2}.fq.gz",
+    "referenceFileUploadPath": "./ica_data_uploads/reference/hg38-alt_masked.cnv.hla.methylation_combined.rna_v4.tar.gz",
+    "referenceFileIcaPath": "/Illumina DRAGEN v10 References/hg38-alt_masked.cnv.hla.methylation_combined.rna_v4.tar.gz",
+    "referenceFileId": "fil.2ed2474579454e9ff42d08dc4483ed72",
     "localDownloadPath": "/home/regan/ica_data_downloads"
 }
-

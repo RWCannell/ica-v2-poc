@@ -148,7 +148,6 @@ process getReferenceFile {
   def projectId = params.projectId
   def referenceAnalysisDataCode = params.referenceAnalysisDataCode
   def referenceFileId = params.referenceFileId
-  def reference_file_name = ""
   """
   #!/bin/bash
   time_stamp=\$(date +"%Y-%m-%d %H:%M:%S")
