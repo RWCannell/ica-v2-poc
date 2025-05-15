@@ -1,12 +1,12 @@
 #!/bin/bash
 
 project_id="049307d6-85dd-4cdc-b88d-a740e4e9e550"
-sample_id="V350117642_L02"
+sample_id="NA12878"
 time_stamp=$(date +"%Y-%m-%d %H:%M:%S")
 
 output_file_prefix=$sample_id
-read_1_file="/spaces/ica/MGI/V350117642_L02_read_1.fq.gz"
-read_2_file="/spaces/ica/MGI/V350117642_L02_read_2.fq.gz"
+read_1_file="/spaces/ica/MGI/NA12878_1.fastq.gz"
+read_2_file="/spaces/ica/MGI/NA12878_2.fastq.gz"
 read_1_analysis_code="read1"
 read_2_analysis_code="read2"
 

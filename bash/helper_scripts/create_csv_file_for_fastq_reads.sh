@@ -3,9 +3,9 @@
 project_id="049307d6-85dd-4cdc-b88d-a740e4e9e550"
 time_stamp=$(date +"%Y-%m-%d %H:%M:%S")
 
-sample_id="V350117642_L02"
-read_1_file_name="V350117642_L02_read_1.fq.gz"
-read_2_file_name="V350117642_L02_read_2.fq.gz"
+sample_id="NA12878"
+read_1_file_name="NA12878_1.fastq.gz"
+read_2_file_name="NA12878_2.fastq.gz"
 
 csv_file="fastq-list-$sample_id.csv"
 touch $csv_file
