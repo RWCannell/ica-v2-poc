@@ -245,7 +245,7 @@ process startAnalysis {
         --parameters enable_sv:true \
         --parameters repeat_genotype_enable:false \
         --parameters enable_hla:false \
-        --parameters enable_variant_annotation:false \
+        --parameters enable_variant_annotation:true \
         --parameters output_file_prefix:"\${sample_id}")
 
     analysis_response_file="analysis_response.txt"
@@ -418,6 +418,8 @@ workflow {
     cramFilePairsChannel = Channel.fromFilePairs(params.cramFilePairsUploadPath, checkIfExists:true) { 
       file -> file.name.replaceAll(/.cram|.crai$/,'') 
     }
+    def cramFilePairsUploadPath = params.cramFilePairsUploadPath
+    cramFilePairsChannel = Channel.fromFilePairs(cramFilePairsUploadPath, checkIfExists:true)
     uploadCramFiles(cramFilePairsChannel)
     getReferenceFile(uploadCramFiles.out.dataFile)
     checkFileStatus(getReferenceFile.out.dataFile)
