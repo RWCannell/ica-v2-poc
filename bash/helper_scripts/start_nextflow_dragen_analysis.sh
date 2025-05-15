@@ -15,13 +15,13 @@ $read_1_file_id="fil.5068092a48584ae4d94b08dd8ca25b14"
 $read_2_file_id="fil.a93d08fe0a9443a1d94c08dd8ca25b14"
 $fastq_list_file_id="fil.f2106d05358849299b0a08dd8c9b02f1"
 
-analysis_response=$(icav2 projectpipelines start nextflow ${pipeline_id} \
-    --user-reference ${user_reference} \
-    --project-id ${project_id} \
-    --storage-size ${storage_size} \
-    --input ${ref_file_analysis_code}:"$ref_file_id" \
-    --input ${fastqs_analysis_data_code}:"${read_1_file_id},${read_2_file_id}" \
-    --input ${fastq_list_data_code}:${fastq_list_file_id} \
+analysis_response=$(icav2 projectpipelines start nextflow $pipeline_id \
+    --user-reference $user_reference \
+    --project-id $project_id \
+    --storage-size $storage_size \
+    --input $ref_file_analysis_code:"$ref_file_id" \
+    --input $fastqs_analysis_data_code:"$read_1_file_id,$read_2_file_id" \
+    --input $fastq_list_data_code:$fastq_list_file_id \
     --parameters enable_map_align:true \
     --parameters enable_map_align_output:true \
     --parameters output_format:CRAM \
@@ -34,8 +34,8 @@ analysis_response=$(icav2 projectpipelines start nextflow ${pipeline_id} \
     --parameters repeat_genotype_enable:false \
     --parameters enable_hla:false \
     --parameters enable_variant_annotation:false \
-    --parameters output_file_prefix:"${sample_id}")
+    --parameters output_file_prefix:"$sample_id")
 
 $analysis_response_file="analysis_response.txt"
-touch ${analysis_response_file}
-echo "${analysis_response}" > ${analysis_response_file}
+touch $analysis_response_file
+echo "$analysis_response" > $analysis_response_file
