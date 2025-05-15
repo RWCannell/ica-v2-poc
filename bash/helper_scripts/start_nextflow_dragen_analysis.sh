@@ -36,6 +36,6 @@ analysis_response=$(icav2 projectpipelines start nextflow $pipeline_id \
     --parameters enable_variant_annotation:false \
     --parameters output_file_prefix:"$sample_id")
 
-$analysis_response_file="analysis_response.txt"
+analysis_response_file="analysis_response.txt"
 touch $analysis_response_file
 echo "$analysis_response" > $analysis_response_file
