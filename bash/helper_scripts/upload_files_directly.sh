@@ -1,27 +1,14 @@
 #!/bin/bash
 
-file_path="/home/regan/ica_data_uploads/gerrit_samples/V350117642_L02"
 project_id="049307d6-85dd-4cdc-b88d-a740e4e9e550"
 sample_id="V350117642_L02"
 time_stamp=$(date +"%Y-%m-%d %H:%M:%S")
 
 output_file_prefix=$sample_id
-read_1_file="/home/regan/ica_data_uploads/gerrit_samples/V350117642_L02/V350117642_L02_read_1.fq.gz"
-read_2_file="/home/regan/ica_data_uploads/gerrit_samples/V350117642_L02/V350117642_L02_read_2.fq.gz"
+read_1_file="/spaces/ica/MGI/V350117642_L02_read_1.fq.gz"
+read_2_file="/spaces/ica/MGI/V350117642_L02_read_2.fq.gz"
 read_1_analysis_code="read1"
 read_2_analysis_code="read2"
-
-for file in "$file_path"/*; do
-    if [[ "$file" == *"_read_1"* ]]; then
-        read_1_file=$file
-        printf "Read 1 file is '$read_1_file'.\n"
-    elif [[ "$file" == *"_read_2"* ]]; then
-        read_2_file=$file
-        printf "Read 2 file is '$read_2_file'.\n"
-    else
-        printf "No read files present in directory.\n"
-    fi
-done
 
 read_1_file_response="read_1_file_response.txt"
 read_2_file_response="read_2_file_response.txt"
