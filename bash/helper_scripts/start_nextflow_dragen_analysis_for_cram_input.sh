@@ -18,7 +18,7 @@ analysis_response=$(icav2 projectpipelines start nextflow $pipeline_id \
     --project-id $project_id \
     --storage-size $storage_size \
     --input $ref_file_analysis_code:"$ref_file_id" \
-    --input $cram_analysis_code:"$cram_file_id \
+    --input $cram_analysis_code:"$cram_file_id" \
     --input $cram_index_analysis_code:"$cram_index_file_id" \
     --parameters enable_map_align:false \
     --parameters enable_map_align_output:false \
