@@ -35,7 +35,7 @@ analysis_response=$(icav2 projectpipelines start nextflow $pipeline_id \
 --parameters enable_sv:true \
 --parameters repeat_genotype_enable:false \
 --parameters enable_hla:false \
---parameters enable_variant_annotation:true \
+--parameters enable_variant_annotation:false \
 --parameters output_file_prefix:"$sample_id")
 
 echo $analysis_response

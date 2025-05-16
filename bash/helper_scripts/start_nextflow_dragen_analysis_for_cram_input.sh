@@ -4,8 +4,8 @@ project_id="d8c5084a-87fc-429b-b0b6-04bdf1ef1739"
 pipeline_id="993fa5a5-1e3d-43cd-a26b-1ffa053e3c1e"
 user_reference="dragen_germline_whole_genome_v4-4"
 storage_size="Medium"
-cram_analysis_code="cram"
-cram_index_analysis_code="cram_index"
+cram_analysis_code="crams"
+cram_index_analysis_code="crais"
 ref_file_analysis_code="ref_tar"
 
 sample_id="LP2100148-DNA_A01"
@@ -30,7 +30,7 @@ analysis_response=$(icav2 projectpipelines start nextflow $pipeline_id \
     --parameters enable_sv:true \
     --parameters repeat_genotype_enable:true \
     --parameters enable_hla:true \
-    --parameters enable_variant_annotation:true \
+    --parameters enable_variant_annotation:false \
     --parameters output_file_prefix:"$sample_id")
 
 analysis_response_file="cram_analysis_response.txt"

@@ -167,7 +167,7 @@ process startAnalysis {
         --parameters enable_sv:false \
         --parameters repeat_genotype_enable:false \
         --parameters enable_hla:false \
-        --parameters enable_variant_annotation:true \
+        --parameters enable_variant_annotation:false \
         --parameters output_file_prefix:"\${sample_id}")
 
     analysis_response_file="analysis_response.txt"
