@@ -1,7 +1,7 @@
 {
     "projectId": "049307d6-85dd-4cdc-b88d-a740e4e9e550",
     "pipelineId": "858708e9-6cdd-42ae-ad97-8b86ee07cdc5",
-    "userReference": "dragen_germline_whole_genome",
+    "userReference": "dragen_germline_whole_genome-v4-3-6",
     "storageSize": "Medium",
     "read1AnalysisDataCode": "read1",
     "read2AnalysisDataCode": "read2",
@@ -12,7 +12,7 @@
     "fileStatusCheckLimit": 100,
     "analysisStatusCheckInterval": 300,
     "analysisStatusCheckLimit": 100,
-    "readsPairFilesUploadPath": "/home/regan/ica_data_uploads/gerrit_samples/**/*_L02_read_{1,2}.fq.gz",
+    "readsPairFilesUploadPath": "/home/regan/ica_data_uploads/NA12878/*_read_{1,2}.fastq.gz",
     "referenceFileUploadPath": "./ica_data_uploads/reference/hg38-alt_masked.cnv.hla.methylation_combined.rna_v4.tar.gz",
     "referenceFileIcaPath": "/Illumina DRAGEN v10 References/hg38-alt_masked.cnv.hla.methylation_combined.rna_v4.tar.gz",
     "referenceFileId": "fil.2ed2474579454e9ff42d08dc4483ed72",

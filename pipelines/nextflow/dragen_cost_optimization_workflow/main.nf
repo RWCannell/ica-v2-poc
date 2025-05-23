@@ -261,6 +261,7 @@ process startAnalysis {
     script:
     def projectId = params.projectId
     def fastqsAnalysisDataCode = params.fastqsAnalysisDataCode
+    def fastqListDataCode = params.fastqListDataCode
     def pipelineId = params.pipelineId
     def userReference = params.userReference
     def storageSize = params.storageSize
@@ -287,6 +288,7 @@ process startAnalysis {
         --storage-size ${storageSize} \
         --input \${reference_analysis_code} \
         --input ${fastqsAnalysisDataCode}:"\${read_1_file_id},\${read_2_file_id}" \
+        --input ${fastqListDataCode}:\${fastq_list_file_id} \
         --parameters enable_map_align:true \
         --parameters enable_map_align_output:true \
         --parameters output_format:CRAM \
