@@ -418,9 +418,7 @@ process deleteData {
 
 workflow {
     def cramFilePairsUploadPath = params.cramFilePairsUploadPath
-    cramFilePairsChannel = Channel.fromFilePairs(cramFilePairsUploadPath, checkIfExists:true) { 
-        file -> file.name.replaceAll(/.cram|.crai$/,'')
-    }
+    cramFilePairsChannel = Channel.fromFilePairs(cramFilePairsUploadPath, checkIfExists:true)
     uploadCramFiles(cramFilePairsChannel)
     // getReferenceFile(uploadCramFiles.out.dataFile)
     // checkFileStatus(getReferenceFile.out.dataFile)
