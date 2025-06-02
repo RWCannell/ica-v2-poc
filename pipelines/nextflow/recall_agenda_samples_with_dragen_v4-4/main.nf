@@ -7,15 +7,18 @@ process uploadCramFiles {
   tag "$sampleId"
 
   input:
-  tuple val(sampleId), file(cram)
+  tuple val(sampleId), file(cramPair)
 
   output:
   path "data.txt", emit: dataFile
 
   script:
-  def cram_file = sampleId + ".cram"
-  def crai_file = sampleId + ".cram.crai"
+//   def cram_file = sampleId + ".cram"
+//   def crai_file = sampleId + ".cram.crai"
   def projectId = params.projectId
+  def cramAnalysisDataCode = params.cramAnalysisDataCode
+  def cramIndexAnalysisDataCode = params.cramIndexAnalysisDataCode
+  def (cram_file, crai_file) = cramPair
   """
   #!/bin/bash
     time_stamp=\$(date +"%Y-%m-%d %H:%M:%S")
@@ -75,8 +78,8 @@ process uploadCramFiles {
     printf "Writing file data to existing data file...\n"
 
     printf "sampleId:${sampleId}\n" >> \${data_file}
-    printf "cram:\${cram_file_id}\n" >> \${data_file}
-    printf "cramIndex:\${crai_file_id}\n" >> \${data_file}
+    printf "${cramAnalysisDataCode}:\${cram_file_id}\n" >> \${data_file}
+    printf "${cramIndexAnalysisDataCode}:\${crai_file_id}\n" >> \${data_file}
   """
 }
 
@@ -232,19 +235,18 @@ process startAnalysis {
         --project-id ${projectId} \
         --storage-size ${storageSize} \
         --input \${reference_analysis_code} \
-        --input ${cramAnalysisDataCode}:"\${cram_file_id}\
-        --input ${cramIndexAnalysisDataCode}:\${fastq_list_file_id} \
-        --parameters enable_map_align:true \
-        --parameters enable_map_align_output:true \
-        --parameters output_format:CRAM \
+        --input ${cramAnalysisDataCode}:\${cram_file_id} \
+        --input ${cramIndexAnalysisDataCode}:\${crai_file_id} \
+        --parameters enable_map_align:false \
+        --parameters enable_map_align_output:false \
         --parameters enable_duplicate_marking:true \
         --parameters enable_variant_caller:true \
         --parameters vc_emit_ref_confidence:GVCF \
         --parameters vc_enable_vcf_output:true \
         --parameters enable_cnv:true \
         --parameters enable_sv:true \
-        --parameters repeat_genotype_enable:false \
-        --parameters enable_hla:false \
+        --parameters repeat_genotype_enable:true \
+        --parameters enable_hla:true \
         --parameters enable_variant_annotation:false \
         --parameters output_file_prefix:"\${sample_id}")
 
@@ -415,14 +417,13 @@ process deleteData {
 }
 
 workflow {
-    cramFilePairsChannel = Channel.fromFilePairs(params.cramFilePairsUploadPath, checkIfExists:true) { 
-      file -> file.name.replaceAll(/.cram|.crai$/,'') 
-    }
     def cramFilePairsUploadPath = params.cramFilePairsUploadPath
-    cramFilePairsChannel = Channel.fromFilePairs(cramFilePairsUploadPath, checkIfExists:true)
+    cramFilePairsChannel = Channel.fromFilePairs(cramFilePairsUploadPath, checkIfExists:true) { 
+        file -> file.name.replaceAll(/.cram|.crai$/,'')
+    }
     uploadCramFiles(cramFilePairsChannel)
-    getReferenceFile(uploadCramFiles.out.dataFile)
-    checkFileStatus(getReferenceFile.out.dataFile)
+    // getReferenceFile(uploadCramFiles.out.dataFile)
+    // checkFileStatus(getReferenceFile.out.dataFile)
     // startAnalysis(checkFileStatus.out.dataFile)
     // checkAnalysisStatus(startAnalysis.out.dataFile)
     // downloadAnalysisOutput(checkAnalysisStatus.out.dataFile)
