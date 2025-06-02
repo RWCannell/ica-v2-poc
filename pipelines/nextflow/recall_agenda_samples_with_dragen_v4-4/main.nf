@@ -13,8 +13,6 @@ process uploadCramFiles {
   path "data.txt", emit: dataFile
 
   script:
-//   def cram_file = sampleId + ".cram"
-//   def crai_file = sampleId + ".cram.crai"
   def projectId = params.projectId
   def cramAnalysisDataCode = params.cramAnalysisDataCode
   def cramIndexAnalysisDataCode = params.cramIndexAnalysisDataCode
@@ -418,12 +416,14 @@ process deleteData {
 
 workflow {
     def cramFilePairsUploadPath = params.cramFilePairsUploadPath
-    cramFilePairsChannel = Channel.fromFilePairs(cramFilePairsUploadPath, checkIfExists:true)
+    cramFilePairsChannel = Channel.fromFilePairs(cramFilePairsUploadPath, checkIfExists:true) { 
+        file -> file.name.replaceAll(/.cram|.crai$/,'')
+    }
     uploadCramFiles(cramFilePairsChannel)
-    // getReferenceFile(uploadCramFiles.out.dataFile)
-    // checkFileStatus(getReferenceFile.out.dataFile)
-    // startAnalysis(checkFileStatus.out.dataFile)
-    // checkAnalysisStatus(startAnalysis.out.dataFile)
-    // downloadAnalysisOutput(checkAnalysisStatus.out.dataFile)
-    // deleteData(downloadAnalysisOutput.out.dataFile)
+    getReferenceFile(uploadCramFiles.out.dataFile)
+    checkFileStatus(getReferenceFile.out.dataFile)
+    startAnalysis(checkFileStatus.out.dataFile)
+    checkAnalysisStatus(startAnalysis.out.dataFile)
+    downloadAnalysisOutput(checkAnalysisStatus.out.dataFile)
+    deleteData(downloadAnalysisOutput.out.dataFile)
 }
