@@ -43,27 +43,13 @@ process uploadCramFiles {
     cram_file_id=\$(cat \${cram_file_response} | grep -i '\"id\": \"fil' | grep -o 'fil.[^\"]*')
     crai_file_id=\$(cat \${crai_file_response} | grep -i '\"id\": \"fil' | grep -o 'fil.[^\"]*')
 
-    cram_uploaded_file_data_response=\$(icav2 projectdata get \${cram_file_id})
-    if [[ \$? != 0 ]]; then
-        printf "Failed to fetch data about file with id '\${cram_file_id}'. \n"
-        exit 1
-    else
-        cram_uploaded_file_name=\$(echo \${cram_uploaded_file_data_response} | jq -r ".details.name")
-        printf "Name of uploaded file is '\${cram_uploaded_file_name}'. \n"
-        cram_uploaded_file_path=\$(echo \${cram_uploaded_file_data_response} | jq -r ".details.path")
-        printf "Path of uploaded .cram file is '\${cram_uploaded_file_path}'. \n"
-    fi
+    cram_uploaded_file_data_response=\$(icav2 projectdata get \${cram_file_id} --project-id ${projectId})
+    cram_uploaded_file_name=\$(echo \${cram_uploaded_file_data_response} | jq -r ".details.name")
+    printf "Name of uploaded file is '\${cram_uploaded_file_name}'. \n"
 
-    crai_uploaded_file_data_response=\$(icav2 projectdata get \${crai_file_id})
-    if [[ \$? != 0 ]]; then
-        printf "Failed to fetch data about file with id '\${crai_file_id}'. \n"
-        exit 1
-    else
-        crai_uploaded_file_name=\$(echo \${crai_uploaded_file_data_response} | jq -r ".details.name")
-        printf "Name of uploaded file is '\${crai_uploaded_file_name}'. \n"
-        crai_uploaded_file_path=\$(echo \${crai_uploaded_file_data_response} | jq -r ".details.path")
-        printf "Path of uploaded .crai file is '\${crai_uploaded_file_path}'. \n"
-    fi
+    crai_uploaded_file_data_response=\$(icav2 projectdata get \${crai_file_id} --project-id ${projectId})
+    crai_uploaded_file_name=\$(echo \${crai_uploaded_file_data_response} | jq -r ".details.name")
+    printf "Name of uploaded file is '\${crai_uploaded_file_name}'. \n"
 
     data_file="data.txt"
 
