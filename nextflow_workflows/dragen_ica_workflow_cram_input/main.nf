@@ -112,13 +112,15 @@ process checkFileStatus {
     script:
     def fileStatusCheckInterval = params.fileStatusCheckInterval
     def fileStatusCheckLimit = params.fileStatusCheckLimit
+    def cramAnalysisDataCode = params.cramAnalysisDataCode
+    def cramIndexAnalysisDataCode = params.cramIndexAnalysisDataCode
     """
     #!/bin/bash
     timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
     printf "[\${timeStamp}]: Getting status of uploaded files...\n"
 
-    cram_file_id=\$(cat ${dataFile} | grep -o 'cram:.*' | cut -f2- -d:)
-    crai_file_id=\$(cat ${dataFile} | grep -o 'cramIndex:.*' | cut -f2- -d:)
+    cram_file_id=\$(cat ${dataFile} | grep -o '${cramAnalysisDataCode}:.*' | cut -f2- -d:)
+    crai_file_id=\$(cat ${dataFile} | grep -o '${cramIndexAnalysisDataCode}:.*' | cut -f2- -d:)
     fastq_list_file_id=\$(cat ${dataFile} | grep -o 'fastq_list:.*' | cut -f2- -d:)
     reference_file_id=\$(cat ${dataFile} | grep -o 'ref_tar:.*' | cut -f2- -d:)
 
@@ -201,12 +203,12 @@ process startAnalysis {
     #!/bin/bash
 
     sample_id=\$(cat ${dataFile} | grep -o 'sampleId:.*' | cut -f2- -d:)
-    cram_file_id=\$(cat ${dataFile} | grep -o 'cram:.*' | cut -f2- -d:)
-    crai_file_id=\$(cat ${dataFile} | grep -o 'cramIndex:.*' | cut -f2- -d:)
+    cram_file_id=\$(cat ${dataFile} | grep -o '${cramAnalysisDataCode}:.*' | cut -f2- -d:)
+    crai_file_id=\$(cat ${dataFile} | grep -o '${cramIndexAnalysisDataCode}:.*' | cut -f2- -d:)
     fastq_list_file_id=\$(cat ${dataFile} | grep -o 'fastq_list:.*' | cut -f2- -d:)
 
-    cram_analysis_code=\$(cat ${dataFile} | grep -E "cram")
-    crai_analysis_code=\$(cat ${dataFile} | grep -E "cramIndex")
+    cram_analysis_code=\$(cat ${dataFile} | grep -E "${cramAnalysisDataCode}")
+    crai_analysis_code=\$(cat ${dataFile} | grep -E "${cramIndexAnalysisDataCode}")
     reference_analysis_code=\$(cat ${dataFile} | grep -E "ref_tar")
 
     user_reference=${userReference}-\${sample_id}
@@ -366,6 +368,8 @@ process deleteData {
     stdout
 
     script:
+    def cramAnalysisDataCode = params.cramAnalysisDataCode
+    def cramIndexAnalysisDataCode = params.cramIndexAnalysisDataCode
     """
     delete_data=\$(cat ${dataFile} | grep -o 'deleteData:.*' | cut -f2- -d:)
 
@@ -374,8 +378,8 @@ process deleteData {
         printf "[\${timeStamp}]: Data will NOT be deleted due to failed analysis...\n"
     else
         sample_id=\$(cat ${dataFile} | grep -o 'sampleId:.*' | cut -f2- -d:)
-        cram_file_id=\$(cat ${dataFile} | grep -o 'cram:.*' | cut -f2- -d:)
-        crai_file_id=\$(cat ${dataFile} | grep -o 'cramIndex:.*' | cut -f2- -d:)
+        cram_file_id=\$(cat ${dataFile} | grep -o '${cramAnalysisDataCode}:.*' | cut -f2- -d:)
+        crai_file_id=\$(cat ${dataFile} | grep -o '${cramIndexAnalysisDataCode}:.*' | cut -f2- -d:)
         fastq_list_file_id=\$(cat ${dataFile} | grep -o 'fastq_list:.*' | cut -f2- -d:)
         analysis_output_folder_id=\$(cat ${dataFile} | grep -o 'outputFolderId:.*' | cut -f2- -d:)
 
