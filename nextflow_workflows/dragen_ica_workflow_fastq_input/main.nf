@@ -218,7 +218,7 @@ process checkFileStatus {
         timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
         printf "[\${timeStamp}]: Current status of fastq list file is '\${fastq_list_file_status}'...\n"
 
-        if [ \${read_1_file_status} == "AVAILABLE" ] && [ \${read_2_file_status} == "AVAILABLE" ] && [ \${fastq_list_file_status} == "AVAILABLE" ]; then
+        if [[ (\${read_1_file_status} == "AVAILABLE") && (\${read_2_file_status} == "AVAILABLE") && (\${fastq_list_file_status} == "AVAILABLE") ]]; then
             printf "Read 1 file is AVAILABLE\n"
             printf "Read 2 file is AVAILABLE\n"
             printf "FASTQ list file is AVAILABLE\n"

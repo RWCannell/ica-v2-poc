@@ -119,7 +119,6 @@ process checkFileStatus {
 
     bam_file_id=\$(cat ${dataFile} | grep -o 'bam:.*' | cut -f2- -d:)
     bai_file_id=\$(cat ${dataFile} | grep -o 'bamIndex:.*' | cut -f2- -d:)
-    fastq_list_file_id=\$(cat ${dataFile} | grep -o 'fastq_list:.*' | cut -f2- -d:)
     reference_file_id=\$(cat ${dataFile} | grep -o 'ref_tar:.*' | cut -f2- -d:)
 
     file_status_check_count=0
@@ -142,18 +141,9 @@ process checkFileStatus {
         timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
         printf "[\${timeStamp}]: Current status of bai file is '\${bai_file_status}'...\n"
 
-        fastq_list_file_data_response=\$(icav2 projectdata get \${fastq_list_file_id})
-
-        printf "Checking status of fastq list file with id '\${fastq_list_file_id}'...\n"
-        fastq_list_file_status=\$(echo \${fastq_list_file_data_response} | jq -r ".details.status")
-
-        timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
-        printf "[\${timeStamp}]: Current status of fastq list file is '\${fastq_list_file_status}'...\n"
-
-        if [ \${bam_file_status} == "AVAILABLE" ] && [ \${bai_file_status} == "AVAILABLE" ] && [ \${fastq_list_file_status} == "AVAILABLE" ]; then
+        if [[ (\${bam_file_status} == "AVAILABLE") && (\${bai_file_status} == "AVAILABLE") ]]; then
             printf "bam file is AVAILABLE\n"
             printf "bam index file is AVAILABLE\n"
-            printf "FASTQ list file is AVAILABLE\n"
             break;
 
         elif [ \${file_status_check_count} -gt ${fileStatusCheckLimit} ]; then
@@ -203,7 +193,6 @@ process startAnalysis {
     sample_id=\$(cat ${dataFile} | grep -o 'sampleId:.*' | cut -f2- -d:)
     bam_file_id=\$(cat ${dataFile} | grep -o 'bam:.*' | cut -f2- -d:)
     bai_file_id=\$(cat ${dataFile} | grep -o 'bamIndex:.*' | cut -f2- -d:)
-    fastq_list_file_id=\$(cat ${dataFile} | grep -o 'fastq_list:.*' | cut -f2- -d:)
 
     bam_analysis_code=\$(cat ${dataFile} | grep -E "bam")
     bai_analysis_code=\$(cat ${dataFile} | grep -E "bamIndex")
@@ -376,7 +365,6 @@ process deleteData {
         sample_id=\$(cat ${dataFile} | grep -o 'sampleId:.*' | cut -f2- -d:)
         bam_file_id=\$(cat ${dataFile} | grep -o 'bam:.*' | cut -f2- -d:)
         bai_file_id=\$(cat ${dataFile} | grep -o 'bamIndex:.*' | cut -f2- -d:)
-        fastq_list_file_id=\$(cat ${dataFile} | grep -o 'fastq_list:.*' | cut -f2- -d:)
         analysis_output_folder_id=\$(cat ${dataFile} | grep -o 'outputFolderId:.*' | cut -f2- -d:)
 
         timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
@@ -386,10 +374,6 @@ process deleteData {
         timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
         printf "[\${timeStamp}]: Deleting uploaded bai file with ID '\${bai_file_id}'...\n"
         icav2 projectdata delete \${bai_file_id}
-
-        timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
-        printf "[\${timeStamp}]: Deleting uploaded CSV file with ID '\${fastq_list_file_id}'...\n"
-        icav2 projectdata delete \${fastq_list_file_id}
 
         timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
         printf "[\${timeStamp}]: Deleting analysis output folder with ID '\${analysis_output_folder_id}'...\n"
