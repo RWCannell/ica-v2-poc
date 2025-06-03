@@ -195,7 +195,6 @@ process startAnalysis {
     sample_id=\$(cat ${dataFile} | grep -o 'sampleId:.*' | cut -f2- -d:)
     cram_file_id=\$(cat ${dataFile} | grep -o '${cramAnalysisDataCode}:.*' | cut -f2- -d:)
     crai_file_id=\$(cat ${dataFile} | grep -o '${cramIndexAnalysisDataCode}:.*' | cut -f2- -d:)
-    fastq_list_file_id=\$(cat ${dataFile} | grep -o 'fastq_list:.*' | cut -f2- -d:)
 
     cram_analysis_code=\$(cat ${dataFile} | grep -E "${cramAnalysisDataCode}")
     crai_analysis_code=\$(cat ${dataFile} | grep -E "${cramIndexAnalysisDataCode}")
@@ -370,7 +369,6 @@ process deleteData {
         sample_id=\$(cat ${dataFile} | grep -o 'sampleId:.*' | cut -f2- -d:)
         cram_file_id=\$(cat ${dataFile} | grep -o '${cramAnalysisDataCode}:.*' | cut -f2- -d:)
         crai_file_id=\$(cat ${dataFile} | grep -o '${cramIndexAnalysisDataCode}:.*' | cut -f2- -d:)
-        fastq_list_file_id=\$(cat ${dataFile} | grep -o 'fastq_list:.*' | cut -f2- -d:)
         analysis_output_folder_id=\$(cat ${dataFile} | grep -o 'outputFolderId:.*' | cut -f2- -d:)
 
         timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
@@ -380,10 +378,6 @@ process deleteData {
         timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
         printf "[\${timeStamp}]: Deleting uploaded crai file with ID '\${crai_file_id}'...\n"
         icav2 projectdata delete \${crai_file_id}
-
-        timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
-        printf "[\${timeStamp}]: Deleting uploaded CSV file with ID '\${fastq_list_file_id}'...\n"
-        icav2 projectdata delete \${fastq_list_file_id}
 
         timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
         printf "[\${timeStamp}]: Deleting analysis output folder with ID '\${analysis_output_folder_id}'...\n"
