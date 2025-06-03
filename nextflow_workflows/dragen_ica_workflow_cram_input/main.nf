@@ -121,7 +121,6 @@ process checkFileStatus {
 
     cram_file_id=\$(cat ${dataFile} | grep -o '${cramAnalysisDataCode}:.*' | cut -f2- -d:)
     crai_file_id=\$(cat ${dataFile} | grep -o '${cramIndexAnalysisDataCode}:.*' | cut -f2- -d:)
-    fastq_list_file_id=\$(cat ${dataFile} | grep -o 'fastq_list:.*' | cut -f2- -d:)
     reference_file_id=\$(cat ${dataFile} | grep -o 'ref_tar:.*' | cut -f2- -d:)
 
     file_status_check_count=0
@@ -144,18 +143,9 @@ process checkFileStatus {
         timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
         printf "[\${timeStamp}]: Current status of crai file is '\${crai_file_status}'...\n"
 
-        fastq_list_file_data_response=\$(icav2 projectdata get \${fastq_list_file_id})
-
-        printf "Checking status of fastq list file with id '\${fastq_list_file_id}'...\n"
-        fastq_list_file_status=\$(echo \${fastq_list_file_data_response} | jq -r ".details.status")
-
-        timeStamp=\$(date +"%Y-%m-%d %H:%M:%S")
-        printf "[\${timeStamp}]: Current status of fastq list file is '\${fastq_list_file_status}'...\n"
-
-        if [ \${cram_file_status} == "AVAILABLE" ] && [ \${crai_file_status} == "AVAILABLE" ] && [ \${fastq_list_file_status} == "AVAILABLE" ]; then
+        if [[ (\${cram_file_status} == "AVAILABLE") && (\${crai_file_status} == "AVAILABLE") ]]; then
             printf "CRAM file is AVAILABLE\n"
             printf "CRAM index file is AVAILABLE\n"
-            printf "FASTQ list file is AVAILABLE\n"
             break;
 
         elif [ \${file_status_check_count} -gt ${fileStatusCheckLimit} ]; then
