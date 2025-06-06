@@ -214,14 +214,14 @@ process startAnalysis {
         --input ${cramIndexAnalysisDataCode}:\${crai_file_id} \
         --parameters enable_map_align:false \
         --parameters enable_map_align_output:false \
-        --parameters enable_duplicate_marking:true \
+        --parameters enable_duplicate_marking:false \
         --parameters enable_variant_caller:true \
         --parameters vc_emit_ref_confidence:GVCF \
         --parameters vc_enable_vcf_output:true \
         --parameters enable_cnv:true \
         --parameters enable_sv:true \
         --parameters repeat_genotype_enable:true \
-        --parameters enable_hla:true \
+        --parameters enable_hla:false \
         --parameters enable_variant_annotation:false \
         --parameters output_file_prefix:"\${sample_id}")
 
