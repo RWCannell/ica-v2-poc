@@ -113,7 +113,7 @@ Once reattached, we can see the progress of our running workflow. If it has fail
 ## DRAGEN ICA Workflow for A BAM/CRAM and BAM/CRAM Index File Pair   
 There are many similarities when using the DRAGEN ICA workflow with CRAM or BAM inputs. CRAM and BAM files also come in pairs. However, instead of being oppositely aligned reads, they instead come along with an index file (`.bam.bai` and `.cram.crai`, respectively). This means that the upload process in the workflow stays mostly the same when dealing with either FASTQ pairs or BAM/CRAM and their index pairs.   
 
-The major difference comes with the pipeline parameters being specified in the **startAnalysis** process. For BAM/CRAM file input, the parameter \_enable_map_align\_ needs to be false, since realignment is not required when using BAM/CRAM as input. Since this parameter is false, there are other parameters that necessarily become false as well.   
+The major difference comes with the pipeline parameters being specified in the **startAnalysis** process. For BAM/CRAM file input, the parameter "enable_map_align" needs to be false, since realignment is not required when using BAM/CRAM as input. Since this parameter is false, there are other parameters that necessarily become false as well.   
 
 The entire workflow for BAM input can be found over [here](nextflow_workflows/bam_input_dragen_ica_workflow/main.nf), and for CRAM input over [here](nextflow_workflows/cram_input_dragen_ica_workflow/main.nf).   
 
