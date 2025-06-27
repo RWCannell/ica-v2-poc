@@ -16,10 +16,13 @@ batch_of_six_total_wall_clock_time = 372 # minutes
 batch_of_eight_total_individual_runtimes = 1317 # minutes
 batch_of_eight_total_wall_clock_time = 271 # minutes
 
-batches = ("Batch of Two", "Batch of Three", "Batch of Four", "Batch of Six", "Batch of Eight")
+batch_of_nine_total_individual_runtimes = 1468 # minutes
+batch_of_nine_total_wall_clock_time = 206 # minutes
+
+batches = ("Batch of Two", "Batch of Three", "Batch of Four", "Batch of Six", "Batch of Eight", "Batch of Nine")
 batch_times = {
-    'Wall-Clock Time': (batch_of_two_total_wall_clock_time, batch_of_three_total_wall_clock_time, batch_of_four_total_wall_clock_time, batch_of_six_total_wall_clock_time, batch_of_eight_total_wall_clock_time),
-    'Sum Total of Workflow Runtimes': (batch_of_two_total_individual_runtimes, batch_of_three_total_individual_runtimes, batch_of_four_total_individual_runtimes, batch_of_six_total_individual_runtimes, batch_of_eight_total_individual_runtimes)
+    'Wall-Clock Time': (batch_of_two_total_wall_clock_time, batch_of_three_total_wall_clock_time, batch_of_four_total_wall_clock_time, batch_of_six_total_wall_clock_time, batch_of_eight_total_wall_clock_time, batch_of_nine_total_wall_clock_time),
+    'Sum Total of Workflow Runtimes': (batch_of_two_total_individual_runtimes, batch_of_three_total_individual_runtimes, batch_of_four_total_individual_runtimes, batch_of_six_total_individual_runtimes, batch_of_eight_total_individual_runtimes, batch_of_nine_total_individual_runtimes)
 }
 
 x = np.arange(len(batches))
@@ -37,7 +40,7 @@ for attribute, measurement in batch_times.items():
 ax.set_ylabel('Time (min)')
 ax.set_title('Wall-Clock Runtimes & Sum Total Workflow Runtimes')
 ax.set_xticks(x + width_of_bars, batches)
-ax.legend(loc='upper left', ncols=5)
-ax.set_ylim(0, 1500)
+ax.legend(loc='upper left', ncols=6)
+ax.set_ylim(0, 1600)
 
 plt.show()
