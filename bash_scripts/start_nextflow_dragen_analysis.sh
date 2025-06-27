@@ -10,6 +10,7 @@ fastqs_analysis_data_code="fastqs"
 fastq_list_data_code="fastq_list",
 ref_file_analysis_code="ref_tar"
 
+sample_id="NA12878"
 ref_file_id="fil.2ed2474579454e9ff42d08dc4483ed72"
 read_1_file_id="fil.19d66b08f8c149a9d3fd08dd9384d2de"
 read_2_file_id="fil.b1c8cba850c44b579b6408dd8c9b02f1"
@@ -33,7 +34,7 @@ analysis_response=$(icav2 projectpipelines start nextflow $pipeline_id \
     --parameters enable_sv:true \
     --parameters repeat_genotype_enable:false \
     --parameters enable_hla:false \
-    --parameters enable_variant_annotation:false \
+    --parameters enable_variant_annotation:true \
     --parameters output_file_prefix:"$sample_id")
 
 analysis_response_file="analysis_response.txt"

@@ -1,4 +1,4 @@
-# ica-v2-poc   
+# ICA eLwazi  
 ## Introduction   
 This is a simple proof of concept (POC) for automating certain processes that use the _Illumina Connected Analytics (ICA)_ CLI. The main processes that we wish to automate are:   
 
@@ -122,6 +122,8 @@ There are many similarities when using the DRAGEN ICA workflow with CRAM or BAM 
 
 The major difference comes with the pipeline parameters being specified in the **startAnalysis** process. For BAM/CRAM file input, the parameter "enable_map_align" needs to be false, since realignment is not required when using BAM/CRAM as input. Since this parameter is false, there are other parameters that necessarily become false as well.   
 
+When using the T2T (or chm13) reference, it is important to set the parameter `repeat_genotype_enable` to _false_. Furthermore, the T2T (or chm13) reference cannot be used directly with the AGenDA data, since the CRAM files from this data was created from the hg38 reference. To get around this, we need to specify the CRAM reference and the T2T reference in command for running the germline whole genome sequence pipeline.   
+
 The entire workflow for BAM input can be found over [here](nextflow_workflows/bam_input_dragen_ica_workflow/main.nf), and for CRAM input over [here](nextflow_workflows/cram_input_dragen_ica_workflow/main.nf).   
 
 ## DRAGEN ICA Workflow for Joint Genotyping
@@ -130,9 +132,47 @@ We need to investigate the best way to go about performing joint genotyping on a
 - We need to provide a list or set of GVCFs for comparison. These GVCF files need to be uploaded to the ICA platform _before_ running the joint genotyping pipeline.
 - If performing joint genotyping on CNVs, then we will need to provide normalized TSV files generated from DRAGEN CNV calling. These TSV files would also need to be uploaded to the ICA platform before running the joint genotyping pipeline.   
 
-We note that in order to perform joint genotyping on a sample, we need access to the GVCFs of related samples that were generated from a DRAGEN analysis. For automation purposes, whenever a DRAGEN analysis completes successfully, we should copy the relevant GVCF files from the output folder to a location inside the ICA platform _before_ downloading and deleting the output folder. This is so that when the next sample gets analysed, it can have the most recent GVCF files included in the comparison. It also saves us from having to reupload the GVCFs.   
+We note that in order to perform joint genotyping on a sample, we need access to the GVCFs of related samples that were generated from a DRAGEN analysis. For automation purposes, whenever a DRAGEN analysis completes successfully, we should copy the relevant GVCF files from the output folder to a location inside the ICA platform _before_ downloading and deleting the output folder. This is so that when the next sample gets analysed, it can have the most recent GVCF files included in the comparison. It also saves us from having to reupload the GVCFs.    
 
 ![Joint Genotyping with DRAGEN ICA Workflow](public/assets/images/joint_genotyping_flowchart_tb.png "Joint Genotyping with DRAGEN ICA Workflow")   
+
+In order to run a joint genotyping analysis, we need to specify a list of `.gvcf.gz` files in the ICA platform. We can get these `.gvcf.gz` files by performing analyses with the DRAGEN Germline Whole Genome 4-4-4 pipeline. We can then upload all the `.gvcf.gz` files to a specified folder in ICA, i.e. a folder named `/GVCFs`.   
+
+A helper Bash script has been created for the bulk uploading of these GVCFs. The script for this bulk uploading of GVCFs is [upload_multiple_GVCFs.sh](bash_scripts/upload_multiple_GVCFs.sh), and the `txt` file containing the paths of the files to be uploaded can be found in the script [GVCFs_to_be_uploaded.txt](bash_scripts/txt_files/GVCFs_to_be_uploaded.txt).   
+
+The `repeats.vcf.gz` files can also be provided as input. These should be uploaded to a separate folder in the ICA platform, i.e. `/Repeats`.   
+
+The `tn.tsv.gz` files can also be provided as input. These should be uploaded to a separate folder in the ICA platform, i.e. `/Normalized_TSV_Files`.   
+
+Using the `icav2` command line tool, we need to either specify each `gvcf.gz` variant with the flag `--variant`, or we can provide the flag `--variant-list` which provides the path of a text file containing the absolute paths of all variants to be used. If using the latter method, it is advisable to keep the order of the variants the same for all subsequent analyses. In keeping with our usual pattern of using the data IDs of the files/folders in ICA, we can simply use the `--input` flag with the appropriate analysis code for the respective files/folders. Here is an example of how the `icav2` command would look:
+```nextflow
+    analysis_response=\$(icav2 projectpipelines start nextflow ${pipelineId} \
+        --project-id ${projectId} \
+        --user-reference ${userReference} \
+        --storage-size ${storageSize} \
+        --input ${referenceAnalysisDataCode}:${referenceFileId} \
+        --input ${cramAnalysisDataCode}:\${cram_file_id} \
+        --input ${cramIndexAnalysisDataCode}:\${crai_file_id} \
+        --input ${tsvFilesAnalysisCode}:"${tsvFileId01},${tsvFileId02},${tsvFileId03},${tsvFileId04}" \
+        --input ${gvcfFilesAnalysisCode}:"${gvcfFileId01},${gvcfFileId02},${gvcfFileId03},${gvcfFileId04}" \
+        --parameters enable_joint_genotyping:true \
+        --parameters enable_variant_caller:true \
+        --parameters vc_emit_ref_confidence:GVCF \
+        --parameters vc_enable_vcf_output:true \
+        --parameters enable_cnv:true \
+        --parameters enable_sv:true \
+        --parameters repeat_genotype_enable:false \
+        --parameters enable_map_align:false \
+        --parameters enable_map_align_output:false \
+        --parameters enable_duplicate_marking:false \
+        --parameters enable_hla:false \
+        --parameters enable_variant_annotation:false \
+        --parameters output_file_prefix:"\${sample_id}")
+```
+The analysis codes for the different input types can be found in ICA itself (although the values are contained in the different `params.json` files inside this repo). The IDs for the desired TSV and GVCF files need to be specified in the `params.json` file.   
+
+## Basic Data Analysis and Statistics with Python
+There exists a [python folder](python) in this repo which contains some code or scripts for doing basic data analysis and plotting graphs.   
 
 ## Acknowledgements
 ![eLwazi](public/assets/images/elwazi_logo.png "eLwazi")   
